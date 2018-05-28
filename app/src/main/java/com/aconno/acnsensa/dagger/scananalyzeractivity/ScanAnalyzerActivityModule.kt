@@ -1,4 +1,4 @@
-package com.aconno.acnsensa.dagger.mainactivity
+package com.aconno.acnsensa.dagger.scananalyzeractivity
 
 import android.arch.lifecycle.ViewModelProviders
 import com.aconno.acnsensa.AcnSensaApplication
@@ -6,7 +6,9 @@ import com.aconno.acnsensa.BluetoothStateReceiver
 import com.aconno.acnsensa.device.permissons.PermissionActionFactory
 import com.aconno.acnsensa.domain.Bluetooth
 import com.aconno.acnsensa.domain.beacon.Beacon
-import com.aconno.acnsensa.ui.MainActivity
+import com.aconno.acnsensa.domain.deserializing.DeserializerRepository
+import com.aconno.acnsensa.domain.interactor.deserializing.GetAllDeserializersUseCase
+import com.aconno.acnsensa.ui.ScanAnalyzerActivity
 import com.aconno.acnsensa.viewmodel.*
 import com.aconno.acnsensa.viewmodel.factory.BeaconListViewModelFactory
 import com.aconno.acnsensa.viewmodel.factory.BluetoothScanningViewModelFactory
@@ -20,41 +22,41 @@ import io.reactivex.Flowable
  * @author aconno
  */
 @Module
-class MainActivityModule(private val mainActivity: MainActivity) {
+class ScanAnalyzerActivityModule(private val scanAnalyzerActivity: ScanAnalyzerActivity) {
 
     @Provides
-    @MainActivityScope
+    @ScanAnalyzerActivityScope
     fun provideSensorListViewModel(sensorListViewModelFactory: SensorListViewModelFactory) =
-        ViewModelProviders.of(mainActivity, sensorListViewModelFactory)
+        ViewModelProviders.of(scanAnalyzerActivity, sensorListViewModelFactory)
             .get(SensorListViewModel::class.java)
 
     @Provides
-    @MainActivityScope
+    @ScanAnalyzerActivityScope
     fun provideBeaconListViewModel(beaconListViewModelFactory: BeaconListViewModelFactory): BeaconListViewModel =
-        ViewModelProviders.of(mainActivity, beaconListViewModelFactory)
+        ViewModelProviders.of(scanAnalyzerActivity, beaconListViewModelFactory)
             .get(BeaconListViewModel::class.java)
 
     @Provides
-    @MainActivityScope
+    @ScanAnalyzerActivityScope
     fun provideSensorListViewModelFactory(
         sensorValues: Flowable<Map<String, Number>>
     ) = SensorListViewModelFactory(sensorValues)
 
     @Provides
-    @MainActivityScope
+    @ScanAnalyzerActivityScope
     fun provideBeaconListViewModelFactory(
         data: Flowable<Beacon>
     ) = BeaconListViewModelFactory(data)
 
     @Provides
-    @MainActivityScope
+    @ScanAnalyzerActivityScope
     fun provideBluetoothScanningViewModel(
         bluetoothScanningViewModelFactory: BluetoothScanningViewModelFactory
-    ) = ViewModelProviders.of(mainActivity, bluetoothScanningViewModelFactory)
+    ) = ViewModelProviders.of(scanAnalyzerActivity, bluetoothScanningViewModelFactory)
         .get(BluetoothScanningViewModel::class.java)
 
     @Provides
-    @MainActivityScope
+    @ScanAnalyzerActivityScope
     fun provideBluetoothScanningViewModelFactory(
         bluetooth: Bluetooth,
         acnSensaApplication: AcnSensaApplication
@@ -64,29 +66,35 @@ class MainActivityModule(private val mainActivity: MainActivity) {
     )
 
     @Provides
-    @MainActivityScope
-    fun provideMainActivity() = mainActivity
+    @ScanAnalyzerActivityScope
+    fun provideScanAnalyzerActivity() = scanAnalyzerActivity
 
     @Provides
-    @MainActivityScope
+    @ScanAnalyzerActivityScope
     fun providePermissionsViewModel(): PermissionViewModel {
-        val permissionAction = PermissionActionFactory.getPermissionAction(mainActivity)
-        return PermissionViewModel(permissionAction, mainActivity)
+        val permissionAction = PermissionActionFactory.getPermissionAction(scanAnalyzerActivity)
+        return PermissionViewModel(permissionAction, scanAnalyzerActivity)
     }
 
     @Provides
-    @MainActivityScope
+    @ScanAnalyzerActivityScope
     fun provideBluetoothViewModelFactory(
         bluetooth: Bluetooth,
         bluetoothStateReceiver: BluetoothStateReceiver
     ) =
-        BluetoothViewModelFactory(bluetooth, bluetoothStateReceiver, mainActivity.application)
+        BluetoothViewModelFactory(bluetooth, bluetoothStateReceiver, scanAnalyzerActivity.application)
 
     @Provides
-    @MainActivityScope
+    @ScanAnalyzerActivityScope
     fun provideBluetoothViewModel(bluetoothViewModelFactory: BluetoothViewModelFactory) =
         ViewModelProviders.of(
-            mainActivity,
+            scanAnalyzerActivity,
             bluetoothViewModelFactory
         ).get(BluetoothViewModel::class.java)
+
+    @Provides
+    @ScanAnalyzerActivityScope
+    fun provideGetAllDeserializersUseCase(deserializerRepository: DeserializerRepository): GetAllDeserializersUseCase {
+        return GetAllDeserializersUseCase(deserializerRepository)
+    }
 }

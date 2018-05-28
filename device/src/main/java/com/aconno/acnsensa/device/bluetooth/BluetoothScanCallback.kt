@@ -28,7 +28,7 @@ class BluetoothScanCallback(
         val deviceAddress = device?.address ?: "Unknown"
         val scannedDevice = Device(deviceName, deviceAddress)
 
-        val bytes = result?.scanRecord?.bytes ?: byteArrayOf()
+        val bytes = (result?.scanRecord?.bytes ?: byteArrayOf())
         val advertisement = Advertisement(bytes.toList())
 
         return ScanResult(scannedDevice, advertisement)

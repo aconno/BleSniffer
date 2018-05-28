@@ -6,9 +6,7 @@ import android.support.v4.content.LocalBroadcastManager
 import com.aconno.acnsensa.AcnSensaApplication
 import com.aconno.acnsensa.BluetoothStateReceiver
 import com.aconno.acnsensa.IntentProviderImpl
-import com.aconno.acnsensa.data.repository.AcnSensaDatabase
-import com.aconno.acnsensa.data.repository.ActionsRepositoryImpl
-import com.aconno.acnsensa.data.repository.InMemoryRepositoryImpl
+import com.aconno.acnsensa.data.repository.*
 import com.aconno.acnsensa.device.SmsSenderImpl
 import com.aconno.acnsensa.device.TextToSpeechPlayerImpl
 import com.aconno.acnsensa.device.VibratorImpl
@@ -23,11 +21,13 @@ import com.aconno.acnsensa.domain.Bluetooth
 import com.aconno.acnsensa.domain.SmsSender
 import com.aconno.acnsensa.domain.Vibrator
 import com.aconno.acnsensa.domain.advertisement.AdvertisementMatcher
-import com.aconno.acnsensa.domain.ifttt.ActionsRepository
-import com.aconno.acnsensa.domain.ifttt.NotificationDisplay
-import com.aconno.acnsensa.domain.ifttt.TextToSpeechPlayer
+import com.aconno.acnsensa.domain.beacon.Beacon
+import com.aconno.acnsensa.domain.beacon.BeaconsRepository
+import com.aconno.acnsensa.domain.deserializing.DeserializerRepository
+import com.aconno.acnsensa.domain.ifttt.*
 import com.aconno.acnsensa.domain.interactor.bluetooth.DeserializeScanResultUseCase
 import com.aconno.acnsensa.domain.interactor.bluetooth.FilterAdvertisementsUseCase
+import com.aconno.acnsensa.domain.interactor.bluetooth.ProcessBeaconDataUseCase
 import com.aconno.acnsensa.domain.model.ScanResult
 import com.aconno.acnsensa.domain.repository.InMemoryRepository
 import dagger.Module
@@ -91,6 +91,10 @@ class AppModule(private val acnSensaApplication: AcnSensaApplication) {
 
     @Provides
     @Singleton
+    fun provideBeaconDataProcessingUseCase() = ProcessBeaconDataUseCase()
+
+    @Provides
+    @Singleton
     fun provideSensorValuesFlowable(
         bluetooth: Bluetooth,
         filterAdvertisementsUseCase: FilterAdvertisementsUseCase,
@@ -100,6 +104,19 @@ class AppModule(private val acnSensaApplication: AcnSensaApplication) {
         return observable
             .concatMap { filterAdvertisementsUseCase.execute(it).toFlowable() }
             .concatMap { sensorValuesUseCase.execute(it).toFlowable() }
+    }
+
+    @Provides
+    @Singleton
+    fun provideBeaconDataFlowable(
+        bluetooth: Bluetooth,
+//        filterAdvertisementsUseCase: FilterAdvertisementsUseCase,
+        beaconDataProcessingUseCase: ProcessBeaconDataUseCase
+    ): Flowable<Beacon> {
+        val observable: Flowable<ScanResult> = bluetooth.getScanResults()
+        return observable
+//            .concatMap { filterAdvertisementsUseCase.execute(it).toFlowable() }
+            .concatMap { beaconDataProcessingUseCase.execute(it).toFlowable() }
     }
 
     @Provides
@@ -130,6 +147,22 @@ class AppModule(private val acnSensaApplication: AcnSensaApplication) {
         acnSensaDatabase: AcnSensaDatabase
     ): ActionsRepository {
         return ActionsRepositoryImpl(acnSensaDatabase.actionDao())
+    }
+
+    @Provides
+    @Singleton
+    fun provideBeaconsRepository(
+        acnSensaDatabase: AcnSensaDatabase
+    ): BeaconsRepository {
+        return BeaconsRepositoryImpl(acnSensaDatabase.beaconDao())
+    }
+
+    @Provides
+    @Singleton
+    fun provideDeserializerRepository(
+        acnSensaDatabase: AcnSensaDatabase
+    ): DeserializerRepository {
+        return DeserializerRepositoryImpl(acnSensaDatabase.deserializerDao())
     }
 
     @Provides

@@ -18,9 +18,26 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.DEFAULT" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.ScanAnalyzerActivity"
+            android:label="AcnSensa Scanner"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.DeserializerListActivity"
+            android:label="AcnSensa Deserializer"
+            android:screenOrientation="portrait" />
+        <activity android:name=".ui.EditDeserializerActivity" />
         <activity android:name=".ui.LiveGraphActivity" />
         <activity android:name=".ui.ActionListActivity" />
         <activity android:name=".ui.actions.AddActionActivity" />

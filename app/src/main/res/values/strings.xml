@@ -104,4 +104,10 @@
     <string name="text_to_speech">Text to Speech</string>
     <string name="notification">Notification</string>
     <string name="sms">SMS</string>
+
+    <!-- Deserializer -->
+    <string-array name="deserializer">
+        <item>Integer</item>
+        <item>Float</item>
+    </string-array>
 </resources>

@@ -20,7 +20,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
 }
 
 repositories {
@@ -29,18 +28,21 @@ repositories {
 
 dependencies {
     implementation project(':domain')
-
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    // Support Library
     implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
+
+    // Unit Testing
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     // Room + RxJava support
-    implementation "android.arch.persistence.room:runtime:1.0.0"
-    kapt "android.arch.persistence.room:compiler:1.0.0"
-    implementation "android.arch.persistence.room:rxjava2:1.0.0"
+    implementation 'android.arch.persistence.room:runtime:1.1.0'
+    kapt "android.arch.persistence.room:compiler:1.1.0"
+    implementation 'android.arch.persistence.room:rxjava2:1.1.0'
 
+    // JSON
+    implementation 'com.google.code.gson:gson:2.8.4'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

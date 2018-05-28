@@ -1,28 +1,38 @@
 package com.aconno.acnsensa.ui
 
 import android.arch.lifecycle.Observer
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.DividerItemDecoration
+import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.SearchView
 import com.aconno.acnsensa.AcnSensaApplication
 import com.aconno.acnsensa.BluetoothScanningService
 import com.aconno.acnsensa.R
-import com.aconno.acnsensa.R.id.activity_container
-import com.aconno.acnsensa.R.id.custom_toolbar
-import com.aconno.acnsensa.dagger.mainactivity.DaggerMainActivityComponent
-import com.aconno.acnsensa.dagger.mainactivity.MainActivityComponent
-import com.aconno.acnsensa.dagger.mainactivity.MainActivityModule
+import com.aconno.acnsensa.adapter.ScanAnalyzerAdapter
+import com.aconno.acnsensa.adapter.ScanRecordListener
+import com.aconno.acnsensa.dagger.scananalyzeractivity.DaggerScanAnalyzerActivityComponent
+import com.aconno.acnsensa.dagger.scananalyzeractivity.ScanAnalyzerActivityComponent
+import com.aconno.acnsensa.dagger.scananalyzeractivity.ScanAnalyzerActivityModule
 import com.aconno.acnsensa.domain.BluetoothState
+import com.aconno.acnsensa.domain.interactor.deserializing.GetAllDeserializersUseCase
 import com.aconno.acnsensa.domain.model.ScanEvent
+import com.aconno.acnsensa.viewmodel.BeaconListViewModel
 import com.aconno.acnsensa.viewmodel.BluetoothScanningViewModel
 import com.aconno.acnsensa.viewmodel.BluetoothViewModel
 import com.aconno.acnsensa.viewmodel.PermissionViewModel
-import kotlinx.android.synthetic.main.activity_main.*
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.activity_scan_analyzer.*
+import timber.log.Timber
 import javax.inject.Inject
 
-class MainActivity : AppCompatActivity(), PermissionViewModel.PermissionCallbacks {
+
+class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.PermissionCallbacks, ScanRecordListener {
 
     @Inject
     lateinit var bluetoothViewModel: BluetoothViewModel
@@ -33,27 +43,35 @@ class MainActivity : AppCompatActivity(), PermissionViewModel.PermissionCallback
     @Inject
     lateinit var permissionViewModel: PermissionViewModel
 
+    @Inject
+    lateinit var beaconListViewModel: BeaconListViewModel
+
+    @Inject
+    lateinit var getAllDeserializersUseCase: GetAllDeserializersUseCase
+
+    private lateinit var beaconScanningAdapter: ScanAnalyzerAdapter
+
     private var mainMenu: Menu? = null
 
     private var snackbar: Snackbar? = null
 
-    val mainActivityComponent: MainActivityComponent by lazy {
+    val scanAnalyzerActivityComponent: ScanAnalyzerActivityComponent by lazy {
         val acnSensaApplication: AcnSensaApplication? = application as? AcnSensaApplication
-        DaggerMainActivityComponent.builder()
-            .appComponent(acnSensaApplication?.appComponent)
-            .mainActivityModule(MainActivityModule(this))
-            .build()
+        DaggerScanAnalyzerActivityComponent.builder()
+                .appComponent(acnSensaApplication?.appComponent)
+                .scanAnalyzerActivityModule(ScanAnalyzerActivityModule(this))
+                .build()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_scan_analyzer)
 
-        mainActivityComponent.inject(this)
+        scanAnalyzerActivityComponent.inject(this)
 
         snackbar =
-                Snackbar.make(activity_container, R.string.bt_disabled, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(R.string.enable) { bluetoothViewModel.enableBluetooth() }
+                Snackbar.make(scan_analyzer_root, R.string.bt_disabled, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.enable) { bluetoothViewModel.enableBluetooth() }
 
         snackbar?.setActionTextColor(resources.getColor(R.color.primaryColor))
 
@@ -63,8 +81,45 @@ class MainActivity : AppCompatActivity(), PermissionViewModel.PermissionCallback
         invalidateOptionsMenu()
 
         if (savedInstanceState == null) {
-            addFragment()
+            initViews()
         }
+    }
+
+
+    private fun initViews() {
+        getAllDeserializersUseCase.execute()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { deserializers ->
+                    beaconScanningAdapter = ScanAnalyzerAdapter(mutableListOf(), this, deserializers)
+                    (mainMenu?.findItem(R.id.search)?.actionView as SearchView).setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                        override fun onQueryTextSubmit(query: String?): Boolean = true
+
+                        override fun onQueryTextChange(newText: String?): Boolean {
+                            newText?.let {
+                                Timber.e(it)
+                                beaconScanningAdapter.filter = it
+                            }
+                            return true
+                        }
+                    })
+                    val linearLayoutManager = LinearLayoutManager(this)
+                    scan_list.layoutManager = linearLayoutManager
+                    scan_list.adapter = beaconScanningAdapter
+                    scan_list.addItemDecoration(DividerItemDecoration(
+                            this, linearLayoutManager.orientation
+                    ))
+                    beaconListViewModel.getBeaconLiveData()
+                            .observe(this, Observer {
+                                it?.let {
+                                    beaconScanningAdapter.logScan(it)
+                                }
+                            })
+                }
+    }
+
+    override fun onRecordAdded() {
+        scan_list.smoothScrollToPosition(0)
     }
 
     override fun onResume() {
@@ -142,16 +197,10 @@ class MainActivity : AppCompatActivity(), PermissionViewModel.PermissionCallback
         }
     }
 
-    private fun addFragment() {
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.add(activity_container.id, SensorListFragment())
-        transaction.commit()
-    }
-
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         mainMenu = menu
         mainMenu?.clear()
-        menuInflater.inflate(R.menu.main_menu, menu)
+        menuInflater.inflate(R.menu.scanner_menu, menu)
 
         mainMenu?.findItem(R.id.action_toggle_scan)?.let {
             setScanMenuLabel(it)
@@ -169,15 +218,16 @@ class MainActivity : AppCompatActivity(), PermissionViewModel.PermissionCallback
         val id: Int? = item?.itemId
         when (id) {
             R.id.action_toggle_scan -> toggleScan(item)
-            R.id.action_start_actions_activity -> startActionListActivity()
+            R.id.action_start_deserializer_list_activity -> startDeserializerListActivity()
         }
 
         return super.onOptionsItemSelected(item)
     }
 
-    private fun startActionListActivity() {
-        ActionListActivity.start(this)
+    private fun startDeserializerListActivity() {
+        startActivity(Intent(this, DeserializerListActivity::class.java))
     }
+
 
     private fun toggleScan(item: MenuItem?) {
         item?.let {
@@ -200,9 +250,9 @@ class MainActivity : AppCompatActivity(), PermissionViewModel.PermissionCallback
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
+            requestCode: Int,
+            permissions: Array<String>,
+            grantResults: IntArray
     ) {
         permissionViewModel.checkGrantedPermission(grantResults, requestCode)
     }

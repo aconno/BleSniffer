@@ -7,9 +7,10 @@ import com.aconno.acnsensa.device.notification.IntentProvider
 import com.aconno.acnsensa.domain.Bluetooth
 import com.aconno.acnsensa.domain.SmsSender
 import com.aconno.acnsensa.domain.Vibrator
-import com.aconno.acnsensa.domain.ifttt.ActionsRepository
-import com.aconno.acnsensa.domain.ifttt.NotificationDisplay
-import com.aconno.acnsensa.domain.ifttt.TextToSpeechPlayer
+import com.aconno.acnsensa.domain.beacon.Beacon
+import com.aconno.acnsensa.domain.beacon.BeaconsRepository
+import com.aconno.acnsensa.domain.deserializing.DeserializerRepository
+import com.aconno.acnsensa.domain.ifttt.*
 import com.aconno.acnsensa.domain.repository.InMemoryRepository
 import dagger.Component
 import io.reactivex.Flowable
@@ -30,7 +31,13 @@ interface AppComponent {
 
     fun sensorValues(): Flowable<Map<String, Number>>
 
+    fun beaconData(): Flowable<Beacon>
+
     fun actionsRepository(): ActionsRepository
+
+    fun beaconsRepository(): BeaconsRepository
+
+    fun deserializerRepository(): DeserializerRepository
 
     fun notificationDisplay(): NotificationDisplay
 
