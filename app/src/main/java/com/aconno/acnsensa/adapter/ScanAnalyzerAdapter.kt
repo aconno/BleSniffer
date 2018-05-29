@@ -15,6 +15,7 @@ import java.util.*
 
 
 fun ByteArray.toHex() = this.joinToString(separator = "") { "0x" + it.toInt().and(0xff).toString(16).padStart(2, '0') + " " }
+fun ByteArray.inversedCopyOfRange(start: Int, end: Int) = this.reversedArray().copyOfRange((size - 1) - start, (size - 1) - end)
 class ScanAnalyzerAdapter(
         private val scanLog: MutableList<MutablePair<Beacon, Int>>,
         private val scanRecordListener: ScanRecordListener,
@@ -48,7 +49,7 @@ class ScanAnalyzerAdapter(
     fun logScan(data: Beacon) {
         Timber.e(data.advertisementData.toHex())
 
-        scanLog.filter { (System.currentTimeMillis() - it.first.lastseen) < 2500 }.forEachIndexed { index, item ->
+        scanLog.filter { (System.currentTimeMillis() - it.first.lastseen) < 5000 }.forEachIndexed { index, item ->
             //            Timber.e(scanLog.indexOf(item).toString())
             if (item.first.address == data.address) {
                 if (item.first.advertisementData.contentEquals(data.advertisementData)) {
@@ -82,6 +83,8 @@ class ScanAnalyzerAdapter(
         return ViewHolder(view)
     }
 
+    override fun getItemViewType(position: Int): Int = if (position > 0) 0 else 1
+
     override fun getItemCount(): Int {
         return (if (filter.isNotEmpty()) filteredList else scanLog).size
     }
@@ -99,29 +102,38 @@ class ScanAnalyzerAdapter(
             view.time.text = getDateCurrentTimeZone(data.first.lastseen)
             view.repeating.text = "x${data.second}"
 
-            if (view.deserialized_field_list.layoutManager == null) {
+            if (view.deserialized_field_list.adapter == null) {
                 Timber.e("Init")
                 view.setOnLongClickListener { longItemClickListener.onLongItemClick(data.first) }
                 view.address.text = data.first.address
                 view.name.text = data.first.name
                 view.data.text = data.first.advertisementData.toHex()
-                deserializers.find { data.first.address.contains(it.filter, ignoreCase = true) }?.let {
-                    it.fieldDeserializers.map {
-                        val b = 5
-                        Triple(
-                                it.name,
-                                it.type.converter.deserialize(
-                                        data.first.advertisementData.copyOfRange(
-                                                it.startIndexInclusive, it.endIndexExclusive
-                                        )
-                                ).toString(),
-                                it.color
-                        )
-                    }.apply {
-                        val a = 4
-                    }.toMutableList().let {
-                        view.deserialized_field_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
-                        view.deserialized_field_list.adapter = DeserializedFieldsAdapter(it)
+                with(data.first) {
+                    deserializers.find {
+                        when (it.filterType) {
+                            Deserializer.Type.MAC -> address.contains(it.filter, ignoreCase = true)
+                            Deserializer.Type.DATA -> advertisementData.toHex().contains(it.filter, ignoreCase = true)
+                            else -> false
+                        }
+                    }?.let {
+                        it.fieldDeserializers.map { d ->
+                            val start = d.startIndexInclusive
+                            val end = d.endIndexExclusive
+                            val size = advertisementData.size
+                            Triple(
+                                    d.name,
+                                    if (start > size || end > size) "Bad Indexes"
+                                    else d.type.converter.deserialize(
+                                            if (start <= end) advertisementData.copyOfRange(start, end)
+                                            else advertisementData.inversedCopyOfRange(start, end)
+                                    ).toString(),
+                                    d.color
+                            )
+                        }.apply {
+                        }.toMutableList().let {
+                            view.deserialized_field_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
+                            view.deserialized_field_list.adapter = DeserializedFieldsAdapter(it)
+                        }
                     }
                 }
             } else {
