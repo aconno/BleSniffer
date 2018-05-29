@@ -63,15 +63,15 @@ class EditDeserializerActivity : AppCompatActivity() {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe({
                         deserializer = it
-                        deserializer_list.adapter = DeserializerEditorAdapter(deserializer)
+                        deserializer_list.adapter = DeserializerEditorAdapter(deserializer, this)
                         existing = true
                     }, {
                         deserializer = GeneralDeserializer("", Deserializer.Type.MAC, mutableListOf())
-                        deserializer_list.adapter = DeserializerEditorAdapter(deserializer)
+                        deserializer_list.adapter = DeserializerEditorAdapter(deserializer, this)
                     })
         } else {
             deserializer = GeneralDeserializer("", Deserializer.Type.MAC, mutableListOf())
-            deserializer_list.adapter = DeserializerEditorAdapter(deserializer)
+            deserializer_list.adapter = DeserializerEditorAdapter(deserializer, this)
         }
 
         add_value_deserializer_button.setOnClickListener {
