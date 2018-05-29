@@ -13,6 +13,7 @@ import com.aconno.acnsensa.dagger.editdeserializeractivity.EditDeserializerActiv
 import com.aconno.acnsensa.domain.ValueConverter
 import com.aconno.acnsensa.domain.deserializing.Deserializer
 import com.aconno.acnsensa.domain.deserializing.GeneralDeserializer
+import com.aconno.acnsensa.domain.deserializing.GeneralFieldDeserializer
 import com.aconno.acnsensa.domain.interactor.deserializing.AddDeserializerUseCase
 import com.aconno.acnsensa.domain.interactor.deserializing.GetDeserializerByIdUseCase
 import com.aconno.acnsensa.domain.interactor.deserializing.UpdateDeserializerUseCase
@@ -33,7 +34,14 @@ class EditDeserializerActivity : AppCompatActivity() {
     @Inject
     lateinit var updateDeserializerUseCase: UpdateDeserializerUseCase
 
-    lateinit var deserializer: Deserializer
+    var deserializer: Deserializer? = null
+        set(value) {
+            field = (value
+                    ?: GeneralDeserializer("", Deserializer.Type.MAC, mutableListOf())).apply {
+                deserializer_list.adapter = DeserializerEditorAdapter(this, this@EditDeserializerActivity)
+                deserializer_filter.editText?.setText(this.filter)
+            }
+        }
 
     val editDeserializerActivityComponent: EditDeserializerActivityComponent by lazy {
         val acnSensaApplication: AcnSensaApplication? = application as? AcnSensaApplication
@@ -61,32 +69,32 @@ class EditDeserializerActivity : AppCompatActivity() {
             getDeserializerByIdUseCase.execute(filterContent, type)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe({
-                        deserializer = it
-                        deserializer_list.adapter = DeserializerEditorAdapter(deserializer, this)
-                        existing = true
-                    }, {
-                        deserializer = GeneralDeserializer("", Deserializer.Type.MAC, mutableListOf())
-                        deserializer_list.adapter = DeserializerEditorAdapter(deserializer, this)
-                    })
+                    .subscribe(
+                            { deserializer = it },
+                            { deserializer = null }
+                    )
         } else {
-            deserializer = GeneralDeserializer("", Deserializer.Type.MAC, mutableListOf())
-            deserializer_list.adapter = DeserializerEditorAdapter(deserializer, this)
+            deserializer = null
         }
 
         add_value_deserializer_button.setOnClickListener {
-            deserializer.valueDeserializers.add(
-                    Triple("", Pair(0, 0), ValueConverter.BOOLEAN)
+            deserializer?.fieldDeserializers?.add(
+                    GeneralFieldDeserializer(
+                            "",
+                            0, 0,
+                            ValueConverter.BOOLEAN,
+                            resources.getColor(android.R.color.holo_red_dark)
+                    )
             )
             deserializer_list.adapter.notifyDataSetChanged()
         }
 
         save.setOnClickListener {
-            if(existing) {
+            if (existing) {
                 updateDeserializerUseCase.execute(GeneralDeserializer(
-                        filter = filter.editText?.text?.toString() ?: "Empty",
-                        filterType = deserializer.filterType,
-                        valueDeserializers = deserializer.valueDeserializers
+                        filter = deserializer_filter.editText?.text?.toString() ?: "Empty",
+                        filterType = deserializer?.filterType ?: Deserializer.Type.MAC,
+                        fieldDeserializers = deserializer?.fieldDeserializers ?: mutableListOf()
                 )).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe({
@@ -94,11 +102,11 @@ class EditDeserializerActivity : AppCompatActivity() {
                         }, {
                             Timber.e(it)
                         })
-            }else {
+            } else {
                 addDeserializersUseCase.execute(GeneralDeserializer(
-                        filter = filter.editText?.text?.toString() ?: "Empty",
-                        filterType = deserializer.filterType,
-                        valueDeserializers = deserializer.valueDeserializers
+                        filter = deserializer_filter.editText?.text?.toString() ?: "Empty",
+                        filterType = deserializer?.filterType ?: Deserializer.Type.MAC,
+                        fieldDeserializers = deserializer?.fieldDeserializers ?: mutableListOf()
                 )).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe({

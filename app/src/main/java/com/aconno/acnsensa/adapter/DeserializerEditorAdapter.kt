@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter
 import com.aconno.acnsensa.R
 import com.aconno.acnsensa.domain.ValueConverter
 import com.aconno.acnsensa.domain.deserializing.Deserializer
+import com.aconno.acnsensa.domain.deserializing.FieldDeserializer
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
 import kotlinx.android.synthetic.main.item_deserializer_field.view.*
@@ -29,14 +30,14 @@ class DeserializerEditorAdapter(
     }
 
     override fun getItemCount(): Int {
-        return deserializer.valueDeserializers.size
+        return deserializer.fieldDeserializers.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(deserializer.valueDeserializers[position])
+        holder.bind(deserializer.fieldDeserializers[position])
     }
 
-    inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view), ColorPickerDialogListener{
+    inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view), ColorPickerDialogListener {
 
         init {
             view.name.editText?.addTextChangedListener(object : TextWatcher {
@@ -44,14 +45,7 @@ class DeserializerEditorAdapter(
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     if (s == null || s.isEmpty()) return
-                    deserializer.valueDeserializers.add(
-                            adapterPosition,
-                            deserializer.valueDeserializers[adapterPosition].copy(
-                                    first = s.toString()
-                            ).apply {
-                                deserializer.valueDeserializers.removeAt(adapterPosition)
-                            }
-                    )
+                    deserializer.fieldDeserializers[adapterPosition].name = s.toString()
                 }
             })
             view.start.editText?.addTextChangedListener(object : TextWatcher {
@@ -59,16 +53,8 @@ class DeserializerEditorAdapter(
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     if (s == null || s.isEmpty()) return
-                    deserializer.valueDeserializers.add(
-                            adapterPosition,
-                            deserializer.valueDeserializers[adapterPosition].copy(
-                                    second = deserializer.valueDeserializers[adapterPosition].second.copy(
-                                            first = Integer.parseInt(s.toString())
-                                    )
-                            ).apply {
-                                deserializer.valueDeserializers.removeAt(adapterPosition)
-                            }
-                    )
+                    deserializer.fieldDeserializers[adapterPosition]
+                            .startIndexInclusive = Integer.parseInt(s.toString())
                 }
             })
             view.end.editText?.addTextChangedListener(object : TextWatcher {
@@ -76,16 +62,8 @@ class DeserializerEditorAdapter(
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     if (s == null || s.isEmpty()) return
-                    deserializer.valueDeserializers.add(
-                            adapterPosition,
-                            deserializer.valueDeserializers[adapterPosition].copy(
-                                    second = deserializer.valueDeserializers[adapterPosition].second.copy(
-                                            second = Integer.parseInt(s.toString())
-                                    )
-                            ).apply {
-                                deserializer.valueDeserializers.removeAt(adapterPosition)
-                            }
-                    )
+                    deserializer.fieldDeserializers[adapterPosition]
+                            .endIndexExclusive = Integer.parseInt(s.toString())
                 }
             })
             view.converter_type.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -93,14 +71,8 @@ class DeserializerEditorAdapter(
                 }
 
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    deserializer.valueDeserializers.add(
-                            adapterPosition,
-                            deserializer.valueDeserializers[adapterPosition].copy(
-                                    third = ValueConverter.values()[position]
-                            ).apply {
-                                deserializer.valueDeserializers.removeAt(adapterPosition)
-                            }
-                    )
+                    deserializer.fieldDeserializers[adapterPosition]
+                            .type = ValueConverter.values()[position]
                 }
 
             }
@@ -112,7 +84,7 @@ class DeserializerEditorAdapter(
                 setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             }
             view.remove.setOnClickListener {
-                deserializer.valueDeserializers.removeAt(adapterPosition)
+                deserializer.fieldDeserializers.removeAt(adapterPosition)
                 notifyDataSetChanged()
             }
             view.color_button.setOnClickListener {
@@ -132,19 +104,21 @@ class DeserializerEditorAdapter(
         }
 
         override fun onColorSelected(dialogId: Int, color: Int) {
-            Timber.e(color.toString())
+            deserializer.fieldDeserializers[adapterPosition].color = color
             view.color_button.setBackgroundColor(color)
         }
 
-        fun bind(valueDeserializer: Triple<String, Pair<Int, Int>, ValueConverter>) {
-            view.name.editText?.setText(valueDeserializer.first)
-            view.start.editText?.setText(valueDeserializer.second.first.toString())
-            view.end.editText?.setText(valueDeserializer.second.second.toString())
+        fun bind(fieldDeserializer: FieldDeserializer) {
+            view.name.editText?.setText(fieldDeserializer.name)
+            deserializer.fieldDeserializers[adapterPosition]
+            view.start.editText?.setText(fieldDeserializer.startIndexInclusive.toString())
+            view.end.editText?.setText(fieldDeserializer.endIndexExclusive.toString())
             view.converter_type.setSelection(
                     (view.converter_type.adapter as ArrayAdapter<String>).getPosition(
-                            valueDeserializer.third.name
+                            fieldDeserializer.type.name
                     )
             )
+            view.color_button.setBackgroundColor(fieldDeserializer.color)
         }
     }
 }

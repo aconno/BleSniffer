@@ -6,5 +6,5 @@ import android.arch.persistence.room.Entity
 data class DeserializerEntity(
     val filter: String,
     val filterType: String,
-    val valueDeserializers: String
+    val fieldDeserializers: String
 )

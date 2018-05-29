@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import com.aconno.acnsensa.R
 import com.aconno.acnsensa.domain.beacon.Beacon
 import com.aconno.acnsensa.domain.deserializing.Deserializer
+import com.aconno.acnsensa.domain.deserializing.FieldDeserializer
 import kotlinx.android.synthetic.main.item_scan_record.view.*
 import timber.log.Timber
 import java.text.DateFormat
@@ -98,17 +99,24 @@ class ScanAnalyzerAdapter(
                 view.address.text = data.first.address
                 view.name.text = data.first.name
                 view.data.text = data.first.advertisementData.toHex()
-                deserializers.find { it.filter == data.first.address }?.let {
-                    it.valueDeserializers.map { valueDeserializer ->
-                        valueDeserializer.second.let { range ->
-                            Pair(valueDeserializer.first, valueDeserializer.third.converter.deserialize(
-                                    data.first.advertisementData.copyOfRange(range.first, range.second)
-                            ).toString())
-                        }
+                deserializers.find { data.first.address.contains(it.filter, ignoreCase = true) }?.let {
+                    it.fieldDeserializers.map {
+                        val b = 5
+                        Triple(
+                                it.name,
+                                it.type.converter.deserialize(
+                                        data.first.advertisementData.copyOfRange(
+                                                it.startIndexInclusive, it.endIndexExclusive
+                                        )
+                                ).toString(),
+                                it.color
+                        )
+                    }.apply {
+                        val a = 4
+                    }.toMutableList().let {
+                        view.deserialized_field_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
+                        view.deserialized_field_list.adapter = DeserializedFieldsAdapter(it)
                     }
-                }?.toMutableList()?.let {
-                    view.deserialized_field_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
-                    view.deserialized_field_list.adapter = DeserializedFieldsAdapter(it)
                 }
             } else {
                 Timber.e("null")

@@ -1,19 +1,17 @@
 package com.aconno.acnsensa.data.repository
 
 import com.aconno.acnsensa.domain.ValueConverter
-import com.aconno.acnsensa.domain.deserializing.Deserializer
-import com.aconno.acnsensa.domain.deserializing.DeserializerRepository
-import com.aconno.acnsensa.domain.deserializing.GeneralDeserializer
+import com.aconno.acnsensa.domain.deserializing.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.reactivex.Single
 
-private val valueDeserializersTypeToken: TypeToken<MutableList<Triple<String, Pair<Int, Int>, ValueConverter>>> by lazy {
-    object : TypeToken<MutableList<Triple<String, Pair<Int, Int>, ValueConverter>>>() {}
+private val valueDeserializersTypeToken: TypeToken<MutableList<GeneralFieldDeserializer>> by lazy {
+    object : TypeToken<MutableList<GeneralFieldDeserializer>>() {}
 }
 
 class DeserializerRepositoryImpl(
-    private val deserializerDao: DeserializerDao
+        private val deserializerDao: DeserializerDao
 ) : DeserializerRepository {
 
     override fun addDeserializer(deserializer: Deserializer) {
@@ -38,9 +36,9 @@ class DeserializerRepositoryImpl(
 
     private fun toEntity(deserializer: Deserializer): DeserializerEntity {
         return DeserializerEntity(
-            filter = deserializer.filter,
-            filterType = deserializer.filterType.name,
-            valueDeserializers = Gson().toJson(deserializer.valueDeserializers)
+                filter = deserializer.filter,
+                filterType = deserializer.filterType.name,
+                fieldDeserializers = Gson().toJson(deserializer.fieldDeserializers)
         )
     }
 
@@ -48,8 +46,8 @@ class DeserializerRepositoryImpl(
         return GeneralDeserializer(
                 filter = deserializerEntity.filter,
                 filterType = Deserializer.Type.valueOf(deserializerEntity.filterType),
-                valueDeserializers = Gson().fromJson(
-                        deserializerEntity.valueDeserializers,
+                fieldDeserializers = Gson().fromJson(
+                        deserializerEntity.fieldDeserializers,
                         valueDeserializersTypeToken.type
                 )
         )
