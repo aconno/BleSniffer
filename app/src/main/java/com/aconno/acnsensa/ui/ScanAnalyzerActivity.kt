@@ -13,12 +13,14 @@ import android.widget.SearchView
 import com.aconno.acnsensa.AcnSensaApplication
 import com.aconno.acnsensa.BluetoothScanningService
 import com.aconno.acnsensa.R
+import com.aconno.acnsensa.adapter.LongItemClickListener
 import com.aconno.acnsensa.adapter.ScanAnalyzerAdapter
 import com.aconno.acnsensa.adapter.ScanRecordListener
 import com.aconno.acnsensa.dagger.scananalyzeractivity.DaggerScanAnalyzerActivityComponent
 import com.aconno.acnsensa.dagger.scananalyzeractivity.ScanAnalyzerActivityComponent
 import com.aconno.acnsensa.dagger.scananalyzeractivity.ScanAnalyzerActivityModule
 import com.aconno.acnsensa.domain.BluetoothState
+import com.aconno.acnsensa.domain.beacon.Beacon
 import com.aconno.acnsensa.domain.interactor.deserializing.GetAllDeserializersUseCase
 import com.aconno.acnsensa.domain.model.ScanEvent
 import com.aconno.acnsensa.viewmodel.BeaconListViewModel
@@ -31,8 +33,9 @@ import kotlinx.android.synthetic.main.activity_scan_analyzer.*
 import timber.log.Timber
 import javax.inject.Inject
 
+const val EXTRA_FILTER_MAC: String = "com.acconno.acnsensa.FILTER_MAC"
 
-class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.PermissionCallbacks, ScanRecordListener {
+class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.PermissionCallbacks, ScanRecordListener, LongItemClickListener<Beacon> {
 
     @Inject
     lateinit var bluetoothViewModel: BluetoothViewModel
@@ -91,18 +94,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { deserializers ->
-                    beaconScanningAdapter = ScanAnalyzerAdapter(mutableListOf(), this, deserializers)
-                    (mainMenu?.findItem(R.id.search)?.actionView as SearchView).setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                        override fun onQueryTextSubmit(query: String?): Boolean = true
-
-                        override fun onQueryTextChange(newText: String?): Boolean {
-                            newText?.let {
-                                Timber.e(it)
-                                beaconScanningAdapter.filter = it
-                            }
-                            return true
-                        }
-                    })
+                    beaconScanningAdapter = ScanAnalyzerAdapter(mutableListOf(), this, deserializers.toMutableList(), this)
                     val linearLayoutManager = LinearLayoutManager(this)
                     scan_list.layoutManager = linearLayoutManager
                     scan_list.adapter = beaconScanningAdapter
@@ -124,7 +116,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
     override fun onResume() {
         super.onResume()
-
         bluetoothScanningViewModel.getResult().observe(this, Observer { handleScanEvent(it) })
         bluetoothViewModel.observeBluetoothState()
         bluetoothViewModel.bluetoothState.observe(this, Observer { onBluetoothStateChange(it) })
@@ -173,6 +164,13 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         //Do nothing.
     }
 
+    override fun onLongItemClick(item: Beacon): Boolean {
+        startActivityForResult(Intent(this, DeserializerListActivity::class.java).apply {
+            putExtra(EXTRA_FILTER_MAC, item.address)
+        }, 0x00)
+        return true
+    }
+
     private fun onScanFailed() {
         onScanStop()
     }
@@ -202,6 +200,18 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         mainMenu?.clear()
         menuInflater.inflate(R.menu.scanner_menu, menu)
 
+        (mainMenu?.findItem(R.id.search)?.actionView as SearchView).setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean = true
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                newText?.let {
+                    Timber.e(it)
+                    beaconScanningAdapter.filter = it
+                }
+                return true
+            }
+        })
+
         mainMenu?.findItem(R.id.action_toggle_scan)?.let {
             setScanMenuLabel(it)
             val state = bluetoothViewModel.bluetoothState.value
@@ -225,7 +235,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     }
 
     private fun startDeserializerListActivity() {
-        startActivity(Intent(this, DeserializerListActivity::class.java))
+        startActivityForResult(Intent(this, DeserializerListActivity::class.java), 0x00)
     }
 
 
@@ -256,6 +266,18 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     ) {
         permissionViewModel.checkGrantedPermission(grantResults, requestCode)
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        getAllDeserializersUseCase.execute()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { deserializers ->
+                    beaconScanningAdapter.updateDeserializers(deserializers.toMutableList())
+                }
+    }
+
 
     override fun permissionAccepted(actionCode: Int) {
         bluetoothScanningViewModel.startScanning()

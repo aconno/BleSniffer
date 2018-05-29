@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import com.aconno.acnsensa.R
 import com.aconno.acnsensa.domain.beacon.Beacon
 import com.aconno.acnsensa.domain.deserializing.Deserializer
-import com.aconno.acnsensa.domain.deserializing.FieldDeserializer
 import kotlinx.android.synthetic.main.item_scan_record.view.*
 import timber.log.Timber
 import java.text.DateFormat
@@ -19,7 +18,8 @@ fun ByteArray.toHex() = this.joinToString(separator = "") { "0x" + it.toInt().an
 class ScanAnalyzerAdapter(
         private val scanLog: MutableList<MutablePair<Beacon, Int>>,
         private val scanRecordListener: ScanRecordListener,
-        private val deserializers: List<Deserializer>
+        private var deserializers: MutableList<Deserializer>,
+        private val longItemClickListener: LongItemClickListener<Beacon>
 ) : RecyclerView.Adapter<ScanAnalyzerAdapter.ViewHolder>() {
 
     var filter: String = ""
@@ -32,6 +32,11 @@ class ScanAnalyzerAdapter(
         }
 
     private var filteredList: MutableList<MutablePair<Beacon, Int>> = mutableListOf()
+
+    fun updateDeserializers(items: MutableList<Deserializer>) {
+        deserializers = items
+        notifyDataSetChanged()
+    }
 
     fun setBeaconData(beaconData: List<Beacon>) {
         this.scanLog.clear()
@@ -96,6 +101,7 @@ class ScanAnalyzerAdapter(
 
             if (view.deserialized_field_list.layoutManager == null) {
                 Timber.e("Init")
+                view.setOnLongClickListener { longItemClickListener.onLongItemClick(data.first) }
                 view.address.text = data.first.address
                 view.name.text = data.first.name
                 view.data.text = data.first.advertisementData.toHex()
@@ -119,7 +125,6 @@ class ScanAnalyzerAdapter(
                     }
                 }
             } else {
-                Timber.e("null")
             }
         }
     }

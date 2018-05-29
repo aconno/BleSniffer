@@ -22,6 +22,9 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_deserializer_list.*
 import javax.inject.Inject
 
+const val REQUEST_CODE_EDIT: Int = 0x00
+const val REQUEST_CODE_EDIT_QUIT_ON_RESULT: Int = 0x01
+
 class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserializer>, LongItemClickListener<Deserializer> {
 
     private var snackbar: Snackbar? = null
@@ -60,14 +63,29 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
             startActivityForResult(Intent(this@DeserializerListActivity, EditDeserializerActivity::class.java).apply {
             }, 0x01)
         }
+
+        intent.extras?.let {
+            if (it.containsKey(EXTRA_FILTER_MAC)) {
+                startEditActivity(it.getString(EXTRA_FILTER_MAC), Deserializer.Type.MAC, true)
+            }
+        }
     }
 
     override fun onItemClick(item: Deserializer) {
-        startActivityForResult(Intent(this, EditDeserializerActivity::class.java).apply {
-            putExtra("filter", item.filter)
-            putExtra("type", item.filterType.name)
-        }, 0x01)
+        startEditActivity(item.filter, item.filterType)
     }
+
+    private fun startEditActivity(filter: String, type: String, quitOnResult: Boolean = false) {
+        startActivityForResult(Intent(this, EditDeserializerActivity::class.java).apply {
+            putExtra("filter", filter)
+            putExtra("type", type)
+        }, if (quitOnResult) REQUEST_CODE_EDIT_QUIT_ON_RESULT else REQUEST_CODE_EDIT)
+    }
+
+    private fun startEditActivity(filter: String,
+                                  type: Deserializer.Type,
+                                  quitOnResult: Boolean = false) =
+            startEditActivity(filter, type.name, quitOnResult)
 
     override fun onLongItemClick(item: Deserializer): Boolean {
         AlertDialog.Builder(this)
@@ -92,10 +110,12 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
-        getAllDeserializersUseCase.execute()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(deserializerAdapter::setDeserializers)
+        when (requestCode) {
+            REQUEST_CODE_EDIT -> getAllDeserializersUseCase.execute()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(deserializerAdapter::setDeserializers)
+            REQUEST_CODE_EDIT_QUIT_ON_RESULT -> finish()
+        }
     }
 }

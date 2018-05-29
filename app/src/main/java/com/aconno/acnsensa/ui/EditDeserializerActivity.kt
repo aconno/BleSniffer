@@ -71,7 +71,7 @@ class EditDeserializerActivity : AppCompatActivity() {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                             { deserializer = it },
-                            { deserializer = null }
+                            { deserializer = GeneralDeserializer(filterContent, Deserializer.Type.MAC, mutableListOf()) }
                     )
         } else {
             deserializer = null
@@ -97,11 +97,10 @@ class EditDeserializerActivity : AppCompatActivity() {
                         fieldDeserializers = deserializer?.fieldDeserializers ?: mutableListOf()
                 )).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe({
-                            finish()
-                        }, {
-                            Timber.e(it)
-                        })
+                        .subscribe(
+                                { finish() },
+                                { Timber.e(it) }
+                        )
             } else {
                 addDeserializersUseCase.execute(GeneralDeserializer(
                         filter = deserializer_filter.editText?.text?.toString() ?: "Empty",
@@ -109,11 +108,10 @@ class EditDeserializerActivity : AppCompatActivity() {
                         fieldDeserializers = deserializer?.fieldDeserializers ?: mutableListOf()
                 )).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe({
-                            finish()
-                        }, {
-                            Timber.e(it)
-                        })
+                        .subscribe(
+                                { finish() },
+                                { Timber.e(it) }
+                        )
             }
         }
     }
