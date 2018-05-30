@@ -54,10 +54,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         deserializer_list.adapter = deserializerAdapter
         setSupportActionBar(custom_toolbar)
 
-        getAllDeserializersUseCase.execute()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(deserializerAdapter::setDeserializers)
+        updateDeserializers()
 
         add_deserializer.setOnClickListener {
             startActivityForResult(Intent(this@DeserializerListActivity, EditDeserializerActivity::class.java).apply {
@@ -95,10 +92,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe {
-                                getAllDeserializersUseCase.execute()
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe(deserializerAdapter::setDeserializers)
+                                updateDeserializers()
                             }
                     dialog.dismiss()
                 }
@@ -108,13 +102,17 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         return true
     }
 
+    private fun updateDeserializers() {
+        getAllDeserializersUseCase.execute()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(deserializerAdapter::setDeserializers)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
-            REQUEST_CODE_EDIT -> getAllDeserializersUseCase.execute()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(deserializerAdapter::setDeserializers)
+            REQUEST_CODE_EDIT -> updateDeserializers()
             REQUEST_CODE_EDIT_QUIT_ON_RESULT -> finish()
         }
     }

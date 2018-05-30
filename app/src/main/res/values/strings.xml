@@ -105,9 +105,9 @@
     <string name="notification">Notification</string>
     <string name="sms">SMS</string>
 
-    <!-- Deserializer -->
-    <string-array name="deserializer">
-        <item>Integer</item>
-        <item>Float</item>
+
+    <string-array name="deserializer_actions">
+        <item>Delete</item>
+        <item>Export</item>
     </string-array>
 </resources>
