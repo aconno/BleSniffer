@@ -1,10 +1,8 @@
 package com.aconno.acnsensa.ui
 
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.os.Environment
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
@@ -19,6 +17,7 @@ import com.aconno.acnsensa.adapter.LongItemClickListener
 import com.aconno.acnsensa.dagger.deserializerlistactivity.DaggerDeserializerListActivityComponent
 import com.aconno.acnsensa.dagger.deserializerlistactivity.DeserializerListActivityComponent
 import com.aconno.acnsensa.dagger.deserializerlistactivity.DeserializerListActivityModule
+import com.aconno.acnsensa.domain.JsonFileStorage
 import com.aconno.acnsensa.domain.deserializing.Deserializer
 import com.aconno.acnsensa.domain.interactor.deserializing.DeleteDeserializerUseCase
 import com.aconno.acnsensa.domain.interactor.deserializing.GetAllDeserializersUseCase
@@ -29,8 +28,6 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_deserializer_list.*
 import kotlinx.android.synthetic.main.dialog_input_text.view.*
 import javax.inject.Inject
-import android.os.Environment.getExternalStorageDirectory
-import java.io.File
 
 
 const val REQUEST_CODE_EDIT: Int = 0x00
@@ -48,6 +45,9 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
 
     @Inject
     lateinit var permissionViewModel: PermissionViewModel
+
+    @Inject
+    lateinit var deserializerFileStorage: JsonFileStorage<Deserializer>
 
     val editDeserializerActivityComponent: DeserializerListActivityComponent by lazy {
         val acnSensaApplication: AcnSensaApplication? = application as? AcnSensaApplication
@@ -112,23 +112,27 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         return true
     }
 
-    private fun showExportItemDialog(item: Deserializer) {
+    private fun showExportItemDialog(
+            item: Deserializer,
+            defaultFileName: String = item.filter.replace("[\\\\/:*?\"<>|]", "")
+    ) {
         val view: View = layoutInflater.inflate(R.layout.dialog_input_text, null)
         view.text_input.editText?.let { textInput ->
-            textInput.hint = "Exported file name"
+            textInput.hint = defaultFileName
             AlertDialog.Builder(this)
                     .setMessage("Export item")
                     .setCancelable(true)
                     .setView(view)
                     .setPositiveButton("Export") { dialog, _ ->
-                        exportItems(textInput.text.toString(), listOf(item))
+                        deserializerFileStorage.storeItem(item,
+                                if (textInput.text.isEmpty()) defaultFileName
+                                else textInput.text.toString()
+                        )
                         dialog.dismiss()
                     }
                     .setOnCancelListener(DialogInterface::dismiss)
+                    .show()
         }
-    }
-
-    private fun exportItems(text: String, listOf: List<Deserializer>) {
     }
 
     private fun showDeleteItemDialog(item: Deserializer) {

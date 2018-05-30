@@ -1,6 +1,9 @@
 package com.aconno.acnsensa.dagger.deserializerlistactivity
 
 import com.aconno.acnsensa.device.permissons.PermissionActionFactory
+import com.aconno.acnsensa.device.storage.JsonFileStorageImpl
+import com.aconno.acnsensa.domain.JsonFileStorage
+import com.aconno.acnsensa.domain.deserializing.Deserializer
 import com.aconno.acnsensa.domain.deserializing.DeserializerRepository
 import com.aconno.acnsensa.domain.interactor.deserializing.AddDeserializerUseCase
 import com.aconno.acnsensa.domain.interactor.deserializing.DeleteDeserializerUseCase
@@ -45,5 +48,11 @@ class DeserializerListActivityModule(private val deserializerListActivity: Deser
     fun providePermissionsViewModel(): PermissionViewModel {
         val permissionAction = PermissionActionFactory.getPermissionAction(deserializerListActivity)
         return PermissionViewModel(permissionAction, deserializerListActivity)
+    }
+
+    @Provides
+    @DeserializerListActivityScope
+    fun provideDeserializerFileStorage(): JsonFileStorage<Deserializer> {
+        return JsonFileStorageImpl(deserializerListActivity)
     }
 }
