@@ -24,9 +24,10 @@ class JsonFileStorageImpl<T>(storageDirectoryName: String) : JsonFileStorage<T> 
     }
 
 
-    override fun storeItems(items: List<T>, fileName: String) {
+    override fun storeItems(items: List<T>, fileName: String): String {
         val file = File(storageDirectory, fileName)
         file.writeText(gson.toJson(items))
+        return file.absolutePath
     }
 
     override fun readItems(fileName: String): List<T> {

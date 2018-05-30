@@ -6,6 +6,8 @@ import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
@@ -127,8 +129,9 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                     deserializerFileStorage.storeItem(item,
                             if (textInput.text.isEmpty()) defaultFileName
                             else textInput.text.toString()
-                    )
-                    Toast.makeText(this, "Successfully exported file!", Toast.LENGTH_SHORT).show()
+                    ).let {
+                        Toast.makeText(this, "Successfully exported file to: $it", Toast.LENGTH_SHORT).show()
+                    }
                     dialog.dismiss()
                 }
                 .setNegativeButton("Cancel") { dialog, _ ->
@@ -141,12 +144,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         AlertDialog.Builder(this)
                 .setMessage("Delete deserializer?")
                 .setPositiveButton("Delete") { dialog, _ ->
-                    deleteDeserializerUseCase.execute(item)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe {
-                                updateDeserializers()
-                            }
+                    updateDeserializers()
                     dialog.dismiss()
                 }
                 .setNegativeButton("No") { dialog, _ ->
@@ -159,6 +157,47 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(deserializerAdapter::setDeserializers)
+    }
+
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        val id: Int? = item?.itemId
+        when (id) {
+            R.id.action_import -> importDeserializers()
+            R.id.action_export_all -> exportAllDeserializers()
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun importDeserializers() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    private fun exportAllDeserializers() {
+        val view: View = layoutInflater.inflate(R.layout.dialog_input_text, null)
+        val textInput: EditText = view.text_input.editText ?: return
+        textInput.hint = "all.json"
+        AlertDialog.Builder(this)
+                .setMessage("Export all deserializers")
+                .setView(view)
+                .setPositiveButton("Export") { dialog, _ ->
+                    deserializerFileStorage.storeItems(deserializerAdapter.deserializers,
+                            if (textInput.text.isEmpty()) "all.json"
+                            else textInput.text.toString()
+                    ).let {
+                        Toast.makeText(this, "Successfully exported file to: $it", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
     }
 
 

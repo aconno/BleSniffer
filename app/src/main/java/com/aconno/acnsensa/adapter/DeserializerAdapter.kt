@@ -12,7 +12,7 @@ import kotlinx.android.synthetic.main.item_deserializer.view.*
  * @author aconno
  */
 class DeserializerAdapter(
-        private val deserializers: MutableList<Deserializer>,
+        val deserializers: MutableList<Deserializer>,
         private val clickListener: ItemClickListener<Deserializer>,
         private val longClickListener: LongItemClickListener<Deserializer>
 ) : RecyclerView.Adapter<DeserializerAdapter.ViewHolder>() {
