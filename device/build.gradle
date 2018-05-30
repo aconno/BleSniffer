@@ -43,6 +43,9 @@ dependencies {
 
     // Timber
     implementation 'com.jakewharton.timber:timber:4.7.0'
+
+    // GSON
+    implementation 'com.google.code.gson:gson:2.8.4'
 }
 
 apply plugin: 'kotlin-android-extensions'
