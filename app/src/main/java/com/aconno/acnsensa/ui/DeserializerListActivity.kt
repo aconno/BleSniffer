@@ -1,11 +1,13 @@
 package com.aconno.acnsensa.ui
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.view.View
 import com.aconno.acnsensa.AcnSensaApplication
 import com.aconno.acnsensa.R
 import com.aconno.acnsensa.adapter.DeserializerAdapter
@@ -20,6 +22,7 @@ import com.aconno.acnsensa.domain.interactor.deserializing.GetAllDeserializersUs
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_deserializer_list.*
+import kotlinx.android.synthetic.main.dialog_input_text.view.*
 import javax.inject.Inject
 
 
@@ -91,11 +94,31 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                 .setItems(R.array.deserializer_actions, { dialog, which ->
                     when (which) {
                         0 -> showDeleteItemDialog(item)
-                        1 -> TODO("Export")
+                        1 -> showExportItemDialog(item)
                     }
                     dialog.dismiss()
                 }).create().show()
         return true
+    }
+
+    private fun showExportItemDialog(item: Deserializer) {
+        val view: View = layoutInflater.inflate(R.layout.dialog_input_text, null)
+        view.text_input.editText?.let { textInput ->
+            textInput.hint = "Exported file name"
+            AlertDialog.Builder(this)
+                    .setMessage("Export item")
+                    .setCancelable(true)
+                    .setView(view)
+                    .setPositiveButton("Export") { dialog, _ ->
+                        exportItems(textInput.text.toString(), listOf(item))
+                        dialog.dismiss()
+                    }
+                    .setOnCancelListener(DialogInterface::dismiss)
+        }
+    }
+
+    private fun exportItems(text: String, listOf: List<Deserializer>) {
+
     }
 
     private fun showDeleteItemDialog(item: Deserializer) {
