@@ -47,26 +47,27 @@ class ScanAnalyzerAdapter(
     }
 
     fun logScan(data: Beacon) {
-        if (scanLog.size > 0) {
-            Timber.e(data.advertisementData.toHex())
-            Timber.e(scanLog[0].first.advertisementData.toHex())
-        }
-        scanLog.filter { (System.currentTimeMillis() - it.first.lastseen) < 2500 }.forEachIndexed { index, item ->
+//        if (scanLog.size > 0) {
+//            Timber.e(data.advertisementData.toHex())
+//            Timber.e(scanLog[0].first.advertisementData.toHex())
+//        }
+        scanLog.filter { (System.currentTimeMillis() - it.first.lastseen) < 2500 && it.first.address == data.address }.forEachIndexed { index, item ->
             //            Timber.e(scanLog.indexOf(item).toString())
-            if (item.first.address == data.address) {
-                if (item.first.advertisementData.contentEquals(data.advertisementData)) {
+//            if (item.first.address == data.address) {
+            if (item.first.advertisementData.contentEquals(data.advertisementData)) {
 //                    filteredList.indexOfFirst { it.first.lastseen == item.first.lastseen }.let {
 //                        if (it == -1) return@let
 //                        filteredList[it].second++
 //                        filteredList[it].first.lastseen = data.lastseen
 //                        notifyItemChanged(it)
 //                    }
-                    item.second++
-                    item.first.lastseen = data.lastseen
-                    notifyItemChanged(index)
-                    return@logScan
-                }
+                item.second++
+                item.first.lastseen = data.lastseen
+                Timber.e("%s - %s", scanLog.indexOf(item), item.first.address.toString())
+                notifyItemChanged(scanLog.indexOf(item))
+                return@logScan
             }
+//            }
         }
         Timber.e("Added")
         scanLog.add(0, MutablePair(data, 1))
@@ -99,23 +100,25 @@ class ScanAnalyzerAdapter(
     }
 
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        private var initialized: Boolean = false
+        private val deserializedFieldsAdapter = DeserializedFieldsAdapter()
 
         init {
-
+            view.deserialized_field_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
+            view.deserialized_field_list.adapter = deserializedFieldsAdapter
         }
 
         fun bind(data: MutablePair<Beacon, Int>) {
             view.time.text = getDateCurrentTimeZone(data.first.lastseen)
             view.repeating.text = "x${data.second}"
 
-            if (!initialized) {
+            if (deserializedFieldsAdapter.fields.isEmpty()) {
 //                Timber.e(filteredList.size.toString())
                 Timber.e(scanLog.size.toString())
                 view.setOnLongClickListener { longItemClickListener.onLongItemClick(data.first) }
                 view.address.text = data.first.address
                 view.name.text = data.first.name
                 view.data.text = data.first.advertisementData.toHex()
+
                 with(data.first) {
                     deserializers.find {
                         when (it.filterType) {
@@ -139,13 +142,10 @@ class ScanAnalyzerAdapter(
                             )
                         }.apply {
                         }.toMutableList().let {
-                            view.deserialized_field_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
-                            view.deserialized_field_list.adapter = DeserializedFieldsAdapter(it)
+                            deserializedFieldsAdapter.setFields(it)
                         }
                     }
                 }
-                initialized = true
-            } else {
             }
         }
     }

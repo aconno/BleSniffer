@@ -12,7 +12,7 @@ import kotlinx.android.synthetic.main.item_deserialized_field.view.*
  * @author aconno
  */
 class DeserializedFieldsAdapter(
-        private val fields: MutableList<Triple<String, String, Int>>
+        val fields: MutableList<Triple<String, String, Int>> = mutableListOf()
 ) : RecyclerView.Adapter<DeserializedFieldsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -23,6 +23,12 @@ class DeserializedFieldsAdapter(
 
     override fun getItemCount(): Int {
         return fields.size
+    }
+
+    fun setFields(fields: MutableList<Triple<String, String, Int>>) {
+        this.fields.clear()
+        this.fields.addAll(fields)
+        notifyDataSetChanged()
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

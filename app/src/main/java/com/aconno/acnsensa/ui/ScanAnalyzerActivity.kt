@@ -7,6 +7,7 @@ import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.SimpleItemAnimator
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.SearchView
@@ -90,6 +91,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
 
     private fun initViews() {
+        (scan_list.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         getAllDeserializersUseCase.execute()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
