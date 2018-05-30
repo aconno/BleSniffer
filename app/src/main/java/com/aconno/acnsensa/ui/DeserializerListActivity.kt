@@ -22,6 +22,7 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_deserializer_list.*
 import javax.inject.Inject
 
+
 const val REQUEST_CODE_EDIT: Int = 0x00
 const val REQUEST_CODE_EDIT_QUIT_ON_RESULT: Int = 0x01
 
@@ -86,6 +87,19 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
 
     override fun onLongItemClick(item: Deserializer): Boolean {
         AlertDialog.Builder(this)
+                .setTitle(R.string.deserializer_actions_title)
+                .setItems(R.array.deserializer_actions, { dialog, which ->
+                    when (which) {
+                        0 -> showDeleteItemDialog(item)
+                        1 -> TODO("Export")
+                    }
+                    dialog.dismiss()
+                }).create().show()
+        return true
+    }
+
+    private fun showDeleteItemDialog(item: Deserializer) {
+        AlertDialog.Builder(this)
                 .setMessage("Delete deserializer?")
                 .setPositiveButton("Delete") { dialog, _ ->
                     deleteDeserializerUseCase.execute(item)
@@ -99,7 +113,6 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                 .setNegativeButton("No") { dialog, _ ->
                     dialog.dismiss()
                 }.show()
-        return true
     }
 
     private fun updateDeserializers() {
