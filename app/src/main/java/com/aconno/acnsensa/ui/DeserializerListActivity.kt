@@ -1,7 +1,12 @@
 package com.aconno.acnsensa.ui
 
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
@@ -19,8 +24,11 @@ import com.aconno.acnsensa.adapter.LongItemClickListener
 import com.aconno.acnsensa.dagger.deserializerlistactivity.DaggerDeserializerListActivityComponent
 import com.aconno.acnsensa.dagger.deserializerlistactivity.DeserializerListActivityComponent
 import com.aconno.acnsensa.dagger.deserializerlistactivity.DeserializerListActivityModule
+import com.aconno.acnsensa.device.PathUtils
+import com.aconno.acnsensa.device.storage.DeserializerFileStorage
 import com.aconno.acnsensa.domain.JsonFileStorage
 import com.aconno.acnsensa.domain.deserializing.Deserializer
+import com.aconno.acnsensa.domain.interactor.deserializing.AddDeserializerUseCase
 import com.aconno.acnsensa.domain.interactor.deserializing.DeleteDeserializerUseCase
 import com.aconno.acnsensa.domain.interactor.deserializing.GetAllDeserializersUseCase
 import com.aconno.acnsensa.model.AcnSensaPermission
@@ -29,12 +37,14 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_deserializer_list.*
 import kotlinx.android.synthetic.main.dialog_input_text.view.*
+import timber.log.Timber
 import java.util.regex.Pattern
 import javax.inject.Inject
 
 
 const val REQUEST_CODE_EDIT: Int = 0x00
 const val REQUEST_CODE_EDIT_QUIT_ON_RESULT: Int = 0x01
+const val REQUEST_CODE_OPEN_FILE: Int = 0x02
 
 class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserializer>, LongItemClickListener<Deserializer>, PermissionViewModel.PermissionCallbacks {
 
@@ -44,13 +54,15 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     @Inject
     lateinit var getAllDeserializersUseCase: GetAllDeserializersUseCase
     @Inject
+    lateinit var addDeserializerUseCase: AddDeserializerUseCase
+    @Inject
     lateinit var deleteDeserializerUseCase: DeleteDeserializerUseCase
 
     @Inject
     lateinit var permissionViewModel: PermissionViewModel
 
     @Inject
-    lateinit var deserializerFileStorage: JsonFileStorage<Deserializer>
+    lateinit var deserializerFileStorage: DeserializerFileStorage
 
     val editDeserializerActivityComponent: DeserializerListActivityComponent by lazy {
         val acnSensaApplication: AcnSensaApplication? = application as? AcnSensaApplication
@@ -144,7 +156,10 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         AlertDialog.Builder(this)
                 .setMessage("Delete deserializer?")
                 .setPositiveButton("Delete") { dialog, _ ->
-                    updateDeserializers()
+                    deleteDeserializerUseCase.execute(item)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe { updateDeserializers() }
                     dialog.dismiss()
                 }
                 .setNegativeButton("No") { dialog, _ ->
@@ -160,23 +175,26 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     }
 
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
-        return true
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.deserializer_list_menu, menu)
+        return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         val id: Int? = item?.itemId
         when (id) {
-            R.id.action_import -> importDeserializers()
+            R.id.action_import -> openFileDialog()
             R.id.action_export_all -> exportAllDeserializers()
         }
 
         return super.onOptionsItemSelected(item)
     }
 
-    private fun importDeserializers() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    private fun openFileDialog() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.type = "*/*"
+        startActivityForResult(intent, REQUEST_CODE_OPEN_FILE)
     }
 
     private fun exportAllDeserializers() {
@@ -193,6 +211,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                     ).let {
                         Toast.makeText(this, "Successfully exported file to: $it", Toast.LENGTH_SHORT).show()
                     }
+                    dialog.dismiss()
                 }
                 .setNegativeButton("Cancel") { dialog, _ ->
                     dialog.dismiss()
@@ -224,6 +243,24 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         when (requestCode) {
             REQUEST_CODE_EDIT -> updateDeserializers()
             REQUEST_CODE_EDIT_QUIT_ON_RESULT -> finish()
+            REQUEST_CODE_OPEN_FILE -> {
+                if (resultCode != Activity.RESULT_OK) return
+                data?.data?.let {
+                    PathUtils.getPath(this, it)?.let {
+                        val b = deserializerFileStorage.readItems(it)
+                        deserializerFileStorage.readItems(it).forEach {
+                            val a = 4
+                            addDeserializerUseCase.execute(it)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe {
+                                        Toast.makeText(this, "Added deserializer for filter ${it.filter}", Toast.LENGTH_SHORT).show()
+                                        updateDeserializers()
+                                    }
+                        }
+                    }
+                }
+            }
         }
     }
 }

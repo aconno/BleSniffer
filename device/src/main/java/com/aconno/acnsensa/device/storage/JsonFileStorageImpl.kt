@@ -9,20 +9,20 @@ import com.google.gson.reflect.TypeToken
 import java.io.File
 
 
-class JsonFileStorageImpl<T>(storageDirectoryName: String) : JsonFileStorage<T> {
-
-    private val typeToken: TypeToken<List<T>> = object : TypeToken<List<T>>() {}
+abstract class JsonFileStorageImpl<T, K : T>(
+        private var storageDirectoryName: String,
+        private var typeToken: TypeToken<List<K>>
+) : JsonFileStorage<T> {
     private val storageDirectory: File = File(
             "${Environment.getExternalStorageDirectory().absolutePath}/$storageDirectoryName"
     )
-    private val gson: Gson by lazy { Gson() }
+    abstract val gson: Gson
 
-    constructor(context: Context) : this(context.getString(R.string.app_name))
+    constructor(context: Context, typeToken: TypeToken<List<K>>) : this(context.getString(R.string.app_name), typeToken)
 
     init {
         if (!storageDirectory.exists()) storageDirectory.mkdirs()
     }
-
 
     override fun storeItems(items: List<T>, fileName: String): String {
         val file = File(storageDirectory, fileName)
@@ -31,7 +31,7 @@ class JsonFileStorageImpl<T>(storageDirectoryName: String) : JsonFileStorage<T> 
     }
 
     override fun readItems(fileName: String): List<T> {
-        val file = File(storageDirectory, fileName)
+        val file = File(fileName)
         return gson.fromJson(file.readText(), typeToken.type)
     }
 }

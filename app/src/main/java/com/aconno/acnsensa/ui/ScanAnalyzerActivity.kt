@@ -52,7 +52,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     @Inject
     lateinit var getAllDeserializersUseCase: GetAllDeserializersUseCase
 
-    private lateinit var beaconScanningAdapter: ScanAnalyzerAdapter
+    private lateinit var scanAnalyzerAdapter: ScanAnalyzerAdapter
 
     private var mainMenu: Menu? = null
 
@@ -94,17 +94,17 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { deserializers ->
-                    beaconScanningAdapter = ScanAnalyzerAdapter(mutableListOf(), this, deserializers.toMutableList(), this)
+                    scanAnalyzerAdapter = ScanAnalyzerAdapter(mutableListOf(), this, deserializers.toMutableList(), this)
                     val linearLayoutManager = LinearLayoutManager(this)
                     scan_list.layoutManager = linearLayoutManager
-                    scan_list.adapter = beaconScanningAdapter
+                    scan_list.adapter = scanAnalyzerAdapter
                     scan_list.addItemDecoration(DividerItemDecoration(
                             this, linearLayoutManager.orientation
                     ))
                     beaconListViewModel.getBeaconLiveData()
                             .observe(this, Observer {
                                 it?.let {
-                                    beaconScanningAdapter.logScan(it)
+                                    scanAnalyzerAdapter.logScan(it)
                                 }
                             })
                 }
@@ -206,7 +206,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             override fun onQueryTextChange(newText: String?): Boolean {
                 newText?.let {
                     Timber.e(it)
-                    beaconScanningAdapter.filter = it
+                    scanAnalyzerAdapter.filter = it
                 }
                 return true
             }
@@ -274,7 +274,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { deserializers ->
-                    beaconScanningAdapter.updateDeserializers(deserializers.toMutableList())
+                    scanAnalyzerAdapter.updateDeserializers(deserializers.toMutableList())
                 }
     }
 
