@@ -1,10 +1,12 @@
 package com.aconno.acnsensa.dagger.deserializerlistactivity
 
+import com.aconno.acnsensa.device.permissons.PermissionActionFactory
 import com.aconno.acnsensa.domain.deserializing.DeserializerRepository
 import com.aconno.acnsensa.domain.interactor.deserializing.AddDeserializerUseCase
 import com.aconno.acnsensa.domain.interactor.deserializing.DeleteDeserializerUseCase
 import com.aconno.acnsensa.domain.interactor.deserializing.GetAllDeserializersUseCase
 import com.aconno.acnsensa.ui.DeserializerListActivity
+import com.aconno.acnsensa.viewmodel.PermissionViewModel
 import dagger.Module
 import dagger.Provides
 
@@ -30,9 +32,18 @@ class DeserializerListActivityModule(private val deserializerListActivity: Deser
     fun provideAddDeserializerUseCase(deserializerRepository: DeserializerRepository): AddDeserializerUseCase {
         return AddDeserializerUseCase(deserializerRepository)
     }
+
     @Provides
     @DeserializerListActivityScope
     fun provideDeleteDeserializerUseCase(deserializerRepository: DeserializerRepository): DeleteDeserializerUseCase {
         return DeleteDeserializerUseCase(deserializerRepository)
+    }
+
+
+    @Provides
+    @DeserializerListActivityScope
+    fun providePermissionsViewModel(): PermissionViewModel {
+        val permissionAction = PermissionActionFactory.getPermissionAction(deserializerListActivity)
+        return PermissionViewModel(permissionAction, deserializerListActivity)
     }
 }

@@ -1,13 +1,16 @@
 package com.aconno.acnsensa.ui
 
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.os.Environment
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
+import android.widget.Toast
 import com.aconno.acnsensa.AcnSensaApplication
 import com.aconno.acnsensa.R
 import com.aconno.acnsensa.adapter.DeserializerAdapter
@@ -19,17 +22,21 @@ import com.aconno.acnsensa.dagger.deserializerlistactivity.DeserializerListActiv
 import com.aconno.acnsensa.domain.deserializing.Deserializer
 import com.aconno.acnsensa.domain.interactor.deserializing.DeleteDeserializerUseCase
 import com.aconno.acnsensa.domain.interactor.deserializing.GetAllDeserializersUseCase
+import com.aconno.acnsensa.model.AcnSensaPermission
+import com.aconno.acnsensa.viewmodel.PermissionViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_deserializer_list.*
 import kotlinx.android.synthetic.main.dialog_input_text.view.*
 import javax.inject.Inject
+import android.os.Environment.getExternalStorageDirectory
+import java.io.File
 
 
 const val REQUEST_CODE_EDIT: Int = 0x00
 const val REQUEST_CODE_EDIT_QUIT_ON_RESULT: Int = 0x01
 
-class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserializer>, LongItemClickListener<Deserializer> {
+class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserializer>, LongItemClickListener<Deserializer>, PermissionViewModel.PermissionCallbacks {
 
     private var snackbar: Snackbar? = null
     private val deserializerAdapter: DeserializerAdapter = DeserializerAdapter(mutableListOf(), this, this)
@@ -38,6 +45,9 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     lateinit var getAllDeserializersUseCase: GetAllDeserializersUseCase
     @Inject
     lateinit var deleteDeserializerUseCase: DeleteDeserializerUseCase
+
+    @Inject
+    lateinit var permissionViewModel: PermissionViewModel
 
     val editDeserializerActivityComponent: DeserializerListActivityComponent by lazy {
         val acnSensaApplication: AcnSensaApplication? = application as? AcnSensaApplication
@@ -57,6 +67,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         deserializer_list.layoutManager = LinearLayoutManager(this)
         deserializer_list.adapter = deserializerAdapter
         setSupportActionBar(custom_toolbar)
+        permissionViewModel.requestWriteExternalStoragePermission()
 
         updateDeserializers()
 
@@ -118,7 +129,6 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     }
 
     private fun exportItems(text: String, listOf: List<Deserializer>) {
-
     }
 
     private fun showDeleteItemDialog(item: Deserializer) {
@@ -143,6 +153,25 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(deserializerAdapter::setDeserializers)
+    }
+
+
+    override fun permissionAccepted(actionCode: Int) {
+    }
+
+    override fun permissionDenied(actionCode: Int) {
+        when (actionCode) {
+            AcnSensaPermission.WRITE_EXTERNAL_STORAGE_CODE -> {
+                Toast.makeText(
+                        this,
+                        "Write permission denied, you will not be able to use any exporting features...",
+                        Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    override fun showRationale(actionCode: Int) {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

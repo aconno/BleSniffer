@@ -5,12 +5,20 @@ import com.aconno.acnsensa.device.permissons.PermissionAction
 import com.aconno.acnsensa.model.AcnSensaPermission
 
 class PermissionViewModel(
-    private val permissionAction: PermissionAction,
-    private val permissionCallbacks: PermissionCallbacks
+        private val permissionAction: PermissionAction,
+        private val permissionCallbacks: PermissionCallbacks
 ) {
 
     fun requestAccessFineLocation() {
         checkAndRequestPermission(AcnSensaPermission.ACCESS_FINE_LOCATION)
+    }
+
+    fun requestReadExternalStoragePermission() {
+        checkAndRequestPermission(AcnSensaPermission.READ_EXTERNAL_STORAGE)
+    }
+
+    fun requestWriteExternalStoragePermission() {
+        checkAndRequestPermission(AcnSensaPermission.WRITE_EXTERNAL_STORAGE)
     }
 
     private fun checkAndRequestPermission(acnSensaPermission: AcnSensaPermission) {
@@ -18,8 +26,8 @@ class PermissionViewModel(
             permissionCallbacks.permissionAccepted(acnSensaPermission.code)
         } else {
             permissionAction.requestPermission(
-                acnSensaPermission.permission,
-                acnSensaPermission.code
+                    acnSensaPermission.permission,
+                    acnSensaPermission.code
             )
         }
     }
