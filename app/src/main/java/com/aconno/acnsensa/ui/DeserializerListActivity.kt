@@ -1,6 +1,5 @@
 package com.aconno.acnsensa.ui
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -8,6 +7,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import com.aconno.acnsensa.AcnSensaApplication
 import com.aconno.acnsensa.R
@@ -27,6 +27,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_deserializer_list.*
 import kotlinx.android.synthetic.main.dialog_input_text.view.*
+import java.util.regex.Pattern
 import javax.inject.Inject
 
 
@@ -114,25 +115,26 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
 
     private fun showExportItemDialog(
             item: Deserializer,
-            defaultFileName: String = item.filter.replace("[\\\\/:*?\"<>|]", "")
+            defaultFileName: String = item.filter.replace(Pattern.compile("[\\\\/:*?\"<>|]").toRegex(), "") + ".json"
     ) {
         val view: View = layoutInflater.inflate(R.layout.dialog_input_text, null)
-        view.text_input.editText?.let { textInput ->
-            textInput.hint = defaultFileName
-            AlertDialog.Builder(this)
-                    .setMessage("Export item")
-                    .setCancelable(true)
-                    .setView(view)
-                    .setPositiveButton("Export") { dialog, _ ->
-                        deserializerFileStorage.storeItem(item,
-                                if (textInput.text.isEmpty()) defaultFileName
-                                else textInput.text.toString()
-                        )
-                        dialog.dismiss()
-                    }
-                    .setOnCancelListener(DialogInterface::dismiss)
-                    .show()
-        }
+        val textInput: EditText = view.text_input.editText ?: return
+        textInput.hint = defaultFileName
+        AlertDialog.Builder(this)
+                .setMessage("Export item: " + item.filter)
+                .setView(view)
+                .setPositiveButton("Export") { dialog, _ ->
+                    deserializerFileStorage.storeItem(item,
+                            if (textInput.text.isEmpty()) defaultFileName
+                            else textInput.text.toString()
+                    )
+                    Toast.makeText(this, "Successfully exported file!", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
     }
 
     private fun showDeleteItemDialog(item: Deserializer) {
