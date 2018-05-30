@@ -63,6 +63,7 @@ class ScanAnalyzerAdapter(
 //                    }
                     item.second++
                     item.first.lastseen = data.lastseen
+                    notifyItemChanged(index)
                     return@logScan
                 }
             }
