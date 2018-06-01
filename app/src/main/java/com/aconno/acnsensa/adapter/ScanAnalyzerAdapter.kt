@@ -63,7 +63,7 @@ class ScanAnalyzerAdapter(
 //                    }
                 item.second++
                 item.first.lastseen = data.lastseen
-                Timber.e("%s - %s", scanLog.indexOf(item), item.first.address.toString())
+                Timber.e("%s - %s", scanLog.indexOf(item), item.first.address)
                 notifyItemChanged(scanLog.indexOf(item))
                 return@logScan
             }

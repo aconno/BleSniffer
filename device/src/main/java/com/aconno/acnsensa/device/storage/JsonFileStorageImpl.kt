@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.Environment
 import com.aconno.acnsensa.device.R
 import com.aconno.acnsensa.domain.JsonFileStorage
+import com.aconno.acnsensa.domain.deserializing.FieldDeserializer
+import com.aconno.acnsensa.domain.deserializing.GeneralFieldDeserializer
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File

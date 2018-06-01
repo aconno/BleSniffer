@@ -27,7 +27,7 @@
         </activity>
         <activity
             android:name=".ui.ScanAnalyzerActivity"
-            android:label="AcnSensa Scanner"
+            android:label="Ble Sniffer"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

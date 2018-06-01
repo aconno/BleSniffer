@@ -10,6 +10,6 @@ class GenericDeserializer<T> : JsonDeserializer<T> {
     @Throws(JsonParseException::class)
     override fun deserialize(je: JsonElement, type: Type, jdc: JsonDeserializationContext): T {
         val content = je.asJsonObject.get("content")
-        return gson.fromJson(content, type)
+        return jdc.deserialize(je, type)
     }
 }
