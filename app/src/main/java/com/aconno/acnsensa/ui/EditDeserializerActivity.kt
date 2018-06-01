@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import com.aconno.acnsensa.AcnSensaApplication
 import com.aconno.acnsensa.R
 import com.aconno.acnsensa.adapter.DeserializerEditorAdapter
@@ -77,6 +80,22 @@ class EditDeserializerActivity : AppCompatActivity() {
             deserializer = null
         }
 
+        deserializer_filter_type.adapter = ArrayAdapter<String>(
+                this,
+                android.R.layout.simple_spinner_item,
+                Deserializer.Type.values().map { it.name }
+        )
+        deserializer_filter_type.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                deserializer_filter_type.setSelection(0)
+                deserializer?.filterType = Deserializer.Type.values()[0]
+            }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                deserializer?.filterType = Deserializer.Type.values()[position]
+            }
+        }
+
         add_value_deserializer_button.setOnClickListener {
             deserializer?.fieldDeserializers?.add(
                     GeneralFieldDeserializer(
@@ -113,6 +132,10 @@ class EditDeserializerActivity : AppCompatActivity() {
                                 { Timber.e(it) }
                         )
             }
+        }
+
+        cancel.setOnClickListener {
+            finish()
         }
     }
 }

@@ -5,7 +5,7 @@ package com.aconno.acnsensa.domain.deserializing
  */
 interface Deserializer {
     val filter: String
-    val filterType: Type
+    var filterType: Type
     val fieldDeserializers: MutableList<FieldDeserializer>
 
     enum class Type {
