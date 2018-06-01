@@ -9,10 +9,11 @@ import com.aconno.acnsensa.domain.model.ScanResult
 import io.reactivex.subjects.PublishSubject
 import timber.log.Timber
 
+fun ByteArray.toHex() = this.joinToString(separator = "") { "0x" + it.toInt().and(0xff).toString(16).padStart(2, '0') + " " }
 //TODO: This needs refactoring.
 class BluetoothScanCallback(
-    val scanResults: PublishSubject<ScanResult>,
-    val scanEvents: PublishSubject<ScanEvent>
+        val scanResults: PublishSubject<ScanResult>,
+        val scanEvents: PublishSubject<ScanEvent>
 ) : ScanCallback() {
 
     override fun onScanResult(callbackType: Int, result: android.bluetooth.le.ScanResult?) {
@@ -27,8 +28,8 @@ class BluetoothScanCallback(
         val deviceName = device?.name ?: "Unknown"
         val deviceAddress = device?.address ?: "Unknown"
         val scannedDevice = Device(deviceName, deviceAddress)
-
         val bytes = (result?.scanRecord?.bytes ?: byteArrayOf())
+        Timber.e("Scan" + device?.name + " - " + bytes.toHex())
         val advertisement = Advertisement(bytes.toList())
 
         return ScanResult(scannedDevice, advertisement)
@@ -40,14 +41,14 @@ class BluetoothScanCallback(
         when (errorCode) {
             SCAN_FAILED_ALREADY_STARTED ->
                 scanEvents.onNext(
-                    ScanEvent(
-                        ScanEvent.SCAN_FAILED_ALREADY_STARTED,
-                        "Scan Failed with error code $errorCode"
-                    )
+                        ScanEvent(
+                                ScanEvent.SCAN_FAILED_ALREADY_STARTED,
+                                "Scan Failed with error code $errorCode"
+                        )
                 )
             else ->
                 scanEvents.onNext(
-                    ScanEvent(ScanEvent.SCAN_FAILED, "Scan failed with error code $errorCode")
+                        ScanEvent(ScanEvent.SCAN_FAILED, "Scan failed with error code $errorCode")
                 )
         }
     }

@@ -17,6 +17,7 @@ import com.aconno.acnsensa.R
 import com.aconno.acnsensa.adapter.LongItemClickListener
 import com.aconno.acnsensa.adapter.ScanAnalyzerAdapter
 import com.aconno.acnsensa.adapter.ScanRecordListener
+import com.aconno.acnsensa.adapter.toHex
 import com.aconno.acnsensa.dagger.scananalyzeractivity.DaggerScanAnalyzerActivityComponent
 import com.aconno.acnsensa.dagger.scananalyzeractivity.ScanAnalyzerActivityComponent
 import com.aconno.acnsensa.dagger.scananalyzeractivity.ScanAnalyzerActivityModule
@@ -107,6 +108,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                             .observe(this, Observer {
                                 it?.let {
                                     scanAnalyzerAdapter.logScan(it)
+                                    Timber.e(it.name + " - " + it.advertisementData.toHex())
                                 }
                             })
                 }

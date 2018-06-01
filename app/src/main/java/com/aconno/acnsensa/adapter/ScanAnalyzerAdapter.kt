@@ -61,6 +61,7 @@ class ScanAnalyzerAdapter(
 //                        filteredList[it].first.lastseen = data.lastseen
 //                        notifyItemChanged(it)
 //                    }
+                Timber.e("Upgrading - " + item.first.name + data.name)
                 item.second++
                 item.first.lastseen = data.lastseen
                 Timber.e("%s - %s", scanLog.indexOf(item), item.first.address)
