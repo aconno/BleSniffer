@@ -107,9 +107,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                     beaconListViewModel.getBeaconLiveData()
                             .observe(this, Observer {
                                 it?.let {
-                                    Timber.tag("MEASURE").e("%s 0", System.currentTimeMillis().toString())
                                     scanAnalyzerAdapter.logScan(it)
-                                    Timber.e(it.name + " - " + it.advertisementData.toHex())
                                 }
                             })
                 }

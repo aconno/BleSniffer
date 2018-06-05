@@ -25,7 +25,7 @@ class DeserializedFieldsAdapter(
         return fields.size
     }
 
-    fun setFields(fields: MutableList<Triple<String, String, Int>>) {
+    fun setFields(fields: List<Triple<String, String, Int>>) {
         this.fields.clear()
         this.fields.addAll(fields)
         notifyDataSetChanged()

@@ -22,6 +22,7 @@ class ScanAnalyzerAdapter(
         private var deserializers: MutableList<Deserializer>,
         private val longItemClickListener: LongItemClickListener<Beacon>
 ) : RecyclerView.Adapter<ScanAnalyzerAdapter.ViewHolder>() {
+    private val hashes: MutableMap<Int, Pair<Int, MutablePair<Beacon, Int>>> = mutableMapOf()
 
     var filter: String = ""
         set(value) {
@@ -39,30 +40,35 @@ class ScanAnalyzerAdapter(
 
     fun setBeaconData(beaconData: List<Beacon>) {
         this.scanLog.clear()
+        this.hashes.clear()
+        this.hashes.putAll(beaconData.mapIndexed { i, it -> Pair(i, Pair(it.hashCode(), MutablePair(it, 1))) })
         this.scanLog.addAll(beaconData.map { MutablePair(it, 1) })
         notifyDataSetChanged()
     }
 
     fun logScan(data: Beacon) {
-        scanLog.filter { (System.currentTimeMillis() - it.first.lastseen) < 2500 && it.first.address == data.address }.forEachIndexed { index, item ->
-            if (item.first.advertisementData.contentEquals(data.advertisementData)) {
-                item.second++
-                item.first.lastseen = data.lastseen
-                notifyItemChanged(scanLog.indexOf(item))
-                return@logScan
+        val hashEntry = hashes[data.hashCode()]
+        if (hashEntry != null) {
+            val (index, beaconPair) = hashEntry
+            if (beaconPair.first.lastseen < 2500) {
+                beaconPair.second++
+                beaconPair.first.lastseen = data.lastseen
+                notifyItemChanged(index)
             }
         }
-        //Adding new
-        scanLog.add(0, MutablePair(data, 1))
-        notifyItemInserted(0)
+        val pair = MutablePair(data, 1)
+        val size = scanLog.size
+        hashes[data.hashCode()] = Pair(size, pair)
+        scanLog.add(pair)
+        notifyItemInserted(size)
 
         scanRecordListener.onRecordAdded()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view =
+        return ViewHolder(
                 LayoutInflater.from(parent.context).inflate(R.layout.item_scan_record, parent, false)
-        return ViewHolder(view)
+        )
     }
 
     override fun getItemCount(): Int {
@@ -74,29 +80,25 @@ class ScanAnalyzerAdapter(
     }
 
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        private val deserializedFieldsAdapter = DeserializedFieldsAdapter()
-
-        init {
-            view.deserialized_field_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
-            view.deserialized_field_list.adapter = deserializedFieldsAdapter
-        }
+        private var initialized = false
 
         fun bind(data: MutablePair<Beacon, Int>) {
             view.time.text = getDateCurrentTimeZone(data.first.lastseen)
             view.repeating.text = "x${data.second}"
 
-            if (deserializedFieldsAdapter.fields.isEmpty()) {
-                Timber.e(scanLog.size.toString())
+            if (!initialized) {
+                val dataHex = data.first.advertisementData.toHex()
+
                 view.setOnLongClickListener { longItemClickListener.onLongItemClick(data.first) }
                 view.address.text = data.first.address
                 view.name.text = data.first.name
-                view.data.text = data.first.advertisementData.toHex()
+                view.data.text = dataHex
 
                 with(data.first) {
                     deserializers.find {
                         when (it.filterType) {
-                            Deserializer.Type.MAC -> address.contains(it.filter, ignoreCase = true)
-                            Deserializer.Type.DATA -> advertisementData.toHex().contains(it.filter, ignoreCase = true)
+                            Deserializer.Type.MAC -> address.matches(it.pattern)
+                            Deserializer.Type.DATA -> dataHex.matches(it.pattern)
                             else -> false
                         }
                     }?.let {
@@ -114,18 +116,23 @@ class ScanAnalyzerAdapter(
                                     ).toString(),
                                     d.color
                             )
-                        }.toMutableList().let {
+                        }.let {
+                            val deserializedFieldsAdapter = DeserializedFieldsAdapter()
+                            view.deserialized_field_list.adapter = deserializedFieldsAdapter
+                            view.deserialized_field_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
                             deserializedFieldsAdapter.setFields(it)
                         }
                         Timber.tag("MEASURE").e("Deserializer end%s", System.currentTimeMillis().toString())
                     }
                 }
+                initialized = true
             }
         }
     }
 }
 
 fun getDateCurrentTimeZone(timestamp: Long): String {
+    // TODO: USE SDF With default locale not HERE USE GLOBAL VARIABLE YES
     try {
         val calendar = Calendar.getInstance()
         val tz = TimeZone.getDefault()

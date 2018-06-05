@@ -1,12 +1,10 @@
 package com.aconno.acnsensa
 
-import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
-
+import android.util.Log
 import org.junit.Test
 import org.junit.runner.RunWith
-
-import org.junit.Assert.*
+import java.nio.ByteBuffer
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -17,8 +15,19 @@ import org.junit.Assert.*
 class ExampleInstrumentedTest {
     @Test
     fun useAppContext() {
-        // Context of the app under test.
-        val appContext = InstrumentationRegistry.getTargetContext()
-        assertEquals("com.aconno.acnsensa", appContext.packageName)
+        var start = System.currentTimeMillis()
+        val testvar = byteArrayOf(0x00, 0x01, 0x02, 0x03, 0x04, 0x05)
+        for (i in 1..10000000) {
+            var time: Long = 0
+            for (i in 5 downTo 0) {
+                time = time or (testvar[i].toLong() shl ((5 - i) * 8))
+            }
+        }
+        Log.e("TEST", (System.currentTimeMillis() - start).toString())
+        start = System.currentTimeMillis()
+        for (i in 1..10000000) {
+            ByteBuffer.wrap(byteArrayOf(0, 0) + testvar, 0, 8).long
+        }
+        Log.e("TEST", (System.currentTimeMillis() - start).toString())
     }
 }

@@ -3,6 +3,7 @@ package com.aconno.acnsensa.domain
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.Charset
+import kotlin.experimental.or
 
 enum class ValueConverter(var default: Any, var converter: Converter<*>) {
     BOOLEAN(false, object : Converter<Boolean>(false) {
@@ -95,7 +96,10 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         }
 
         override fun deserializeInternal(data: ByteArray): Short {
-            return ByteBuffer.wrap(data, 0, 2).short
+            var short: Short = 0
+            short = short or (data[1].toInt() shl 0).toShort()
+            short = short or (data[0].toInt() shl 8).toShort()
+            return short
         }
     }),
     UINT16(0, object : Converter<Int>(0) {
@@ -108,7 +112,9 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         }
 
         override fun deserializeInternal(data: ByteArray): Int {
-            val v = ByteBuffer.wrap(data, 0, 2).short
+            var v: Short = 0
+            v = v or (data[1].toInt() shl 0).toShort()
+            v = v or (data[0].toInt() shl 8).toShort()
             return (if (v < 0) v.toInt() + 65536 else v.toInt())
         }
 
@@ -123,7 +129,11 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         }
 
         override fun deserializeInternal(data: ByteArray): Int {
-            return ByteBuffer.wrap(data, 0, 4).int
+            var int: Int = 0
+            for (i in 3 downTo 0) {
+                int = int or (data[i].toInt() shl ((3 - i) * 8))
+            }
+            return int
         }
 
     }),
@@ -137,11 +147,16 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         }
 
         override fun deserializeInternal(data: ByteArray): Long {
-            val v = ByteBuffer.wrap(data, 0, 4).int
+            var v: Int = 0
+            for (i in 3 downTo 0) {
+                v = v or (data[i].toInt() shl ((3 - i) * 8))
+            }
             return (if (v < 0) v.toLong() + 4294967296L else v.toLong())
         }
     }),
     UTF8STRING("", object : Converter<String>("") {
+        private val ASCII = Charset.forName("ASCII")
+
         override fun fromString(string: String): String {
             return string
         }
@@ -151,11 +166,11 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         }
 
         override fun serializeInternal(data: String): ByteArray {
-            return data.toByteArray(Charset.forName("ASCII"))
+            return data.toByteArray(ASCII)
         }
 
         override fun deserializeInternal(data: ByteArray): String {
-            return data.toString(Charset.forName("ASCII")).trim(0x00.toChar())
+            return data.toString(ASCII).trim(0x00.toChar())
         }
 
     }),
@@ -169,9 +184,11 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         }
 
         override fun deserializeInternal(data: ByteArray): Long {
-            val missingBytes: MutableList<Byte> = mutableListOf(0, 0)
-            missingBytes.addAll(data.toTypedArray())
-            return ByteBuffer.wrap(missingBytes.toByteArray(), 0, 8).long
+            var time: Long = 0
+            for (i in 5 downTo 0) {
+                time = time or (data[i].toLong() shl ((5 - i) * 8))
+            }
+            return time
         }
 
     });

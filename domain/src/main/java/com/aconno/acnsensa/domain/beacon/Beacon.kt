@@ -1,7 +1,5 @@
 package com.aconno.acnsensa.domain.beacon
 
-import com.aconno.acnsensa.domain.ifttt.outcome.Outcome
-
 /**
  * @author aconno
  */
