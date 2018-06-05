@@ -1,5 +1,7 @@
 package com.aconno.acnsensa.adapter
 
+import android.content.Context
+import android.os.Build
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -10,7 +12,7 @@ import com.aconno.acnsensa.domain.beacon.Beacon
 import com.aconno.acnsensa.domain.deserializing.Deserializer
 import kotlinx.android.synthetic.main.item_scan_record.view.*
 import timber.log.Timber
-import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -50,10 +52,11 @@ class ScanAnalyzerAdapter(
         val hashEntry = hashes[data.hashCode()]
         if (hashEntry != null) {
             val (index, beaconPair) = hashEntry
-            if (beaconPair.first.lastseen < 2500) {
+            if (data.lastseen - beaconPair.first.lastseen < 2500) {
                 beaconPair.second++
                 beaconPair.first.lastseen = data.lastseen
                 notifyItemChanged(index)
+                return
             }
         }
         val pair = MutablePair(data, 1)
@@ -62,7 +65,7 @@ class ScanAnalyzerAdapter(
         scanLog.add(pair)
         notifyItemInserted(size)
 
-        scanRecordListener.onRecordAdded()
+        scanRecordListener.onRecordAdded(size)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -83,7 +86,7 @@ class ScanAnalyzerAdapter(
         private var initialized = false
 
         fun bind(data: MutablePair<Beacon, Int>) {
-            view.time.text = getDateCurrentTimeZone(data.first.lastseen)
+            view.time.text = formatTimestamp(data.first.lastseen, longItemClickListener as Context)
             view.repeating.text = "x${data.second}"
 
             if (!initialized) {
@@ -125,27 +128,24 @@ class ScanAnalyzerAdapter(
                         Timber.tag("MEASURE").e("Deserializer end%s", System.currentTimeMillis().toString())
                     }
                 }
-                initialized = true
             }
+            initialized = true
         }
     }
 }
 
-fun getDateCurrentTimeZone(timestamp: Long): String {
-    // TODO: USE SDF With default locale not HERE USE GLOBAL VARIABLE YES
-    try {
-        val calendar = Calendar.getInstance()
-        val tz = TimeZone.getDefault()
-        calendar.timeInMillis = timestamp
-        calendar.add(Calendar.MILLISECOND, tz.getOffset(calendar.timeInMillis))
-        val sdf = DateFormat.getDateTimeInstance()
-        val currentTimeZone = calendar.time as Date
-        return sdf.format(currentTimeZone)
-    } catch (e: Exception) {
-    }
+var sdf: SimpleDateFormat? = null
 
-    return ""
-}
+fun getCurrentLocale(context: Context): Locale =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) context.resources.configuration.locales.get(0)
+        else context.resources.configuration.locale
+
+fun formatTimestamp(timestamp: Long, context: Context): String =
+        (sdf ?: run {
+            sdf = SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa", getCurrentLocale(context))
+            sdf
+        })?.format(Date(timestamp)) ?: "Invalid Timestamp"
+
 
 class MutablePair<A, B>(
         var first: A,

@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aconno.acnsensa">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -49,6 +50,9 @@
             android:exported="false" />
 
         <activity android:name=".ui.UpdateActionActivity" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="af33bc92f5a62c7484661bea00a9c59aef76430d" />
     </application>
 
 </manifest>

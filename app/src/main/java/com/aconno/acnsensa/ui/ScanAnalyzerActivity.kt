@@ -7,9 +7,12 @@ import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.widget.SearchView
 import com.aconno.acnsensa.AcnSensaApplication
 import com.aconno.acnsensa.BluetoothScanningService
@@ -17,7 +20,6 @@ import com.aconno.acnsensa.R
 import com.aconno.acnsensa.adapter.LongItemClickListener
 import com.aconno.acnsensa.adapter.ScanAnalyzerAdapter
 import com.aconno.acnsensa.adapter.ScanRecordListener
-import com.aconno.acnsensa.adapter.toHex
 import com.aconno.acnsensa.dagger.scananalyzeractivity.DaggerScanAnalyzerActivityComponent
 import com.aconno.acnsensa.dagger.scananalyzeractivity.ScanAnalyzerActivityComponent
 import com.aconno.acnsensa.dagger.scananalyzeractivity.ScanAnalyzerActivityModule
@@ -99,6 +101,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 .subscribe { deserializers ->
                     scanAnalyzerAdapter = ScanAnalyzerAdapter(mutableListOf(), this, deserializers.toMutableList(), this)
                     val linearLayoutManager = LinearLayoutManager(this)
+                    linearLayoutManager.reverseLayout = true
                     scan_list.layoutManager = linearLayoutManager
                     scan_list.adapter = scanAnalyzerAdapter
                     scan_list.addItemDecoration(DividerItemDecoration(
@@ -113,8 +116,8 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 }
     }
 
-    override fun onRecordAdded() {
-        scan_list.smoothScrollToPosition(0)
+    override fun onRecordAdded(size: Int) {
+        scan_list.scrollToPosition(size)
     }
 
     override fun onResume() {

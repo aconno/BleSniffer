@@ -2,6 +2,7 @@ package com.aconno.acnsensa.adapter
 
 import android.app.Activity
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -16,7 +17,6 @@ import com.aconno.acnsensa.domain.deserializing.FieldDeserializer
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
 import kotlinx.android.synthetic.main.item_deserializer_field.view.*
-import timber.log.Timber
 
 class DeserializerEditorAdapter(
         private val deserializer: Deserializer,
@@ -121,4 +121,21 @@ class DeserializerEditorAdapter(
             view.color_button.setBackgroundColor(fieldDeserializer.color)
         }
     }
+
+    fun createItemTouchHelper(): ItemTouchHelper.SimpleCallback =
+            object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT) {
+                override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                    val oldPos = viewHolder.adapterPosition
+                    val newPos = target.adapterPosition
+                    val item = deserializer.fieldDeserializers[oldPos]
+                    deserializer.fieldDeserializers.removeAt(oldPos)
+                    deserializer.fieldDeserializers.add(newPos, item)
+                    notifyItemMoved(oldPos, newPos)
+                    return true
+                }
+
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    deserializer.fieldDeserializers.removeAt(viewHolder.adapterPosition)
+                }
+            }
 }

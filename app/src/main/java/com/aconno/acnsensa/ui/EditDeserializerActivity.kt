@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -41,7 +42,12 @@ class EditDeserializerActivity : AppCompatActivity() {
         set(value) {
             field = (value
                     ?: GeneralDeserializer("", Deserializer.Type.MAC, mutableListOf())).apply {
-                deserializer_list.adapter = DeserializerEditorAdapter(this, this@EditDeserializerActivity)
+                deserializer_list.adapter = DeserializerEditorAdapter(this, this@EditDeserializerActivity).apply {
+                    ItemTouchHelper(createItemTouchHelper()).attachToRecyclerView(deserializer_list)
+                }
+                deserializer_filter_type.setSelection(Deserializer.Type.values().indexOf(
+                        Deserializer.Type.valueOf(deserializer?.filterType?.name ?: "MAC")
+                ))
                 deserializer_filter.editText?.setText(this.filter)
             }
         }
