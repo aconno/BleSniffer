@@ -27,12 +27,10 @@ class ScanAnalyzerAdapter(
         set(value) {
             field = value
             if (value.isNotEmpty()) {
-//                filteredList = scanLog.filter { beacon -> beacon.first.address.contains(filter, ignoreCase = true) }.toMutableList()
                 notifyDataSetChanged()
             }
         }
 
-//    private var filteredList: MutableList<MutablePair<Beacon, Int>> = mutableListOf()
 
     fun updateDeserializers(items: MutableList<Deserializer>) {
         deserializers = items
@@ -42,43 +40,22 @@ class ScanAnalyzerAdapter(
     fun setBeaconData(beaconData: List<Beacon>) {
         this.scanLog.clear()
         this.scanLog.addAll(beaconData.map { MutablePair(it, 1) })
-//        if (filter.isNotEmpty()) filteredList = scanLog.filter { beacon -> beacon.first.address.contains(filter, ignoreCase = true) }.toMutableList()
         notifyDataSetChanged()
     }
 
     fun logScan(data: Beacon) {
-//        if (scanLog.size > 0) {
-//            Timber.e(data.advertisementData.toHex())
-//            Timber.e(scanLog[0].first.advertisementData.toHex())
-//        }
         scanLog.filter { (System.currentTimeMillis() - it.first.lastseen) < 2500 && it.first.address == data.address }.forEachIndexed { index, item ->
-            //            Timber.e(scanLog.indexOf(item).toString())
-//            if (item.first.address == data.address) {
             if (item.first.advertisementData.contentEquals(data.advertisementData)) {
-//                    filteredList.indexOfFirst { it.first.lastseen == item.first.lastseen }.let {
-//                        if (it == -1) return@let
-//                        filteredList[it].second++
-//                        filteredList[it].first.lastseen = data.lastseen
-//                        notifyItemChanged(it)
-//                    }
-                Timber.e("Upgrading - " + item.first.name + data.name)
                 item.second++
                 item.first.lastseen = data.lastseen
-                Timber.e("%s - %s", scanLog.indexOf(item), item.first.address)
                 notifyItemChanged(scanLog.indexOf(item))
                 return@logScan
             }
-//            }
         }
-        Timber.e("Added")
+        //Adding new
         scanLog.add(0, MutablePair(data, 1))
-
-
-
-        if (filter.isEmpty() || data.address.contains(filter)) {
-//            filteredList.add(0, MutablePair(data, 1))
-        }
         notifyItemInserted(0)
+
         scanRecordListener.onRecordAdded()
     }
 
@@ -88,16 +65,12 @@ class ScanAnalyzerAdapter(
         return ViewHolder(view)
     }
 
-    override fun getItemViewType(position: Int): Int = if (position > 0) 0 else 1
-
     override fun getItemCount(): Int {
         return scanLog.size
-//        return (if (filter.isNotEmpty()) filteredList else scanLog).size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(scanLog[position])
-//        holder.bind((if (filter.isNotEmpty()) filteredList else scanLog)[position])
     }
 
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
@@ -113,7 +86,6 @@ class ScanAnalyzerAdapter(
             view.repeating.text = "x${data.second}"
 
             if (deserializedFieldsAdapter.fields.isEmpty()) {
-//                Timber.e(filteredList.size.toString())
                 Timber.e(scanLog.size.toString())
                 view.setOnLongClickListener { longItemClickListener.onLongItemClick(data.first) }
                 view.address.text = data.first.address
@@ -128,6 +100,7 @@ class ScanAnalyzerAdapter(
                             else -> false
                         }
                     }?.let {
+                        Timber.tag("MEASURE").e("Deserializer start%s", System.currentTimeMillis().toString())
                         it.fieldDeserializers.map { d ->
                             val start = d.startIndexInclusive
                             val end = d.endIndexExclusive
@@ -141,10 +114,10 @@ class ScanAnalyzerAdapter(
                                     ).toString(),
                                     d.color
                             )
-                        }.apply {
                         }.toMutableList().let {
                             deserializedFieldsAdapter.setFields(it)
                         }
+                        Timber.tag("MEASURE").e("Deserializer end%s", System.currentTimeMillis().toString())
                     }
                 }
             }
