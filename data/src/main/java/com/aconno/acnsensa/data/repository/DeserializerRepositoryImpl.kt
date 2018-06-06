@@ -1,7 +1,9 @@
 package com.aconno.acnsensa.data.repository
 
-import com.aconno.acnsensa.domain.ValueConverter
-import com.aconno.acnsensa.domain.deserializing.*
+import com.aconno.acnsensa.domain.deserializing.Deserializer
+import com.aconno.acnsensa.domain.deserializing.DeserializerRepository
+import com.aconno.acnsensa.domain.deserializing.GeneralDeserializer
+import com.aconno.acnsensa.domain.deserializing.GeneralFieldDeserializer
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.reactivex.Single
@@ -27,15 +29,23 @@ class DeserializerRepositoryImpl(
     }
 
     override fun getAllDeserializers(): Single<List<Deserializer>> {
-        return deserializerDao.all.map { deserializerEntities -> deserializerEntities.map { toDeserializer(it) } }
+        return deserializerDao.all
+                .map { deserializerEntities -> deserializerEntities.map { toDeserializer(it) } }
     }
 
     override fun getDeserializerByFilter(filter: String, type: Deserializer.Type): Single<Deserializer> {
-        return deserializerDao.getDeserializerByFilter(filter, type.name).map { deserializerEntity -> toDeserializer(deserializerEntity) }
+        return deserializerDao.getDeserializerByFilter(filter, type.name)
+                .map { deserializerEntity -> toDeserializer(deserializerEntity) }
+    }
+
+    override fun getDeserializerById(id: Long): Single<Deserializer> {
+        return deserializerDao.getDeserializerById(id)
+                .map { deserializerEntity -> toDeserializer(deserializerEntity) }
     }
 
     private fun toEntity(deserializer: Deserializer): DeserializerEntity {
         return DeserializerEntity(
+                id = deserializer.id,
                 filter = deserializer.filter,
                 filterType = deserializer.filterType.name,
                 fieldDeserializers = Gson().toJson(deserializer.fieldDeserializers)
@@ -44,6 +54,7 @@ class DeserializerRepositoryImpl(
 
     private fun toDeserializer(deserializerEntity: DeserializerEntity): Deserializer {
         return GeneralDeserializer(
+                id = deserializerEntity.id,
                 filter = deserializerEntity.filter,
                 filterType = Deserializer.Type.valueOf(deserializerEntity.filterType),
                 fieldDeserializers = Gson().fromJson(

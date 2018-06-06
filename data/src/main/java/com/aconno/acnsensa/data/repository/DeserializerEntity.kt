@@ -1,10 +1,12 @@
 package com.aconno.acnsensa.data.repository
 
 import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 
-@Entity(tableName = "deserializers", primaryKeys = ["filter", "filterType"])
+@Entity(tableName = "deserializers")
 data class DeserializerEntity(
-    val filter: String,
-    val filterType: String,
-    val fieldDeserializers: String
+        @PrimaryKey(autoGenerate = true) val id: Long,
+        val filter: String,
+        val filterType: String,
+        val fieldDeserializers: String
 )

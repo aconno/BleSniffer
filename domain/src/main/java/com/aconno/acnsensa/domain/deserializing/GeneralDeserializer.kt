@@ -3,6 +3,7 @@ package com.aconno.acnsensa.domain.deserializing
 import java.util.regex.Pattern
 
 data class GeneralDeserializer(
+        override val id: Long,
         override val filter: String = "",
         override var filterType: Deserializer.Type = Deserializer.Type.MAC,
         override val fieldDeserializers: MutableList<FieldDeserializer> = mutableListOf()
