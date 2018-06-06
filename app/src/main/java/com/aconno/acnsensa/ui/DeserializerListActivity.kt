@@ -185,10 +185,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     }
 
     private fun openFileDialog() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
-        intent.type = "*/*"
-        startActivityForResult(intent, REQUEST_CODE_OPEN_FILE)
+        startActivityForResult(PathUtils.createGetContentIntent(), REQUEST_CODE_OPEN_FILE)
     }
 
     private fun exportAllDeserializers() {

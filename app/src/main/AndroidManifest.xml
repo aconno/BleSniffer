@@ -29,7 +29,7 @@
         <activity
             android:name=".ui.ScanAnalyzerActivity"
             android:label="Ble Sniffer"
-            android:icon="@drawable/sniffer_app_icon"
+            android:icon="@mipmap/ic_launcher_sniffer"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,6 +45,17 @@
         <activity android:name=".ui.LiveGraphActivity" />
         <activity android:name=".ui.ActionListActivity" />
         <activity android:name=".ui.actions.AddActionActivity" />
+
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.aconno.acnsensa.device.fileprovider"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/filepaths" />
+        </provider>
 
         <service
             android:name=".BluetoothScanningService"
