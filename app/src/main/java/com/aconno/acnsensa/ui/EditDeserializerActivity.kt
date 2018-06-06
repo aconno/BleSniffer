@@ -41,7 +41,7 @@ class EditDeserializerActivity : AppCompatActivity() {
     var deserializer: Deserializer? = null
         set(value) {
             field = (value.also { existing = true }
-                    ?: GeneralDeserializer(null, "", Deserializer.Type.MAC, mutableListOf())).apply {
+                    ?: GeneralDeserializer(null, "Unnamed", "", Deserializer.Type.MAC, mutableListOf())).apply {
                 deserializer_list.adapter = DeserializerEditorAdapter(this, this@EditDeserializerActivity).apply {
                     ItemTouchHelper(createItemTouchHelper()).attachToRecyclerView(deserializer_list)
                 }
@@ -49,6 +49,7 @@ class EditDeserializerActivity : AppCompatActivity() {
                         Deserializer.Type.valueOf(this.filterType.name)
                 ))
                 deserializer_filter.editText?.setText(this.filter)
+                deserializer_name.editText?.setText(this.name)
             }
         }
 
@@ -82,6 +83,7 @@ class EditDeserializerActivity : AppCompatActivity() {
                             { deserializer = it },
                             {
                                 deserializer = GeneralDeserializer(
+                                        name = "Unnamed",
                                         filter = filterContent,
                                         filterType = Deserializer.Type.MAC,
                                         fieldDeserializers = mutableListOf()
@@ -125,6 +127,7 @@ class EditDeserializerActivity : AppCompatActivity() {
                 deserializer?.let { deserializer ->
                     updateDeserializerUseCase.execute(GeneralDeserializer(
                             id = deserializer.id,
+                            name = deserializer_name.editText?.text?.toString() ?: "Unnamed",
                             filter = deserializer_filter.editText?.text?.toString() ?: "Empty",
                             filterType = deserializer.filterType,
                             fieldDeserializers = deserializer.fieldDeserializers
@@ -137,6 +140,7 @@ class EditDeserializerActivity : AppCompatActivity() {
                 }
             } else {
                 addDeserializersUseCase.execute(GeneralDeserializer(
+                        name = deserializer_name.editText?.text?.toString() ?: "Unnamed",
                         filter = deserializer_filter.editText?.text?.toString() ?: "Empty",
                         filterType = deserializer?.filterType ?: Deserializer.Type.MAC,
                         fieldDeserializers = deserializer?.fieldDeserializers ?: mutableListOf()

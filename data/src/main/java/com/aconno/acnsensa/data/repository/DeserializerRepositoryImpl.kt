@@ -46,6 +46,7 @@ class DeserializerRepositoryImpl(
     private fun toEntity(deserializer: Deserializer): DeserializerEntity {
         return DeserializerEntity(
                 id = deserializer.id,
+                name = deserializer.name,
                 filter = deserializer.filter,
                 filterType = deserializer.filterType.name,
                 fieldDeserializers = Gson().toJson(deserializer.fieldDeserializers)
@@ -55,6 +56,7 @@ class DeserializerRepositoryImpl(
     private fun toDeserializer(deserializerEntity: DeserializerEntity): Deserializer {
         return GeneralDeserializer(
                 id = deserializerEntity.id,
+                name = deserializerEntity.name,
                 filter = deserializerEntity.filter,
                 filterType = Deserializer.Type.valueOf(deserializerEntity.filterType),
                 fieldDeserializers = Gson().fromJson(

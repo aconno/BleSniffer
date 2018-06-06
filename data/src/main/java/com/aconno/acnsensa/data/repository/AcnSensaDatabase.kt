@@ -6,7 +6,7 @@ import android.arch.persistence.room.RoomDatabase
 /**
  * @author aconno
  */
-@Database(entities = [ActionEntity::class, BeaconEntity::class, DeserializerEntity::class], version = 6)
+@Database(entities = [ActionEntity::class, BeaconEntity::class, DeserializerEntity::class], version = 7)
 abstract class AcnSensaDatabase : RoomDatabase() {
     abstract fun actionDao(): ActionDao
     abstract fun beaconDao(): BeaconDao

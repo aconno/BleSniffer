@@ -7,6 +7,7 @@ import java.util.regex.Pattern
  */
 interface Deserializer {
     var id: Long?
+    var name: String
     val filter: String
     var filterType: Type
     val fieldDeserializers: MutableList<FieldDeserializer>

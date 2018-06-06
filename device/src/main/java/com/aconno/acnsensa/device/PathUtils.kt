@@ -243,27 +243,28 @@ object PathUtils {
     fun getPath(context: Context, uri: Uri): String? {
 
         if (DEBUG)
-            Timber.d("File - " +
-                    "Authority: " + uri.authority +
-                    ", Fragment: " + uri.fragment +
-                    ", Port: " + uri.port +
-                    ", Query: " + uri.query +
-                    ", Scheme: " + uri.scheme +
-                    ", Host: " + uri.host +
-                    ", Segments: " + uri.pathSegments.toString()
+            Timber.d("""
+                |File -
+                |Authority: ${uri.authority},
+                |Fragment: ${uri.fragment},
+                |Port: ${uri.port},
+                |Query: ${uri.query},
+                |Scheme: ${uri.scheme},
+                |Host: ${uri.host},
+                |Segments: ${uri.pathSegments}
+                |""".trimMargin()
             )
 
-        val isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
 
         // DocumentProvider
-        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+        if (DocumentsContract.isDocumentUri(context, uri)) {
             // LocalStorageProvider
             if (isLocalStorageDocument(uri)) {
                 // The path is the id
                 return DocumentsContract.getDocumentId(uri)
             } else if (isExternalStorageDocument(uri)) {
                 val docId = DocumentsContract.getDocumentId(uri)
-                val split = docId.split((":").toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                val split = docId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 val type = split[0]
 
                 if ("primary".equals(type, ignoreCase = true)) {
@@ -280,33 +281,31 @@ object PathUtils {
                 return getDataColumn(context, contentUri, null, null)
             } else if (isMediaDocument(uri)) {
                 val docId = DocumentsContract.getDocumentId(uri)
-                val split = docId.split((":").toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                val split = docId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 val type = split[0]
 
                 var contentUri: Uri? = null
-                if ("image" == type) {
-                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                } else if ("video" == type) {
-                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-                } else if ("audio" == type) {
-                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                when (type) {
+                    "image" -> contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    "video" -> contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                    "audio" -> contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                 }
 
                 val selection = "_id=?"
                 val selectionArgs = arrayOf(split[1])
 
                 return getDataColumn(context, contentUri, selection, selectionArgs)
-            }// MediaProvider
+            }
+            // MediaProvider
             // DownloadsProvider
             // ExternalStorageProvider
         } else if ("content".equals(uri.scheme, ignoreCase = true)) {
-
             // Return the remote address
             return if (isGooglePhotosUri(uri)) uri.lastPathSegment else getDataColumn(context, uri, null, null)
-
         } else if ("file".equals(uri.scheme, ignoreCase = true)) {
             return uri.path
-        }// File
+        }
+        // File
         // MediaStore (and general)
 
         return null
@@ -321,10 +320,9 @@ object PathUtils {
      * @author paulburke
      */
     fun getFile(context: Context, uri: Uri?): File? {
-        if (uri != null) {
-            val path = getPath(context, uri)
-            if (path != null && isLocal(path)) {
-                return File(path!!)
+        uri?.let { uri ->
+            getPath(context, uri)?.takeIf { isLocal(it) }?.let { path ->
+                return File(path)
             }
         }
         return null
@@ -337,28 +335,12 @@ object PathUtils {
      * @return
      * @author paulburke
      */
-    fun getReadableFileSize(size: Int): String {
-        val BYTES_IN_KILOBYTES = 1024
-        val dec = DecimalFormat("###.#")
-        val KILOBYTES = " KB"
-        val MEGABYTES = " MB"
-        val GIGABYTES = " GB"
-        var fileSize = 0f
-        var suffix = KILOBYTES
-
-        if (size > BYTES_IN_KILOBYTES) {
-            fileSize = (size / BYTES_IN_KILOBYTES).toFloat()
-            if (fileSize > BYTES_IN_KILOBYTES) {
-                fileSize = fileSize / BYTES_IN_KILOBYTES
-                if (fileSize > BYTES_IN_KILOBYTES) {
-                    fileSize = fileSize / BYTES_IN_KILOBYTES
-                    suffix = GIGABYTES
-                } else {
-                    suffix = MEGABYTES
-                }
-            }
-        }
-        return (dec.format(fileSize) + suffix).toString()
+    val base = 1024
+    fun getReadableFileSize(bytes: Long): String {
+        if (bytes < base) return bytes.toString() + " B"
+        val exp = (Math.log(bytes.toDouble()) / Math.log(base.toDouble())).toInt()
+        val pre = ("KMGTPE")[exp - 1] + "i"
+        return String.format("%.1f %sB", bytes / Math.pow(base.toDouble(), exp.toDouble()), pre)
     }
 
     /**
