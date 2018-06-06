@@ -1,5 +1,7 @@
 package com.aconno.acnsensa.domain
 
+import io.reactivex.Single
+
 /**
  * @aconno
  */
@@ -8,7 +10,9 @@ interface JsonFileStorage<T> {
 
     fun storeItems(items: List<T>, fileName: String): String
 
-    fun readItem(fileName: String): T? = readItems(fileName).let { if (it.isNotEmpty()) it[0] else null }
+    fun readItem(fileName: String): Single<T?> {
+        TODO("Reimplement")
+    }
 
-    fun readItems(fileName: String): List<T>
+    fun readItems(fileName: String): Single<List<T>>
 }

@@ -5,7 +5,7 @@ import android.arch.persistence.room.PrimaryKey
 
 @Entity(tableName = "deserializers")
 data class DeserializerEntity(
-        @PrimaryKey(autoGenerate = true) val id: Long,
+        @PrimaryKey(autoGenerate = true) var id: Long? = null,
         val filter: String,
         val filterType: String,
         val fieldDeserializers: String

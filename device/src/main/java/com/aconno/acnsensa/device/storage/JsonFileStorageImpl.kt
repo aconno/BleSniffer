@@ -4,10 +4,9 @@ import android.content.Context
 import android.os.Environment
 import com.aconno.acnsensa.device.R
 import com.aconno.acnsensa.domain.JsonFileStorage
-import com.aconno.acnsensa.domain.deserializing.FieldDeserializer
-import com.aconno.acnsensa.domain.deserializing.GeneralFieldDeserializer
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import io.reactivex.Single
 import java.io.File
 
 
@@ -32,8 +31,12 @@ abstract class JsonFileStorageImpl<T, K : T>(
         return file.absolutePath
     }
 
-    override fun readItems(fileName: String): List<T> {
-        val file = File(fileName)
-        return gson.fromJson(file.readText(), typeToken.type)
+    override fun readItems(fileName: String): Single<List<T>> {
+        return try {
+            val file = File(fileName)
+            Single.just(gson.fromJson(file.readText(), typeToken.type))
+        } catch (e: Exception) {
+            Single.error<List<T>>(e)
+        }
     }
 }

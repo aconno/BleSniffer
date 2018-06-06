@@ -36,8 +36,8 @@ class ScanAnalyzerAdapter(
 
 
     fun updateDeserializers(items: MutableList<Deserializer>) {
-        deserializers = items
-        notifyDataSetChanged()
+        deserializers.clear()
+        deserializers.addAll(items)
     }
 
     fun setBeaconData(beaconData: List<Beacon>) {

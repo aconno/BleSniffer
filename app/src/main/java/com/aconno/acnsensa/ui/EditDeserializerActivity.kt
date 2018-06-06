@@ -40,13 +40,13 @@ class EditDeserializerActivity : AppCompatActivity() {
 
     var deserializer: Deserializer? = null
         set(value) {
-            field = (value
-                    ?: GeneralDeserializer("", Deserializer.Type.MAC, mutableListOf())).apply {
+            field = (value.also { existing = true }
+                    ?: GeneralDeserializer(null, "", Deserializer.Type.MAC, mutableListOf())).apply {
                 deserializer_list.adapter = DeserializerEditorAdapter(this, this@EditDeserializerActivity).apply {
                     ItemTouchHelper(createItemTouchHelper()).attachToRecyclerView(deserializer_list)
                 }
                 deserializer_filter_type.setSelection(Deserializer.Type.values().indexOf(
-                        Deserializer.Type.valueOf(deserializer?.filterType?.name ?: "MAC")
+                        Deserializer.Type.valueOf(this.filterType.name)
                 ))
                 deserializer_filter.editText?.setText(this.filter)
             }
@@ -68,7 +68,7 @@ class EditDeserializerActivity : AppCompatActivity() {
 
         editDeserializerActivityComponent.inject(this)
 
-        custom_toolbar.title = getString(R.string.app_name)
+        custom_toolbar.title = getString(R.string.scanner_app_name)
         setSupportActionBar(custom_toolbar)
 
         deserializer_list.layoutManager = LinearLayoutManager(this)
@@ -80,7 +80,13 @@ class EditDeserializerActivity : AppCompatActivity() {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                             { deserializer = it },
-                            { deserializer = GeneralDeserializer(filterContent, Deserializer.Type.MAC, mutableListOf()) }
+                            {
+                                deserializer = GeneralDeserializer(
+                                        filter = filterContent,
+                                        filterType = Deserializer.Type.MAC,
+                                        fieldDeserializers = mutableListOf()
+                                )
+                            }
                     )
         } else {
             deserializer = null
@@ -116,16 +122,19 @@ class EditDeserializerActivity : AppCompatActivity() {
 
         save.setOnClickListener {
             if (existing) {
-                updateDeserializerUseCase.execute(GeneralDeserializer(
-                        filter = deserializer_filter.editText?.text?.toString() ?: "Empty",
-                        filterType = deserializer?.filterType ?: Deserializer.Type.MAC,
-                        fieldDeserializers = deserializer?.fieldDeserializers ?: mutableListOf()
-                )).subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                { finish() },
-                                { Timber.e(it) }
-                        )
+                deserializer?.let { deserializer ->
+                    updateDeserializerUseCase.execute(GeneralDeserializer(
+                            id = deserializer.id,
+                            filter = deserializer_filter.editText?.text?.toString() ?: "Empty",
+                            filterType = deserializer.filterType,
+                            fieldDeserializers = deserializer.fieldDeserializers
+                    )).subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(
+                                    { finish() },
+                                    { Timber.e(it) }
+                            )
+                }
             } else {
                 addDeserializersUseCase.execute(GeneralDeserializer(
                         filter = deserializer_filter.editText?.text?.toString() ?: "Empty",

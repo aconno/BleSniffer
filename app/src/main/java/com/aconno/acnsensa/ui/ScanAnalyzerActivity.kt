@@ -82,7 +82,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
         snackbar?.setActionTextColor(resources.getColor(R.color.primaryColor))
 
-        custom_toolbar.title = getString(R.string.app_name)
+        custom_toolbar.title = getString(R.string.scanner_app_name)
         setSupportActionBar(custom_toolbar)
 
         invalidateOptionsMenu()

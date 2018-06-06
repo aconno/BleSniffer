@@ -1,12 +1,8 @@
 package com.aconno.acnsensa.ui
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.database.Cursor
-import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
@@ -26,7 +22,6 @@ import com.aconno.acnsensa.dagger.deserializerlistactivity.DeserializerListActiv
 import com.aconno.acnsensa.dagger.deserializerlistactivity.DeserializerListActivityModule
 import com.aconno.acnsensa.device.PathUtils
 import com.aconno.acnsensa.device.storage.DeserializerFileStorage
-import com.aconno.acnsensa.domain.JsonFileStorage
 import com.aconno.acnsensa.domain.deserializing.Deserializer
 import com.aconno.acnsensa.domain.interactor.deserializing.AddDeserializerUseCase
 import com.aconno.acnsensa.domain.interactor.deserializing.DeleteDeserializerUseCase
@@ -37,7 +32,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_deserializer_list.*
 import kotlinx.android.synthetic.main.dialog_input_text.view.*
-import timber.log.Timber
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -78,7 +72,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
 
         editDeserializerActivityComponent.inject(this)
 
-        custom_toolbar.title = getString(R.string.app_name)
+        custom_toolbar.title = getString(R.string.scanner_app_name)
         deserializer_list.layoutManager = LinearLayoutManager(this)
         deserializer_list.adapter = deserializerAdapter
         setSupportActionBar(custom_toolbar)
@@ -198,6 +192,10 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     }
 
     private fun exportAllDeserializers() {
+        if (deserializerAdapter.deserializers.isEmpty()) {
+            Toast.makeText(this, "No deserializers to export!", Toast.LENGTH_SHORT).show()
+            return
+        }
         val view: View = layoutInflater.inflate(R.layout.dialog_input_text, null)
         val textInput: EditText = view.text_input.editText ?: return
         textInput.hint = "all.json"
@@ -247,17 +245,19 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                 if (resultCode != Activity.RESULT_OK) return
                 data?.data?.let {
                     PathUtils.getPath(this, it)?.let {
-                        val b = deserializerFileStorage.readItems(it)
-                        deserializerFileStorage.readItems(it).forEach {
-                            val a = 4
-                            addDeserializerUseCase.execute(it)
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe {
-                                        Toast.makeText(this, "Added deserializer for filter ${it.filter}", Toast.LENGTH_SHORT).show()
-                                        updateDeserializers()
-                                    }
-                        }
+                        deserializerFileStorage.readItems(it).subscribe({
+                            it.forEach {
+                                addDeserializerUseCase.execute(it)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe {
+                                            Toast.makeText(this, "Added deserializer for filter ${it.filter}", Toast.LENGTH_SHORT).show()
+                                            updateDeserializers()
+                                        }
+                            }
+                        }, {
+                            Toast.makeText(this, "There was an error reading the file.", Toast.LENGTH_SHORT).show()
+                        })
                     }
                 }
             }

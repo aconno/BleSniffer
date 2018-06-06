@@ -29,6 +29,7 @@
         <activity
             android:name=".ui.ScanAnalyzerActivity"
             android:label="Ble Sniffer"
+            android:icon="@drawable/sniffer_app_icon"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

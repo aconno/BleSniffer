@@ -106,6 +106,7 @@
     <string name="sms">SMS</string>
 
     <string name="deserializer_actions_title">Pick an Action</string>
+    <string name="scanner_app_name">BLE Sniffer</string>
     <string-array name="deserializer_actions">
         <item>Delete</item>
         <item>Export</item>
