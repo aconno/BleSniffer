@@ -116,7 +116,7 @@ class ScanAnalyzerAdapter(
                             else -> false
                         }
                     }?.let {
-                        Timber.tag("MEASURE").e("Deserializer start%s", System.currentTimeMillis().toString())
+                        view.deserializer_name.text = it.name
                         it.fieldDeserializers.map { d ->
                             val start = d.startIndexInclusive
                             val end = d.endIndexExclusive
@@ -136,7 +136,6 @@ class ScanAnalyzerAdapter(
                             view.deserialized_field_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
                             deserializedFieldsAdapter.setFields(it)
                         }
-                        Timber.tag("MEASURE").e("Deserializer end%s", System.currentTimeMillis().toString())
                     }
                 }
             }
