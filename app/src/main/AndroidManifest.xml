@@ -28,9 +28,9 @@
         </activity>
         <activity
             android:name=".ui.ScanAnalyzerActivity"
-            android:label="Ble Sniffer"
-            android:screenOrientation="landscape"
-            android:icon="@mipmap/ic_launcher_sniffer">
+            android:configChanges="orientation|screenSize"
+            android:icon="@mipmap/ic_launcher_sniffer"
+            android:label="Ble Sniffer">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -50,8 +50,8 @@
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.aconno.acnsensa.device.fileprovider"
-            android:grantUriPermissions="true"
-            android:exported="false">
+            android:exported="false"
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/filepaths" />

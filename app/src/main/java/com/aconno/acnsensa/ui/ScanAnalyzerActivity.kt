@@ -31,7 +31,6 @@ import com.aconno.acnsensa.viewmodel.PermissionViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_scan_analyzer.*
-import timber.log.Timber
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -55,6 +54,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     lateinit var getAllDeserializersUseCase: GetAllDeserializersUseCase
 
     private lateinit var scanAnalyzerAdapter: ScanAnalyzerAdapter
+    private var adapterDataObserver: Observer<Beacon>? = null
 
     private var mainMenu: Menu? = null
 
@@ -93,30 +93,34 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
 
     private fun initViews() {
+        scanAnalyzerAdapter = ScanAnalyzerAdapter( this, this)
+        val linearLayoutManager = LinearLayoutManager(this)
+        linearLayoutManager.reverseLayout = true
+        scan_list.layoutManager = linearLayoutManager
+        scan_list.adapter = scanAnalyzerAdapter
+        scan_list.addItemDecoration(DividerItemDecoration(
+                this, linearLayoutManager.orientation
+        ))
         (scan_list.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+
         getAllDeserializersUseCase.execute()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { deserializers ->
-                    scanAnalyzerAdapter = ScanAnalyzerAdapter(mutableListOf(), this, deserializers.toMutableList(), this)
-                    val linearLayoutManager = LinearLayoutManager(this)
-                    linearLayoutManager.reverseLayout = true
-                    scan_list.layoutManager = linearLayoutManager
-                    scan_list.adapter = scanAnalyzerAdapter
-                    scan_list.addItemDecoration(DividerItemDecoration(
-                            this, linearLayoutManager.orientation
-                    ))
-                    beaconListViewModel.getBeaconLiveData()
-                            .observe(this, Observer {
-                                it?.let { beacon ->
-                                    regex.let {
-                                        if (it == null || (it.matches(beacon.address) || it.matches(beacon.name))) {
-                                            scanAnalyzerAdapter.logScan(beacon)
-                                        }
-                                    }
-                                }
-                            })
+                    scanAnalyzerAdapter.updateDeserializers(deserializers)
                 }
+    }
+
+    private fun createAdapterDataObserver(): Observer<Beacon> {
+        return Observer {
+            it?.let { beacon ->
+                regex.let {
+                    if (it == null || (it.matches(beacon.address) || it.matches(beacon.name))) {
+                        scanAnalyzerAdapter.logScan(beacon)
+                    }
+                }
+            }
+        }
     }
 
     override fun onRecordAdded(size: Int) {
@@ -130,9 +134,16 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         bluetoothViewModel.bluetoothState.observe(this, Observer { onBluetoothStateChange(it) })
     }
 
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+    }
+
     override fun onPause() {
         super.onPause()
         bluetoothViewModel.stopObservingBluetoothState()
+        adapterDataObserver?.let {
+            beaconListViewModel.getBeaconLiveData().removeObserver(it)
+        }
     }
 
     private fun onBluetoothStateChange(bluetoothState: BluetoothState?) {
@@ -191,6 +202,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 it.setTitle(getString(R.string.stop_scan))
             }
         }
+        adapterDataObserver = createAdapterDataObserver().apply {
+            beaconListViewModel.getBeaconLiveData().observe(this@ScanAnalyzerActivity, this)
+        }
     }
 
     private fun onScanStop() {
@@ -200,6 +214,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 it.isChecked = false
                 it.setTitle(getString(R.string.start_scan))
             }
+        }
+        adapterDataObserver?.let {
+            beaconListViewModel.getBeaconLiveData().removeObserver(it)
         }
     }
 

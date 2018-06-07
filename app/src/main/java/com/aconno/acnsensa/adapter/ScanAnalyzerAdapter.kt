@@ -19,12 +19,12 @@ import java.util.*
 fun ByteArray.toHex() = this.joinToString(separator = "") { "0x" + it.toInt().and(0xff).toString(16).padStart(2, '0') + " " }
 fun ByteArray.inversedCopyOfRange(start: Int, end: Int) = this.reversedArray().copyOfRange((size - 1) - start, (size - 1) - end)
 class ScanAnalyzerAdapter(
-        private val scanLog: MutableList<MutablePair<Beacon, Int>>,
         private val scanRecordListener: ScanRecordListener,
-        private var deserializers: MutableList<Deserializer>,
         private val longItemClickListener: LongItemClickListener<Beacon>
 ) : RecyclerView.Adapter<ScanAnalyzerAdapter.ViewHolder>() {
+    val scanLog: MutableList<MutablePair<Beacon, Int>> = mutableListOf()
     private val hashes: MutableMap<Int, Pair<Int, MutablePair<Beacon, Int>>> = mutableMapOf()
+    var deserializers: MutableList<Deserializer> = mutableListOf()
 
     init {
         setHasStableIds(true)
@@ -39,7 +39,7 @@ class ScanAnalyzerAdapter(
         }
 
 
-    fun updateDeserializers(items: MutableList<Deserializer>) {
+    fun updateDeserializers(items: List<Deserializer>) {
         deserializers.clear()
         deserializers.addAll(items)
     }
