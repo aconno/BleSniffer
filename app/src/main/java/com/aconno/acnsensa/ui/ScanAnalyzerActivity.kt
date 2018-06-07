@@ -31,6 +31,7 @@ import com.aconno.acnsensa.viewmodel.PermissionViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_scan_analyzer.*
+import timber.log.Timber
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -93,7 +94,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
 
     private fun initViews() {
-        scanAnalyzerAdapter = ScanAnalyzerAdapter( this, this)
+        scanAnalyzerAdapter = ScanAnalyzerAdapter(this, this)
         val linearLayoutManager = LinearLayoutManager(this)
         linearLayoutManager.reverseLayout = true
         scan_list.layoutManager = linearLayoutManager
@@ -112,8 +113,10 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     }
 
     private fun createAdapterDataObserver(): Observer<Beacon> {
+        Timber.e("LALA")
         return Observer {
             it?.let { beacon ->
+                Timber.e("Test" + beacon.lastseen)
                 regex.let {
                     if (it == null || (it.matches(beacon.address) || it.matches(beacon.name))) {
                         scanAnalyzerAdapter.logScan(beacon)
@@ -202,7 +205,11 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 it.setTitle(getString(R.string.stop_scan))
             }
         }
-        adapterDataObserver = createAdapterDataObserver().apply {
+        if(adapterDataObserver != null) {
+            beaconListViewModel.getBeaconLiveData().removeObservers(this)
+        }
+        adapterDataObserver = createAdapterDataObserver()
+        adapterDataObserver?.apply {
             beaconListViewModel.getBeaconLiveData().observe(this@ScanAnalyzerActivity, this)
         }
     }
@@ -214,9 +221,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 it.isChecked = false
                 it.setTitle(getString(R.string.start_scan))
             }
-        }
-        adapterDataObserver?.let {
-            beaconListViewModel.getBeaconLiveData().removeObserver(it)
         }
     }
 
