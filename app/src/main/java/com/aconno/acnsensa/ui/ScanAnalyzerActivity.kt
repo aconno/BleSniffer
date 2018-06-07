@@ -7,12 +7,9 @@ import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SimpleItemAnimator
-import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.Menu
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.widget.SearchView
 import com.aconno.acnsensa.AcnSensaApplication
 import com.aconno.acnsensa.BluetoothScanningService
@@ -35,6 +32,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_scan_analyzer.*
 import timber.log.Timber
+import java.util.regex.Pattern
 import javax.inject.Inject
 
 const val EXTRA_FILTER_MAC: String = "com.acconno.acnsensa.FILTER_MAC"
@@ -61,6 +59,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private var mainMenu: Menu? = null
 
     private var snackbar: Snackbar? = null
+    private var regex: Regex? = null
 
     val scanAnalyzerActivityComponent: ScanAnalyzerActivityComponent by lazy {
         val acnSensaApplication: AcnSensaApplication? = application as? AcnSensaApplication
@@ -109,8 +108,12 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                     ))
                     beaconListViewModel.getBeaconLiveData()
                             .observe(this, Observer {
-                                it?.let {
-                                    scanAnalyzerAdapter.logScan(it)
+                                it?.let { beacon ->
+                                    regex.let {
+                                        if (it == null || (it.matches(beacon.address) || it.matches(beacon.name))) {
+                                            scanAnalyzerAdapter.logScan(beacon)
+                                        }
+                                    }
                                 }
                             })
                 }
@@ -200,6 +203,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         }
     }
 
+
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         mainMenu = menu
         mainMenu?.clear()
@@ -210,8 +214,8 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 newText?.let {
-                    Timber.e(it)
-                    scanAnalyzerAdapter.filter = it
+                    regex = if (newText.isNotEmpty()) Pattern.compile(it, Pattern.CASE_INSENSITIVE).toRegex()
+                    else null
                 }
                 return true
             }

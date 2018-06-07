@@ -26,6 +26,10 @@ class ScanAnalyzerAdapter(
 ) : RecyclerView.Adapter<ScanAnalyzerAdapter.ViewHolder>() {
     private val hashes: MutableMap<Int, Pair<Int, MutablePair<Beacon, Int>>> = mutableMapOf()
 
+    init {
+        setHasStableIds(true)
+    }
+
     var filter: String = ""
         set(value) {
             field = value
@@ -55,7 +59,7 @@ class ScanAnalyzerAdapter(
             if (data.lastseen - beaconPair.first.lastseen < 2500) {
                 beaconPair.second++
                 beaconPair.first.lastseen = data.lastseen
-                notifyItemChanged(index)
+                notifyItemChanged(index, null)
                 return
             }
         }
@@ -82,6 +86,12 @@ class ScanAnalyzerAdapter(
         holder.bind(scanLog[position])
     }
 
+    override fun getItemId(position: Int): Long {
+        return position.toLong()
+    }
+
+    override fun getItemViewType(position: Int): Int = position
+
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         private var initialized = false
 
@@ -94,6 +104,7 @@ class ScanAnalyzerAdapter(
 
                 view.setOnLongClickListener { longItemClickListener.onLongItemClick(data.first) }
                 view.address.text = data.first.address
+                Timber.e(data.first.name)
                 view.name.text = data.first.name
                 view.data.text = dataHex
 
