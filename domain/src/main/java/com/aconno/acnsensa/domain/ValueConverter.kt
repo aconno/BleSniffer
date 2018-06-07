@@ -97,8 +97,10 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
 
         override fun deserializeInternal(data: ByteArray): Short {
             var short: Short = 0
-            short = short or (data[1].toInt() shl 0).toShort()
-            short = short or (data[0].toInt() shl 8).toShort()
+            var i =1
+            short = short or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 0).toShort()
+            i=0
+            short = short or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 8).toShort()
             return short
         }
     }),
@@ -113,8 +115,10 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
 
         override fun deserializeInternal(data: ByteArray): Int {
             var v: Short = 0
-            v = v or (data[1].toInt() shl 0).toShort()
-            v = v or (data[0].toInt() shl 8).toShort()
+            var i=1
+            v = v or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 0).toShort()
+            i=0
+            v = v or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 8).toShort()
             return (if (v < 0) v.toInt() + 65536 else v.toInt())
         }
 
@@ -131,7 +135,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         override fun deserializeInternal(data: ByteArray): Int {
             var int: Int = 0
             for (i in 3 downTo 0) {
-                int = int or (data[i].toInt() shl ((3 - i) * 8))
+                int = int or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl ((3 - i) * 8))
             }
             return int
         }
@@ -149,7 +153,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         override fun deserializeInternal(data: ByteArray): Long {
             var v: Int = 0
             for (i in 3 downTo 0) {
-                v = v or (data[i].toInt() shl ((3 - i) * 8))
+                v = v or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl ((3 - i) * 8))
             }
             return (if (v < 0) v.toLong() + 4294967296L else v.toLong())
         }
@@ -186,7 +190,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         override fun deserializeInternal(data: ByteArray): Long {
             var time: Long = 0
             for (i in 5 downTo 0) {
-                time = time or (data[i].toLong() shl ((5 - i) * 8))
+                time += ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toLong() shl ((5 - i) * 8))
             }
             return time
         }
@@ -209,6 +213,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         abstract fun serializeInternal(data: T): ByteArray
 
         open fun deserialize(data: ByteArray, order: ByteOrder = ByteOrder.LITTLE_ENDIAN): T {
+            val a = 5
             if (data.size != length && length != -1) {
                 throw IllegalArgumentException("Invalid buffer length, expected $length, got ${data.size}")
             } else {

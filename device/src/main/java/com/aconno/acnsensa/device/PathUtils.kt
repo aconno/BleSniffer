@@ -371,7 +371,7 @@ object PathUtils {
         if (DEBUG)
             Timber.d("Attempting to get thumbnail")
 
-        if (!isMediaUri(uri!!)) {
+        if (!isMediaUri(uri)) {
             Timber.e("You can only retrieve thumbnails for images and videos.")
             return null
         }

@@ -125,7 +125,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         bluetoothScanningViewModel.getResult().observe(this, Observer { handleScanEvent(it) })
         bluetoothViewModel.observeBluetoothState()
         bluetoothViewModel.bluetoothState.observe(this, Observer { onBluetoothStateChange(it) })
-
     }
 
     override fun onPause() {
