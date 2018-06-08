@@ -17,6 +17,7 @@ class DeserializerAdapter(
         private val longClickListener: LongItemClickListener<Deserializer>
 ) : RecyclerView.Adapter<DeserializerAdapter.ViewHolder>() {
 
+
     fun setDeserializers(deserializers: List<Deserializer>) {
         this.deserializers.clear()
         this.deserializers.addAll(deserializers)

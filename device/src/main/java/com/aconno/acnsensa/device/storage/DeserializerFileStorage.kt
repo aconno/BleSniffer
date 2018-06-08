@@ -20,6 +20,7 @@ class DeserializerFileStorage(
                 .registerTypeAdapter(Deserializer::class.java, JsonSerializer<GeneralDeserializer> { src, typeOfSrc, context ->
                     val json = JsonObject()
                     src?.let {
+                        json.addProperty("name", src.name)
                         json.addProperty("filter", src.filter)
                         json.addProperty("filterType", src.filterType.name)
                         json.add("fieldDeserializers", JsonArray().apply {
@@ -31,6 +32,7 @@ class DeserializerFileStorage(
                 }).registerTypeAdapter(GeneralDeserializer::class.java, JsonSerializer<GeneralDeserializer> { src, typeOfSrc, context ->
                     val json = JsonObject()
                     src?.let {
+                        json.addProperty("name", src.name)
                         json.addProperty("filter", src.filter)
                         json.addProperty("filterType", src.filterType.name)
                         json.add("fieldDeserializers", JsonArray().apply {
