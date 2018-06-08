@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.SimpleItemAnimator
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ImageView
 import android.widget.SearchView
 import com.aconno.acnsensa.AcnSensaApplication
 import com.aconno.acnsensa.BluetoothScanningService
@@ -32,8 +33,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_scan_analyzer.*
 import timber.log.Timber
-import java.util.regex.Pattern
 import javax.inject.Inject
+
 
 const val EXTRA_FILTER_MAC: String = "com.acconno.acnsensa.FILTER_MAC"
 
@@ -116,9 +117,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         Timber.e("LALA")
         return Observer {
             it?.let { beacon ->
-                Timber.e("Test" + beacon.lastseen)
+                Timber.e("Test" + beacon.address)
                 filter.let {
-                    if (it == null || (beacon.address.contains(it) || beacon.name.contains(it))) {
+                    if (it == null || (beacon.address.contains(it, ignoreCase = true) || beacon.name.contains(it, ignoreCase = true))) {
                         scanAnalyzerAdapter.logScan(beacon)
                     }
                 }
@@ -205,7 +206,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 it.setTitle(getString(R.string.stop_scan))
             }
         }
-        if(adapterDataObserver != null) {
+        if (adapterDataObserver != null) {
             beaconListViewModel.getBeaconLiveData().removeObservers(this)
         }
         adapterDataObserver = createAdapterDataObserver()
@@ -230,18 +231,39 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         mainMenu?.clear()
         menuInflater.inflate(R.menu.scanner_menu, menu)
 
-        (mainMenu?.findItem(R.id.search)?.actionView as SearchView).setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean = false
+        val searchView = mainMenu?.findItem(R.id.search)?.actionView as SearchView
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                filter = null
+                query?.let {
+                    filter = if (query.isNotEmpty()) query
+                    else null
+                }
+                return false
+            }
 
             override fun onQueryTextChange(newText: String?): Boolean {
+
+                var but = searchView.context.resources.getIdentifier("android:id/search_close_btn", null, null)
+                var closeButton = findViewById<ImageView>(but)
+                closeButton.setOnClickListener {
+                    searchView.clearFocus()
+                    searchView.setQuery("", false)
+                    filter = null
+                }
                 filter = null
                 newText?.let {
                     filter = if (newText.isNotEmpty()) newText
                     else null
                 }
-                return true
+                return false
             }
         })
+//        (searchView.findViewById(R.id.search_close_btn) as (ImageView)).setOnClickListener {
+//            searchView.setQuery("", false)
+//            searchView.clearFocus()
+//        }
 
         mainMenu?.findItem(R.id.action_toggle_scan)?.let {
             setScanMenuLabel(it)
@@ -260,7 +282,10 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         when (id) {
             R.id.action_toggle_scan -> toggleScan(item)
             R.id.action_start_deserializer_list_activity -> startDeserializerListActivity()
-            R.id.action_clear -> scanAnalyzerAdapter.clear()
+            R.id.action_clear -> {
+                scanAnalyzerAdapter.clear()
+            }
+            R.id.search -> (mainMenu?.findItem(R.id.search)?.actionView as SearchView).performClick()
         }
 
         return super.onOptionsItemSelected(item)

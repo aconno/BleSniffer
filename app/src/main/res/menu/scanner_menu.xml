@@ -7,13 +7,13 @@
         android:icon="@android:drawable/ic_menu_search"
         android:title="Search"
         app:actionViewClass="android.widget.SearchView"
-        app:showAsAction="collapseActionView|ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_toggle_scan"
         android:checkable="true"
         android:checked="false"
         android:title="@string/start_scan"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_clear"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"

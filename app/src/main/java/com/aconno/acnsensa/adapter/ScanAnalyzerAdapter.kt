@@ -87,12 +87,15 @@ class ScanAnalyzerAdapter(
     }
 
     override fun getItemId(position: Int): Long {
-        return position.toLong()
+        return idCounterStart + position.toLong()
     }
 
-    override fun getItemViewType(position: Int): Int = position
+    override fun getItemViewType(position: Int): Int = idCounterStart + position
+
+    private var idCounterStart: Int = 0
 
     fun clear() {
+        idCounterStart += scanLog.size
         hashes.clear()
         scanLog.clear()
         notifyDataSetChanged()
