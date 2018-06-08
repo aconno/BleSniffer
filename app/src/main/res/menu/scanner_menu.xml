@@ -2,17 +2,23 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/search"
-        android:title="Search"
+    <item
+        android:id="@+id/search"
         android:icon="@android:drawable/ic_menu_search"
-        app:showAsAction="collapseActionView|ifRoom"
-        app:actionViewClass="android.widget.SearchView" />
+        android:title="Search"
+        app:actionViewClass="android.widget.SearchView"
+        app:showAsAction="collapseActionView|ifRoom" />
     <item
         android:id="@+id/action_toggle_scan"
-        android:title="@string/start_scan"
         android:checkable="true"
         android:checked="false"
+        android:title="@string/start_scan"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_clear"
+        android:icon="@android:drawable/ic_menu_close_clear_cancel"
+        android:title="Clear"
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_start_deserializer_list_activity"
         android:title="Deserializers"

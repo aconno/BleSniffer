@@ -92,6 +92,12 @@ class ScanAnalyzerAdapter(
 
     override fun getItemViewType(position: Int): Int = position
 
+    fun clear() {
+        hashes.clear()
+        scanLog.clear()
+        notifyDataSetChanged()
+    }
+
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         private var initialized = false
 

@@ -30,7 +30,8 @@
             android:name=".ui.ScanAnalyzerActivity"
             android:configChanges="orientation|screenSize"
             android:icon="@mipmap/ic_launcher_sniffer"
-            android:label="Ble Sniffer">
+            android:screenOrientation="landscape"
+            android:label="@string/scanner_app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

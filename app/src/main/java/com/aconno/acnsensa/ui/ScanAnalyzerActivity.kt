@@ -60,7 +60,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private var mainMenu: Menu? = null
 
     private var snackbar: Snackbar? = null
-    private var regex: Regex? = null
+    private var filter: String? = null
 
     val scanAnalyzerActivityComponent: ScanAnalyzerActivityComponent by lazy {
         val acnSensaApplication: AcnSensaApplication? = application as? AcnSensaApplication
@@ -117,8 +117,8 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         return Observer {
             it?.let { beacon ->
                 Timber.e("Test" + beacon.lastseen)
-                regex.let {
-                    if (it == null || (it.matches(beacon.address) || it.matches(beacon.name))) {
+                filter.let {
+                    if (it == null || (beacon.address.contains(it) || beacon.name.contains(it))) {
                         scanAnalyzerAdapter.logScan(beacon)
                     }
                 }
@@ -231,11 +231,12 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         menuInflater.inflate(R.menu.scanner_menu, menu)
 
         (mainMenu?.findItem(R.id.search)?.actionView as SearchView).setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean = true
+            override fun onQueryTextSubmit(query: String?): Boolean = false
 
             override fun onQueryTextChange(newText: String?): Boolean {
+                filter = null
                 newText?.let {
-                    regex = if (newText.isNotEmpty()) Pattern.compile(it, Pattern.CASE_INSENSITIVE).toRegex()
+                    filter = if (newText.isNotEmpty()) newText
                     else null
                 }
                 return true
@@ -259,6 +260,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         when (id) {
             R.id.action_toggle_scan -> toggleScan(item)
             R.id.action_start_deserializer_list_activity -> startDeserializerListActivity()
+            R.id.action_clear -> scanAnalyzerAdapter.clear()
         }
 
         return super.onOptionsItemSelected(item)
