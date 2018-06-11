@@ -21,14 +21,14 @@ import com.aconno.acnsensa.adapter.ScanRecordListener
 import com.aconno.acnsensa.dagger.scananalyzeractivity.DaggerScanAnalyzerActivityComponent
 import com.aconno.acnsensa.dagger.scananalyzeractivity.ScanAnalyzerActivityComponent
 import com.aconno.acnsensa.dagger.scananalyzeractivity.ScanAnalyzerActivityModule
-import com.aconno.acnsensa.domain.BluetoothState
-import com.aconno.acnsensa.domain.beacon.Beacon
 import com.aconno.acnsensa.domain.interactor.deserializing.GetAllDeserializersUseCase
 import com.aconno.acnsensa.domain.model.ScanEvent
-import com.aconno.acnsensa.viewmodel.BeaconListViewModel
+import com.aconno.acnsensa.domain.model.ScanResult
+import com.aconno.acnsensa.domain.scanning.BluetoothState
 import com.aconno.acnsensa.viewmodel.BluetoothScanningViewModel
 import com.aconno.acnsensa.viewmodel.BluetoothViewModel
 import com.aconno.acnsensa.viewmodel.PermissionViewModel
+import com.aconno.acnsensa.viewmodel.ScanResultViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_scan_analyzer.*
@@ -38,7 +38,7 @@ import javax.inject.Inject
 
 const val EXTRA_FILTER_MAC: String = "com.acconno.acnsensa.FILTER_MAC"
 
-class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.PermissionCallbacks, ScanRecordListener, LongItemClickListener<Beacon> {
+class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.PermissionCallbacks, ScanRecordListener, LongItemClickListener<ScanResult> {
 
     @Inject
     lateinit var bluetoothViewModel: BluetoothViewModel
@@ -50,13 +50,13 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     lateinit var permissionViewModel: PermissionViewModel
 
     @Inject
-    lateinit var beaconListViewModel: BeaconListViewModel
+    lateinit var scanResultViewModel: ScanResultViewModel
 
     @Inject
     lateinit var getAllDeserializersUseCase: GetAllDeserializersUseCase
 
     private lateinit var scanAnalyzerAdapter: ScanAnalyzerAdapter
-    private var adapterDataObserver: Observer<Beacon>? = null
+    private var adapterDataObserver: Observer<ScanResult>? = null
 
     private var mainMenu: Menu? = null
 
@@ -113,14 +113,13 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 }
     }
 
-    private fun createAdapterDataObserver(): Observer<Beacon> {
-        Timber.e("LALA")
+    private fun createAdapterDataObserver(): Observer<ScanResult> {
         return Observer {
-            it?.let { beacon ->
-                Timber.e("Test" + beacon.address)
+            it?.let { result ->
+                Timber.e("Test: %s", result.device.macAddress)
                 filter.let {
-                    if (it == null || (beacon.address.contains(it, ignoreCase = true) || beacon.name.contains(it, ignoreCase = true))) {
-                        scanAnalyzerAdapter.logScan(beacon)
+                    if (it == null || (result.device.macAddress.contains(it, ignoreCase = true) || result.device.name.contains(it, ignoreCase = true))) {
+                        scanAnalyzerAdapter.logScan(result)
                     }
                 }
             }
@@ -146,7 +145,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         super.onPause()
         bluetoothViewModel.stopObservingBluetoothState()
         adapterDataObserver?.let {
-            beaconListViewModel.getBeaconLiveData().removeObserver(it)
+            scanResultViewModel.getScanResultsLiveData().removeObserver(it)
         }
     }
 
@@ -187,9 +186,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         //Do nothing.
     }
 
-    override fun onLongItemClick(item: Beacon): Boolean {
+    override fun onLongItemClick(item: ScanResult): Boolean {
         startActivityForResult(Intent(this, DeserializerListActivity::class.java).apply {
-            putExtra(EXTRA_FILTER_MAC, item.address)
+            putExtra(EXTRA_FILTER_MAC, item.device.macAddress)
         }, 0x00)
         return true
     }
@@ -207,11 +206,11 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             }
         }
         if (adapterDataObserver != null) {
-            beaconListViewModel.getBeaconLiveData().removeObservers(this)
+            scanResultViewModel.getScanResultsLiveData().removeObservers(this)
         }
         adapterDataObserver = createAdapterDataObserver()
         adapterDataObserver?.apply {
-            beaconListViewModel.getBeaconLiveData().observe(this@ScanAnalyzerActivity, this)
+            scanResultViewModel.getScanResultsLiveData().observe(this@ScanAnalyzerActivity, this)
         }
     }
 
@@ -244,9 +243,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-
-                var but = searchView.context.resources.getIdentifier("android:id/search_close_btn", null, null)
-                var closeButton = findViewById<ImageView>(but)
+                // Clean this up somehow
+                val but = searchView.context.resources.getIdentifier("android:id/search_close_btn", null, null)
+                val closeButton = findViewById<ImageView>(but)
                 closeButton.setOnClickListener {
                     searchView.clearFocus()
                     searchView.setQuery("", false)
@@ -260,10 +259,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 return false
             }
         })
-//        (searchView.findViewById(R.id.search_close_btn) as (ImageView)).setOnClickListener {
-//            searchView.setQuery("", false)
-//            searchView.clearFocus()
-//        }
 
         mainMenu?.findItem(R.id.action_toggle_scan)?.let {
             setScanMenuLabel(it)

@@ -3,26 +3,23 @@ package com.aconno.acnsensa.viewmodel
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import com.aconno.acnsensa.domain.model.Device
+import com.aconno.acnsensa.domain.model.ScanResult
 import io.reactivex.Flowable
 import timber.log.Timber
 
-class BeaconListViewModel(
-    private val beacons: Flowable<Device>
+class ScanResultViewModel(
+    private val scanResults: Flowable<ScanResult>
 ) : ViewModel() {
 
-    private val beaconsLiveData: MutableLiveData<MutableList<Device>> = MutableLiveData()
+    private val scanResultsLiveData: MutableLiveData<ScanResult> = MutableLiveData()
 
     init {
-        beacons.subscribe {
-            val beacons = beaconsLiveData.value ?: mutableListOf()
-            if (!beacons.contains(it)) {
-                beacons.add(it)
-                beaconsLiveData.value = beacons
-            }
+        scanResults.subscribe{
+            scanResultsLiveData.value = it
         }
     }
 
-    fun getBeaconsLiveData(): MutableLiveData<MutableList<Device>> {
-        return beaconsLiveData
+    fun getScanResultsLiveData(): MutableLiveData<ScanResult> {
+        return scanResultsLiveData
     }
 }

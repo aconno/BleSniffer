@@ -21,8 +21,9 @@ class JsonFileStorageTest {
         val list: List<String> = listOf("a", "b", "c")
         val fileName = "test.json"
         storage.storeItems(list, fileName)
-        val storedList: List<String> = storage.readItems(fileName)
+        storage.readItems(fileName).subscribe { it ->
+            assert(list == it)
+        }
 
-        assert(list == storedList)
     }
 }

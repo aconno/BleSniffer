@@ -1,10 +1,7 @@
 package com.aconno.acnsensa.dagger.scananalyzeractivity
 
 import com.aconno.acnsensa.dagger.application.AppComponent
-import com.aconno.acnsensa.ui.BeaconListFragment
-import com.aconno.acnsensa.ui.MainActivity
 import com.aconno.acnsensa.ui.ScanAnalyzerActivity
-import com.aconno.acnsensa.ui.SensorListFragment
 import dagger.Component
 
 /**
@@ -14,6 +11,4 @@ import dagger.Component
 @ScanAnalyzerActivityScope
 interface ScanAnalyzerActivityComponent {
     fun inject(mainActivity: ScanAnalyzerActivity)
-    fun inject(sensorListFragment: SensorListFragment)
-    fun inject(beaconListFragment: BeaconListFragment)
 }

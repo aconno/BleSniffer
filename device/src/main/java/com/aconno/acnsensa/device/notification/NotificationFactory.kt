@@ -76,7 +76,7 @@ class NotificationDisplayImpl(
     private val notificationFactory: NotificationFactory,
     private val intentProvider: IntentProvider,
     private val context: Context
-) : NotificationDisplay {
+): NotificationDisplay {
     override fun displayAlertNotification(message: String) {
         display(
             context,

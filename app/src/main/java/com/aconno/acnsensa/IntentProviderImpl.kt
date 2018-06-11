@@ -6,31 +6,31 @@ import android.content.Intent
 import com.aconno.acnsensa.device.notification.AlertNotificationReceiver
 import com.aconno.acnsensa.device.notification.IntentProvider
 import com.aconno.acnsensa.device.notification.NotificationFactory
-import com.aconno.acnsensa.ui.MainActivity
+import com.aconno.acnsensa.ui.ScanAnalyzerActivity
 
 class IntentProviderImpl : IntentProvider {
 
     override fun getAcnSensaContentIntent(context: Context): PendingIntent {
-        val contentIntent = Intent(context, MainActivity::class.java)
+        val contentIntent = Intent(context, ScanAnalyzerActivity::class.java)
         contentIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         return PendingIntent.getActivity(
-            context,
-            0,
-            contentIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+                context,
+                0,
+                contentIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
         )
     }
 
     override fun getAlertNotificationContentIntent(context: Context): PendingIntent {
-        val contentIntent = Intent(context, MainActivity::class.java)
+        val contentIntent = Intent(context, ScanAnalyzerActivity::class.java)
         contentIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
         val requestCode = 0
         return PendingIntent.getActivity(
-            context,
-            requestCode,
-            contentIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+                context,
+                requestCode,
+                contentIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
         )
     }
 
@@ -39,8 +39,8 @@ class IntentProviderImpl : IntentProvider {
 
         outcome.action = AlertNotificationReceiver.DISMISS
         outcome.putExtra(
-            NotificationFactory.ALERT_NOTIFICATION_NAME,
-            NotificationFactory.ALERT_NOTIFICATION_ID
+                NotificationFactory.ALERT_NOTIFICATION_NAME,
+                NotificationFactory.ALERT_NOTIFICATION_ID
         )
 
         val requestCode = 0

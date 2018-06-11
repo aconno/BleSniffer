@@ -29,9 +29,22 @@ class BluetoothScanCallback(
         val deviceAddress = device?.address ?: "Unknown"
         val scannedDevice = Device(deviceName, deviceAddress)
         val bytes = (result?.scanRecord?.bytes ?: byteArrayOf())
-        val advertisement = Advertisement(bytes.toList())
+        val advertisement = Advertisement(trimRawData(bytes))
+        val timestamp = result?.timestampNanos ?: -1
 
-        return ScanResult(scannedDevice, advertisement)
+        return ScanResult(scannedDevice, advertisement, timestamp)
+    }
+
+    fun trimRawData(rawData: ByteArray): ByteArray {
+        val bytes: MutableList<Byte> = mutableListOf()
+        var length: Int = 0
+        for (byte in rawData) {
+            if (length == 0 && byte == 0x00.toByte()) break
+            if (length == 0) length = byte.toInt() + 1
+            bytes.add(byte)
+            length--
+        }
+        return bytes.toByteArray()
     }
 
     override fun onScanFailed(errorCode: Int) {

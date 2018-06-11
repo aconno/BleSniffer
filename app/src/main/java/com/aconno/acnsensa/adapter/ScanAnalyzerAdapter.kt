@@ -8,10 +8,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.aconno.acnsensa.R
-import com.aconno.acnsensa.domain.beacon.Beacon
 import com.aconno.acnsensa.domain.deserializing.Deserializer
+import com.aconno.acnsensa.domain.model.ScanResult
 import kotlinx.android.synthetic.main.item_scan_record.view.*
-import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -20,10 +19,10 @@ fun ByteArray.toHex() = this.joinToString(separator = "") { "0x" + it.toInt().an
 fun ByteArray.inversedCopyOfRange(start: Int, end: Int) = this.reversedArray().copyOfRange((size - 1) - start, (size - 1) - end)
 class ScanAnalyzerAdapter(
         private val scanRecordListener: ScanRecordListener,
-        private val longItemClickListener: LongItemClickListener<Beacon>
+        private val longItemClickListener: LongItemClickListener<ScanResult>
 ) : RecyclerView.Adapter<ScanAnalyzerAdapter.ViewHolder>() {
-    val scanLog: MutableList<MutablePair<Beacon, Int>> = mutableListOf()
-    private val hashes: MutableMap<Int, Pair<Int, MutablePair<Beacon, Int>>> = mutableMapOf()
+    val scanLog: MutableList<MutablePair<ScanResult, Int>> = mutableListOf()
+    private val hashes: MutableMap<Int, Pair<Int, MutablePair<ScanResult, Int>>> = mutableMapOf()
     var deserializers: MutableList<Deserializer> = mutableListOf()
 
     init {
@@ -44,7 +43,7 @@ class ScanAnalyzerAdapter(
         deserializers.addAll(items)
     }
 
-    fun setBeaconData(beaconData: List<Beacon>) {
+    fun setBeaconData(beaconData: List<ScanResult>) {
         this.scanLog.clear()
         this.hashes.clear()
         this.hashes.putAll(beaconData.mapIndexed { i, it -> Pair(i, Pair(it.hashCode(), MutablePair(it, 1))) })
@@ -52,13 +51,13 @@ class ScanAnalyzerAdapter(
         notifyDataSetChanged()
     }
 
-    fun logScan(data: Beacon) {
+    fun logScan(data: ScanResult) {
         val hashEntry = hashes[data.hashCode()]
         if (hashEntry != null) {
             val (index, beaconPair) = hashEntry
-            if (data.lastseen - beaconPair.first.lastseen < 2500) {
+            if ((data.timestamp / 1000) - (beaconPair.first.timestamp / 1000) < 2500) {
                 beaconPair.second++
-                beaconPair.first.lastseen = data.lastseen
+                beaconPair.first.timestamp = data.timestamp
                 notifyItemChanged(index, null)
                 return
             }
@@ -103,23 +102,24 @@ class ScanAnalyzerAdapter(
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         private var initialized = false
 
-        fun bind(data: MutablePair<Beacon, Int>) {
-            view.time.text = formatTimestamp(data.first.lastseen, longItemClickListener as Context)
+        fun bind(data: MutablePair<ScanResult, Int>) {
+            view.time.text = formatTimestamp(data.first.timestamp/ 1000, longItemClickListener as Context)
             view.repeating.text = "x${data.second}"
 
             if (!initialized) {
-                val dataHex = data.first.advertisementData.toHex()
+                val device = data.first.device
+                val advertisementData = data.first.advertisement.rawData
+                val dataHex = advertisementData.toHex()
 
                 view.setOnLongClickListener { longItemClickListener.onLongItemClick(data.first) }
-                view.address.text = data.first.address
-                Timber.e(data.first.name)
-                view.name.text = data.first.name
+                view.address.text = device.macAddress
+                view.name.text = device.name
                 view.data.text = dataHex
 
                 with(data.first) {
                     deserializers.find {
                         when (it.filterType) {
-                            Deserializer.Type.MAC -> address.matches(it.pattern)
+                            Deserializer.Type.MAC -> device.macAddress.matches(it.pattern)
                             Deserializer.Type.DATA -> dataHex.matches(it.pattern)
                             else -> false
                         }
@@ -128,7 +128,7 @@ class ScanAnalyzerAdapter(
                         it.fieldDeserializers.map { d ->
                             val start = d.startIndexInclusive
                             val end = d.endIndexExclusive
-                            val size = advertisementData.size
+                            val size = advertisement.rawData.size
                             Triple(
                                     d.name,
                                     if (start > size || end > size) "Bad Indexes"
