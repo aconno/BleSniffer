@@ -6,6 +6,7 @@ import com.aconno.acnsensa.dagger.application.AppModule
 import com.aconno.acnsensa.dagger.application.DaggerAppComponent
 import com.crashlytics.android.Crashlytics
 import io.fabric.sdk.android.Fabric
+import com.squareup.leakcanary.LeakCanary
 import timber.log.Timber
 
 
@@ -23,6 +24,12 @@ class AcnSensaApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            // This process is dedicated to LeakCanary for heap analysis.
+            // You should not init your app in this process.
+            return
+        }
+        LeakCanary.install(this);
         Timber.plant(Timber.DebugTree())
         Fabric.with(this, Crashlytics())
     }

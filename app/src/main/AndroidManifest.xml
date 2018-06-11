@@ -59,6 +59,13 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="af33bc92f5a62c7484661bea00a9c59aef76430d" />
+
+        <activity android:name=".ui.actions.EditActionActivity" />
+        <activity
+            android:name=".ui.settings.PublishListActivity"
+            android:label="@string/title_publish_list"
+            android:theme="@style/AppTheme" />
+        <activity android:name=".ui.settings.AddPublishActivity" />
     </application>
 
 </manifest>

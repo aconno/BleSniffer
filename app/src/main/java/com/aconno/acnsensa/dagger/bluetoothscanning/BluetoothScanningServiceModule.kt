@@ -12,14 +12,13 @@ import com.aconno.acnsensa.device.notification.NotificationFactory
 import com.aconno.acnsensa.device.storage.FileStorageImpl
 import com.aconno.acnsensa.domain.SmsSender
 import com.aconno.acnsensa.domain.Vibrator
-import com.aconno.acnsensa.domain.ifttt.ActionsRepository
-import com.aconno.acnsensa.domain.ifttt.NotificationDisplay
-import com.aconno.acnsensa.domain.ifttt.TextToSpeechPlayer
+import com.aconno.acnsensa.domain.ifttt.*
 import com.aconno.acnsensa.domain.ifttt.outcome.*
 import com.aconno.acnsensa.domain.interactor.LogReadingUseCase
-import com.aconno.acnsensa.domain.interactor.ifttt.InputToOutcomesUseCase
-import com.aconno.acnsensa.domain.interactor.ifttt.ReadingToInputUseCase
-import com.aconno.acnsensa.domain.interactor.repository.RecordSensorValuesUseCase
+import com.aconno.acnsensa.domain.interactor.ifttt.*
+import com.aconno.acnsensa.domain.interactor.repository.GetDevicesThatConnectedWithGooglePublishUseCase
+import com.aconno.acnsensa.domain.interactor.repository.GetDevicesThatConnectedWithRESTPublishUseCase
+import com.aconno.acnsensa.domain.interactor.repository.SaveSensorReadingsUseCase
 import com.aconno.acnsensa.domain.interactor.repository.SensorValuesToReadingsUseCase
 import com.aconno.acnsensa.domain.repository.InMemoryRepository
 import dagger.Module
@@ -67,8 +66,8 @@ class BluetoothScanningServiceModule(
     @BluetoothScanningServiceScope
     fun provideRecordSensorValuesUseCase(
         inMemoryRepository: InMemoryRepository
-    ): RecordSensorValuesUseCase {
-        return RecordSensorValuesUseCase(inMemoryRepository)
+    ): SaveSensorReadingsUseCase {
+        return SaveSensorReadingsUseCase(inMemoryRepository)
     }
 
     @Provides
@@ -82,12 +81,6 @@ class BluetoothScanningServiceModule(
     @BluetoothScanningServiceScope
     fun provideLogReadingsUseCase(): LogReadingUseCase {
         return LogReadingUseCase(FileStorageImpl(bluetoothScanningService))
-    }
-
-    @Provides
-    @BluetoothScanningServiceScope
-    fun provideReadingToInputUseCase(): ReadingToInputUseCase {
-        return ReadingToInputUseCase()
     }
 
     @Provides
@@ -116,5 +109,41 @@ class BluetoothScanningServiceModule(
         )
 
         return RunOutcomeUseCase(outcomeExecutorSelector)
+    }
+
+    @Provides
+    @BluetoothScanningServiceScope
+    fun provideGetAllEnabledGooglePublishUseCase(googlePublishRepository: GooglePublishRepository): GetAllEnabledGooglePublishUseCase {
+        return GetAllEnabledGooglePublishUseCase(googlePublishRepository)
+    }
+
+    @Provides
+    @BluetoothScanningServiceScope
+    fun provideGetAllEnabledRESTPublishUseCase(restPublishRepository: RESTPublishRepository): GetAllEnabledRESTPublishUseCase {
+        return GetAllEnabledRESTPublishUseCase(restPublishRepository)
+    }
+
+    @Provides
+    @BluetoothScanningServiceScope
+    fun provideUpdateRESTPublishUseCase(restPublishRepository: RESTPublishRepository): UpdateRESTPublishUserCase {
+        return UpdateRESTPublishUserCase(restPublishRepository)
+    }
+
+    @Provides
+    @BluetoothScanningServiceScope
+    fun provideUpdateGooglePublishUseCase(restPublishRepository: GooglePublishRepository): UpdateGooglePublishUseCase {
+        return UpdateGooglePublishUseCase(restPublishRepository)
+    }
+
+    @Provides
+    @BluetoothScanningServiceScope
+    fun provideGetDevicesThatConnectedWithGooglePublishUseCase(publishDeviceJoinRepository: PublishDeviceJoinRepository): GetDevicesThatConnectedWithGooglePublishUseCase {
+        return GetDevicesThatConnectedWithGooglePublishUseCase(publishDeviceJoinRepository)
+    }
+
+    @Provides
+    @BluetoothScanningServiceScope
+    fun provideGetDevicesThatConnectedWithRESTPublishUseCase(publishDeviceJoinRepository: PublishDeviceJoinRepository): GetDevicesThatConnectedWithRESTPublishUseCase {
+        return GetDevicesThatConnectedWithRESTPublishUseCase(publishDeviceJoinRepository)
     }
 }

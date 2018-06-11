@@ -6,19 +6,27 @@ import com.aconno.acnsensa.BluetoothStateReceiver
 import com.aconno.acnsensa.device.permissons.PermissionActionFactory
 import com.aconno.acnsensa.domain.Bluetooth
 import com.aconno.acnsensa.domain.beacon.Beacon
+import com.aconno.acnsensa.domain.interactor.bluetooth.DeserializeScanResultUseCase
+import com.aconno.acnsensa.domain.interactor.bluetooth.FilterAdvertisementsUseCase
+import com.aconno.acnsensa.domain.interactor.bluetooth.FilterByMacAddressUseCase
+import com.aconno.acnsensa.domain.interactor.repository.GetSavedDevicesUseCase
+import com.aconno.acnsensa.domain.interactor.repository.SaveDeviceUseCase
+import com.aconno.acnsensa.domain.model.Device
+import com.aconno.acnsensa.domain.model.ScanResult
+import com.aconno.acnsensa.domain.repository.DeviceRepository
+import com.aconno.acnsensa.domain.scanning.Bluetooth
 import com.aconno.acnsensa.ui.MainActivity
 import com.aconno.acnsensa.viewmodel.*
 import com.aconno.acnsensa.viewmodel.factory.BeaconListViewModelFactory
 import com.aconno.acnsensa.viewmodel.factory.BluetoothScanningViewModelFactory
 import com.aconno.acnsensa.viewmodel.factory.BluetoothViewModelFactory
 import com.aconno.acnsensa.viewmodel.factory.SensorListViewModelFactory
+import com.aconno.acnsensa.viewmodel.*
+import com.aconno.acnsensa.viewmodel.factory.*
 import dagger.Module
 import dagger.Provides
 import io.reactivex.Flowable
 
-/**
- * @author aconno
- */
 @Module
 class MainActivityModule(private val mainActivity: MainActivity) {
 
@@ -30,21 +38,17 @@ class MainActivityModule(private val mainActivity: MainActivity) {
 
     @Provides
     @MainActivityScope
-    fun provideBeaconListViewModel(beaconListViewModelFactory: BeaconListViewModelFactory): BeaconListViewModel =
-        ViewModelProviders.of(mainActivity, beaconListViewModelFactory)
-            .get(BeaconListViewModel::class.java)
-
-    @Provides
-    @MainActivityScope
     fun provideSensorListViewModelFactory(
-        sensorValues: Flowable<Map<String, Number>>
-    ) = SensorListViewModelFactory(sensorValues)
-
-    @Provides
-    @MainActivityScope
-    fun provideBeaconListViewModelFactory(
-        data: Flowable<Beacon>
-    ) = BeaconListViewModelFactory(data)
+        scanResults: Flowable<ScanResult>,
+        filterAdvertisementsUseCase: FilterAdvertisementsUseCase,
+        filterByMacAddressUseCase: FilterByMacAddressUseCase,
+        deserializeScanResultUseCase: DeserializeScanResultUseCase
+    ) = SensorListViewModelFactory(
+        scanResults,
+        filterAdvertisementsUseCase,
+        filterByMacAddressUseCase,
+        deserializeScanResultUseCase
+    )
 
     @Provides
     @MainActivityScope
@@ -89,4 +93,52 @@ class MainActivityModule(private val mainActivity: MainActivity) {
             mainActivity,
             bluetoothViewModelFactory
         ).get(BluetoothViewModel::class.java)
+
+    @Provides
+    @MainActivityScope
+    fun provideBeaconListViewModel(
+        beaconListViewModelFactory: BeaconListViewModelFactory
+    ) = ViewModelProviders.of(mainActivity, beaconListViewModelFactory)
+        .get(BeaconListViewModel::class.java)
+
+
+    @Provides
+    @MainActivityScope
+    fun provideBeaconListViewModelFactory(
+        beacons: Flowable<Device>
+    ) = BeaconListViewModelFactory(beacons)
+
+    @Provides
+    @MainActivityScope
+    fun provideGetAllDevicesUseCase(
+        deviceRepository: DeviceRepository
+    ): GetSavedDevicesUseCase {
+        return GetSavedDevicesUseCase(deviceRepository)
+    }
+
+    @Provides
+    @MainActivityScope
+    fun provideSaveDeviceUseCase(
+        deviceRepository: DeviceRepository
+    ): SaveDeviceUseCase {
+        return SaveDeviceUseCase(deviceRepository)
+    }
+
+    @Provides
+    @MainActivityScope
+    fun provideDeviceListViewModelFactory(
+        getSavedDevicesUseCase: GetSavedDevicesUseCase,
+        saveDeviceUseCase: SaveDeviceUseCase
+    ): DeviceListViewModelFactory {
+        return DeviceListViewModelFactory(getSavedDevicesUseCase, saveDeviceUseCase)
+    }
+
+    @Provides
+    @MainActivityScope
+    fun provideDeviceListViewModel(
+        deviceListViewModelFactory: DeviceListViewModelFactory
+    ): DeviceViewModel {
+        return ViewModelProviders.of(mainActivity, deviceListViewModelFactory)
+            .get(DeviceViewModel::class.java)
+    }
 }
