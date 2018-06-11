@@ -97,9 +97,9 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
 
         override fun deserializeInternal(data: ByteArray): Short {
             var short: Short = 0
-            var i =1
+            var i = 1
             short = short or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 0).toShort()
-            i=0
+            i = 0
             short = short or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 8).toShort()
             return short
         }
@@ -115,9 +115,9 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
 
         override fun deserializeInternal(data: ByteArray): Int {
             var v: Short = 0
-            var i=1
+            var i = 1
             v = v or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 0).toShort()
-            i=0
+            i = 0
             v = v or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 8).toShort()
             return (if (v < 0) v.toInt() + 65536 else v.toInt())
         }

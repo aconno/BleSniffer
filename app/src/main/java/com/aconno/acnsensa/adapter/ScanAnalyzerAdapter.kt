@@ -68,7 +68,6 @@ class ScanAnalyzerAdapter(
         hashes[data.hashCode()] = Pair(size, pair)
         scanLog.add(pair)
         notifyItemInserted(size)
-
         scanRecordListener.onRecordAdded(size)
     }
 
@@ -155,6 +154,7 @@ class ScanAnalyzerAdapter(
 
 var sdf: SimpleDateFormat? = null
 
+@Suppress("DEPRECATION")
 fun getCurrentLocale(context: Context): Locale =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) context.resources.configuration.locales.get(0)
         else context.resources.configuration.locale
