@@ -243,15 +243,18 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                 data?.data?.let {
                     PathUtils.getPath(this, it)?.let {
                         deserializerFileStorage.readItems(it).subscribe({
+                            Toast.makeText(this, "Loaded file with ${it.size} deserializer definitions!", Toast.LENGTH_SHORT).show()
+                            var numLoaded: Int = 0
                             it.forEach {
                                 addDeserializerUseCase.execute(it)
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe {
-                                            Toast.makeText(this, "Added deserializer for filter ${it.filter}", Toast.LENGTH_SHORT).show()
-                                            updateDeserializers()
+                                            numLoaded++
                                         }
                             }
+                            updateDeserializers()
+                            Toast.makeText(this, "Loaded $numLoaded definitions!", Toast.LENGTH_SHORT).show()
                         }, {
                             Toast.makeText(this, "There was an error reading the file.", Toast.LENGTH_SHORT).show()
                         })
