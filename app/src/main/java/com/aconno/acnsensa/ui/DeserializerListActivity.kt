@@ -28,6 +28,7 @@ import com.aconno.acnsensa.domain.interactor.deserializing.DeleteDeserializerUse
 import com.aconno.acnsensa.domain.interactor.deserializing.GetAllDeserializersUseCase
 import com.aconno.acnsensa.model.AcnSensaPermission
 import com.aconno.acnsensa.viewmodel.PermissionViewModel
+import com.crashlytics.android.Crashlytics
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_deserializer_list.*
@@ -257,6 +258,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                             Toast.makeText(this, "Loaded $numLoaded definitions!", Toast.LENGTH_SHORT).show()
                         }, {
                             Toast.makeText(this, "There was an error reading the file.", Toast.LENGTH_SHORT).show()
+                            Crashlytics.logException(it)
                         })
                     }
                 }
