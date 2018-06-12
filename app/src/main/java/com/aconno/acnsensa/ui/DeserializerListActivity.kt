@@ -31,6 +31,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_deserializer_list.*
 import kotlinx.android.synthetic.main.dialog_input_text.view.*
+import timber.log.Timber
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -209,7 +210,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                                 Toast.makeText(this@DeserializerListActivity, "An error occurred while getting all the deserializers to be removed...", Toast.LENGTH_LONG).show()
                             })
                 }
-                .setNegativeButton("Cancel") { dialog, which -> }
+                .setNegativeButton("Cancel") { _, _ -> }
                 .show()
     }
 
@@ -252,7 +253,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
             AcnSensaPermission.WRITE_EXTERNAL_STORAGE_CODE -> {
                 Toast.makeText(
                         this,
-                        "Write permission denied, you will not be able to use any exporting features...",
+                        "Permission denied, you will not be able to use any exporting/importing features...",
                         Toast.LENGTH_LONG
                 ).show()
             }
@@ -268,25 +269,62 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
             REQUEST_CODE_EDIT -> updateDeserializers()
             REQUEST_CODE_EDIT_QUIT_ON_RESULT -> finish()
             REQUEST_CODE_OPEN_FILE -> {
-                if (resultCode != Activity.RESULT_OK) return
+                if (resultCode != Activity.RESULT_OK) {
+                    Toast.makeText(this, "ERROR CODE 1: RESULT_OK != true", Toast.LENGTH_LONG).show()
+                    Crashlytics.logException(Exception("Result: $resultCode"))
+                    return
+                }
+                if (data == null) {
+                    Toast.makeText(this, "ERROR CODE 2: Data == null", Toast.LENGTH_LONG).show()
+                    Crashlytics.logException(Exception("Data == null"))
+                } else {
+                    if (data.data == null) {
+                        Toast.makeText(this, "ERROR CODE 3: Data.data == null", Toast.LENGTH_LONG).show()
+                        Crashlytics.logException(Exception("data.data == null"))
+                    }
+                }
                 data?.data?.let {
-                    PathUtils.getPath(this, it)?.let {
-                        deserializerFileStorage.readItems(it).subscribe({ list ->
-                            Toast.makeText(this, "Loaded file with ${list.size} deserializer definitions!", Toast.LENGTH_SHORT).show()
+                    val path = PathUtils.getPath(this, it)
+                    if (path != null) {
+                        deserializerFileStorage.readItems(path).subscribe({ list ->
+                            Toast.makeText(this, "Loaded file with ${list.size} deserializer definitions!", Toast.LENGTH_LONG).show()
                             addDeserializersUseCase.execute(list)
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
                                     .subscribe {
-                                        Toast.makeText(this, "Loaded ${list.size}  definitions!", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this, "Loaded ${list.size} definitions!", Toast.LENGTH_LONG).show()
                                         updateDeserializers()
                                     }
                         }, {
-                            Toast.makeText(this, "There was an error reading the file.", Toast.LENGTH_SHORT).show()
-                            Crashlytics.logException(it)
+                            if (it.message?.contains("Permission denied") == true && !permissionViewModel.hasSelfPermission(AcnSensaPermission.READ_EXTERNAL_STORAGE)) {
+                                permissionViewModel.checkRequestAndRun(AcnSensaPermission.WRITE_EXTERNAL_STORAGE, {
+                                    onActivityResult(requestCode, resultCode, data)
+                                }, {
+                                    runOnUiThread {
+                                        Timber.e("Permission Denied")
+                                        Toast.makeText(this, "Permission denied, unable to load items. Please grant the permission.", Toast.LENGTH_LONG).show()
+                                    }
+                                })
+                            } else {
+                                Toast.makeText(this, "ERROR CODE 4: There was an error reading the file.", Toast.LENGTH_LONG).show()
+                                Crashlytics.logException(it)
+                            }
                         })
+                    } else {
+                        Toast.makeText(this, "ERROR CODE 5: Path for uri $it is null", Toast.LENGTH_LONG).show()
+                        Crashlytics.logException(Exception("Path for uri $it is null"))
                     }
                 }
             }
         }
     }
+
+    override fun onRequestPermissionsResult(
+            requestCode: Int,
+            permissions: Array<String>,
+            grantResults: IntArray
+    ) {
+        permissionViewModel.checkGrantedPermission(grantResults, requestCode)
+    }
+
 }
