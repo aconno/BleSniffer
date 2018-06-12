@@ -8,7 +8,6 @@ import com.aconno.acnsensa.device.notification.IntentProvider
 import com.aconno.acnsensa.device.notification.NotificationFactory
 import dagger.Module
 import dagger.Provides
-import javax.inject.Singleton
 
 /**
  * @author aconno

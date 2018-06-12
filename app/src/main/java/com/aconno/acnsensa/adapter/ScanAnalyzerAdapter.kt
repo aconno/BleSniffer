@@ -16,7 +16,7 @@ import java.util.*
 
 
 fun ByteArray.toHex() = this.joinToString(separator = "") { "0x" + it.toInt().and(0xff).toString(16).padStart(2, '0') + " " }
-fun ByteArray.inversedCopyOfRange(start: Int, end: Int) = this.reversedArray().copyOfRange((size - 1) - start, (size - 1) - end)
+fun ByteArray.inversedCopyOfRangeInclusive(start: Int, end: Int) = this.reversedArray().copyOfRange((size - 1) - start, (size - 1) - end + 1)
 class ScanAnalyzerAdapter(
         private val scanRecordListener: ScanRecordListener,
         private val longItemClickListener: LongItemClickListener<ScanResult>
@@ -103,7 +103,7 @@ class ScanAnalyzerAdapter(
         private var initialized = false
 
         fun bind(data: MutablePair<ScanResult, Int>) {
-            view.time.text = formatTimestamp(data.first.timestamp/ 1000, longItemClickListener as Context)
+            view.time.text = formatTimestamp(data.first.timestamp / 1000, longItemClickListener as Context)
             view.repeating.text = "x${data.second}"
 
             if (!initialized) {
@@ -133,8 +133,8 @@ class ScanAnalyzerAdapter(
                                     d.name,
                                     if (start > size || end > size) "Bad Indexes"
                                     else d.type.converter.deserialize(
-                                            if (start <= end) advertisementData.copyOfRange(start, end)
-                                            else advertisementData.inversedCopyOfRange(start, end)
+                                            if (start <= end) advertisementData.copyOfRange(start, end + 1)
+                                            else advertisementData.inversedCopyOfRangeInclusive(start, end)
                                     ).toString(),
                                     d.color
                             )
