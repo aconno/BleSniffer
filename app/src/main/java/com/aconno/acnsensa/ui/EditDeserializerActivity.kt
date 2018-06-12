@@ -8,6 +8,7 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import com.aconno.acnsensa.AcnSensaApplication
 import com.aconno.acnsensa.R
 import com.aconno.acnsensa.adapter.DeserializerEditorAdapter
@@ -40,7 +41,7 @@ class EditDeserializerActivity : AppCompatActivity() {
 
     var deserializer: Deserializer? = null
         set(value) {
-            field = (value.also { existing = true }
+            field = (value
                     ?: GeneralDeserializer(null, "Unnamed", "", Deserializer.Type.MAC, mutableListOf())).apply {
                 deserializer_list.adapter = DeserializerEditorAdapter(this, this@EditDeserializerActivity).apply {
                     ItemTouchHelper(createItemTouchHelper()).attachToRecyclerView(deserializer_list)
@@ -80,7 +81,10 @@ class EditDeserializerActivity : AppCompatActivity() {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
-                            { deserializer = it },
+                            {
+                                deserializer = it
+                                existing = true
+                            },
                             {
                                 deserializer = GeneralDeserializer(
                                         name = "Unnamed",
@@ -134,8 +138,13 @@ class EditDeserializerActivity : AppCompatActivity() {
                     )).subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(
-                                    { finish() },
-                                    { Timber.e(it) }
+                                    {
+                                        Toast.makeText(this, "Updated deserializer!", Toast.LENGTH_LONG).show()
+                                        finish()
+                                    },
+                                    {
+                                        Timber.e(it)
+                                    }
                             )
                 }
             } else {
@@ -147,8 +156,13 @@ class EditDeserializerActivity : AppCompatActivity() {
                 )).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
-                                { finish() },
-                                { Timber.e(it) }
+                                {
+                                    Toast.makeText(this, "Created deserializer!", Toast.LENGTH_LONG).show()
+                                    finish()
+                                },
+                                {
+                                    Timber.e(it)
+                                }
                         )
             }
         }

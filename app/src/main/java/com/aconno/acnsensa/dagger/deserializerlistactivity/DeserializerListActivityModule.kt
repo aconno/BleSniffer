@@ -34,7 +34,7 @@ class DeserializerListActivityModule(private val deserializerListActivity: Deser
     }
 
     @Provides
-    @EditDeserializerActivityScope
+    @DeserializerListActivityScope
     fun provideAddDeserializersUseCase(deserializerRepository: DeserializerRepository): AddDeserializersUseCase {
         return AddDeserializersUseCase(deserializerRepository)
     }

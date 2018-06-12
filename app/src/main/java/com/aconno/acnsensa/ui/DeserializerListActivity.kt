@@ -84,8 +84,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         updateDeserializers()
 
         add_deserializer.setOnClickListener {
-            startActivityForResult(Intent(this@DeserializerListActivity, EditDeserializerActivity::class.java).apply {
-            }, 0x01)
+            startEditActivity("", Deserializer.Type.MAC)
         }
 
         intent.extras?.let {
@@ -156,7 +155,10 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                     deleteDeserializerUseCase.execute(item)
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe { updateDeserializers() }
+                            .subscribe {
+                                updateDeserializers()
+                                Toast.makeText(this, "Deserializer removed!", Toast.LENGTH_SHORT).show()
+                            }
                     dialog.dismiss()
                 }
                 .setNegativeButton("No") { dialog, _ ->
@@ -181,14 +183,14 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         val id: Int? = item?.itemId
         when (id) {
             R.id.action_import -> openFileDialog()
-            R.id.action_export_all -> exportAllDeserializers()
-            R.id.action_remove_all -> removeAllDeserializers()
+            R.id.action_export_all -> showExportAllDeserializersDialog()
+            R.id.action_remove_all -> showRemoveAllDeserializersDialog()
         }
 
         return super.onOptionsItemSelected(item)
     }
 
-    private fun removeAllDeserializers() {
+    private fun showRemoveAllDeserializersDialog() {
         AlertDialog.Builder(this)
                 .setMessage("Remove all deserializers?")
                 .setPositiveButton("Remove") { dialog, which ->
@@ -200,7 +202,8 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                                         .subscribeOn(Schedulers.io())
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe {
-                                            Toast.makeText(this@DeserializerListActivity, "${it.size} deserializers removed!!", Toast.LENGTH_SHORT).show()
+                                            updateDeserializers()
+                                            Toast.makeText(this@DeserializerListActivity, "${it.size} deserializers removed!", Toast.LENGTH_SHORT).show()
                                         }
                             }, {
                                 Toast.makeText(this@DeserializerListActivity, "An error occurred while getting all the deserializers to be removed...", Toast.LENGTH_LONG).show()
@@ -214,7 +217,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         startActivityForResult(PathUtils.createGetContentIntent(), REQUEST_CODE_OPEN_FILE)
     }
 
-    private fun exportAllDeserializers() {
+    private fun showExportAllDeserializersDialog() {
         if (deserializerAdapter.deserializers.isEmpty()) {
             Toast.makeText(this, "No deserializers to export!", Toast.LENGTH_SHORT).show()
             return
