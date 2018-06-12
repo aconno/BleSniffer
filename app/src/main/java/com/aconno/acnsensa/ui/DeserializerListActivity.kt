@@ -23,9 +23,7 @@ import com.aconno.acnsensa.dagger.deserializerlistactivity.DeserializerListActiv
 import com.aconno.acnsensa.device.PathUtils
 import com.aconno.acnsensa.device.storage.DeserializerFileStorage
 import com.aconno.acnsensa.domain.deserializing.Deserializer
-import com.aconno.acnsensa.domain.interactor.deserializing.AddDeserializerUseCase
-import com.aconno.acnsensa.domain.interactor.deserializing.DeleteDeserializerUseCase
-import com.aconno.acnsensa.domain.interactor.deserializing.GetAllDeserializersUseCase
+import com.aconno.acnsensa.domain.interactor.deserializing.*
 import com.aconno.acnsensa.model.AcnSensaPermission
 import com.aconno.acnsensa.viewmodel.PermissionViewModel
 import com.crashlytics.android.Crashlytics
@@ -51,7 +49,11 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     @Inject
     lateinit var addDeserializerUseCase: AddDeserializerUseCase
     @Inject
+    lateinit var addDeserializersUseCase: AddDeserializersUseCase
+    @Inject
     lateinit var deleteDeserializerUseCase: DeleteDeserializerUseCase
+    @Inject
+    lateinit var deleteDeserializersUseCase: DeleteDeserializersUseCase
 
     @Inject
     lateinit var permissionViewModel: PermissionViewModel
@@ -180,9 +182,32 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         when (id) {
             R.id.action_import -> openFileDialog()
             R.id.action_export_all -> exportAllDeserializers()
+            R.id.action_remove_all -> removeAllDeserializers()
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun removeAllDeserializers() {
+        AlertDialog.Builder(this)
+                .setMessage("Remove all deserializers?")
+                .setPositiveButton("Remove") { dialog, which ->
+                    getAllDeserializersUseCase.execute()
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe({
+                                deleteDeserializersUseCase.execute(it)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe {
+                                            Toast.makeText(this@DeserializerListActivity, "${it.size} deserializers removed!!", Toast.LENGTH_SHORT).show()
+                                        }
+                            }, {
+                                Toast.makeText(this@DeserializerListActivity, "An error occurred while getting all the deserializers to be removed...", Toast.LENGTH_LONG).show()
+                            })
+                }
+                .setNegativeButton("Cancel") { dialog, which -> }
+                .show()
     }
 
     private fun openFileDialog() {
@@ -243,19 +268,15 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                 if (resultCode != Activity.RESULT_OK) return
                 data?.data?.let {
                     PathUtils.getPath(this, it)?.let {
-                        deserializerFileStorage.readItems(it).subscribe({
-                            Toast.makeText(this, "Loaded file with ${it.size} deserializer definitions!", Toast.LENGTH_SHORT).show()
-                            var numLoaded: Int = 0
-                            it.forEach {
-                                addDeserializerUseCase.execute(it)
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe {
-                                            numLoaded++
-                                        }
-                            }
-                            updateDeserializers()
-                            Toast.makeText(this, "Loaded $numLoaded definitions!", Toast.LENGTH_SHORT).show()
+                        deserializerFileStorage.readItems(it).subscribe({ list ->
+                            Toast.makeText(this, "Loaded file with ${list.size} deserializer definitions!", Toast.LENGTH_SHORT).show()
+                            addDeserializersUseCase.execute(list)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe {
+                                        Toast.makeText(this, "Loaded ${list.size}  definitions!", Toast.LENGTH_SHORT).show()
+                                        updateDeserializers()
+                                    }
                         }, {
                             Toast.makeText(this, "There was an error reading the file.", Toast.LENGTH_SHORT).show()
                             Crashlytics.logException(it)

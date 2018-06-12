@@ -1,11 +1,10 @@
 package com.aconno.acnsensa.dagger.deserializerlistactivity
 
+import com.aconno.acnsensa.dagger.editdeserializeractivity.EditDeserializerActivityScope
 import com.aconno.acnsensa.device.permissons.PermissionActionFactory
 import com.aconno.acnsensa.device.storage.DeserializerFileStorage
 import com.aconno.acnsensa.domain.deserializing.DeserializerRepository
-import com.aconno.acnsensa.domain.interactor.deserializing.AddDeserializerUseCase
-import com.aconno.acnsensa.domain.interactor.deserializing.DeleteDeserializerUseCase
-import com.aconno.acnsensa.domain.interactor.deserializing.GetAllDeserializersUseCase
+import com.aconno.acnsensa.domain.interactor.deserializing.*
 import com.aconno.acnsensa.ui.DeserializerListActivity
 import com.aconno.acnsensa.viewmodel.PermissionViewModel
 import dagger.Module
@@ -35,11 +34,22 @@ class DeserializerListActivityModule(private val deserializerListActivity: Deser
     }
 
     @Provides
+    @EditDeserializerActivityScope
+    fun provideAddDeserializersUseCase(deserializerRepository: DeserializerRepository): AddDeserializersUseCase {
+        return AddDeserializersUseCase(deserializerRepository)
+    }
+
+    @Provides
     @DeserializerListActivityScope
     fun provideDeleteDeserializerUseCase(deserializerRepository: DeserializerRepository): DeleteDeserializerUseCase {
         return DeleteDeserializerUseCase(deserializerRepository)
     }
 
+    @Provides
+    @DeserializerListActivityScope
+    fun provideDeleteDeserializersUseCase(deserializerRepository: DeserializerRepository): DeleteDeserializersUseCase {
+        return DeleteDeserializersUseCase(deserializerRepository)
+    }
 
     @Provides
     @DeserializerListActivityScope
@@ -50,7 +60,7 @@ class DeserializerListActivityModule(private val deserializerListActivity: Deser
 
     @Provides
     @DeserializerListActivityScope
-    fun provideDeserializerFileStorage(): DeserializerFileStorage{
+    fun provideDeserializerFileStorage(): DeserializerFileStorage {
         return DeserializerFileStorage(deserializerListActivity)
     }
 }

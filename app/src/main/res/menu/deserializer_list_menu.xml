@@ -9,4 +9,8 @@
         android:id="@+id/action_export_all"
         android:title="Export All"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_remove_all"
+        android:title="Remove All"
+        app:showAsAction="never" />
 </menu>

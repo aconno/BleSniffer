@@ -1,10 +1,7 @@
 package com.aconno.acnsensa.dagger.editdeserializeractivity
 
 import com.aconno.acnsensa.domain.deserializing.DeserializerRepository
-import com.aconno.acnsensa.domain.interactor.deserializing.AddDeserializerUseCase
-import com.aconno.acnsensa.domain.interactor.deserializing.GetAllDeserializersUseCase
-import com.aconno.acnsensa.domain.interactor.deserializing.GetDeserializerByIdUseCase
-import com.aconno.acnsensa.domain.interactor.deserializing.UpdateDeserializerUseCase
+import com.aconno.acnsensa.domain.interactor.deserializing.*
 import com.aconno.acnsensa.ui.EditDeserializerActivity
 import dagger.Module
 import dagger.Provides
