@@ -15,7 +15,7 @@
         app:layout_constraintEnd_toStartOf="@+id/address"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
-        tools:text="FF:FF:FF:FF:FF:FF" />
+        tools:text="Name" />
 
     <TextView
         android:id="@+id/address"
@@ -34,7 +34,16 @@
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="00:00:01" />
+        tools:text="06/13/2018 11:51:46 AM" />
+    <TextView
+        android:id="@+id/rssi"
+        android:layout_marginStart="4dp"
+        style="@style/ListItemSecondaryText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/time"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="-45dB" />
 
     <TextView
         android:id="@+id/repeating"
@@ -73,7 +82,7 @@
         app:layout_constraintEnd_toStartOf="@+id/repeating"
         android:layout_marginStart="8dp"
         android:text="No Deserializer"
-        app:layout_constraintStart_toEndOf="@+id/time"
+        app:layout_constraintStart_toEndOf="@+id/rssi"
         app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

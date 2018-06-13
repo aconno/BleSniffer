@@ -104,6 +104,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 this, linearLayoutManager.orientation
         ))
         (scan_list.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        scan_list.itemAnimator = null
 
         getAllDeserializersUseCase.execute()
                 .subscribeOn(Schedulers.io())

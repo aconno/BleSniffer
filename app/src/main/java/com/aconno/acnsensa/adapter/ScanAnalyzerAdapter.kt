@@ -58,6 +58,7 @@ class ScanAnalyzerAdapter(
             if ((data.timestamp) - (beaconPair.first.timestamp) < 2500) {
                 beaconPair.second++
                 beaconPair.first.timestamp = data.timestamp
+                beaconPair.first.rssi = data.rssi
                 notifyItemChanged(index, null)
                 return
             }
@@ -104,6 +105,7 @@ class ScanAnalyzerAdapter(
 
         fun bind(data: MutablePair<ScanResult, Int>) {
             view.time.text = formatTimestamp(data.first.timestamp, longItemClickListener as Context)
+            view.rssi.text = "${data.first.rssi}dB"
             view.repeating.text = "x${data.second}"
 
             if (!initialized) {
