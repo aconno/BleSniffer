@@ -213,7 +213,6 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         abstract fun serializeInternal(data: T): ByteArray
 
         open fun deserialize(data: ByteArray, order: ByteOrder = ByteOrder.LITTLE_ENDIAN): T {
-            val a = 5
             if (data.size != length && length != -1) {
                 throw IllegalArgumentException("Invalid buffer length, expected $length, got ${data.size}")
             } else {

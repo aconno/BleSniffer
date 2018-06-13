@@ -6,9 +6,15 @@ import com.aconno.acnsensa.device.R
 import com.aconno.acnsensa.domain.JsonFileStorage
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.google.gson.stream.JsonReader
 import io.reactivex.Single
 import java.io.File
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.nio.charset.Charset
 
+
+val utf8charset: Charset = Charset.forName("UTF-8")
 
 abstract class JsonFileStorageImpl<T, K : T>(
         private var storageDirectoryName: String,
@@ -31,10 +37,9 @@ abstract class JsonFileStorageImpl<T, K : T>(
         return file.absolutePath
     }
 
-    override fun readItems(fileName: String): Single<List<T>> {
+    override fun readItems(inputStream: InputStream, charset: String): Single<List<T>> {
         return try {
-            val file = File(fileName)
-            Single.just(gson.fromJson(file.readText(), typeToken.type))
+            Single.just(gson.fromJson(JsonReader(InputStreamReader(inputStream, charset)), typeToken.type))
         } catch (e: Exception) {
             Single.error<List<T>>(e)
         }

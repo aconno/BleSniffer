@@ -30,12 +30,12 @@ class BluetoothScanCallback(
         val scannedDevice = Device(deviceName, deviceAddress)
         val bytes = (result?.scanRecord?.bytes ?: byteArrayOf())
         val advertisement = Advertisement(trimRawData(bytes))
-        val timestamp = result?.timestampNanos ?: -1
+        val timestamp = System.currentTimeMillis()
 
         return ScanResult(scannedDevice, advertisement, timestamp)
     }
 
-    fun trimRawData(rawData: ByteArray): ByteArray {
+    private fun trimRawData(rawData: ByteArray): ByteArray {
         val bytes: MutableList<Byte> = mutableListOf()
         var length: Int = 0
         for (byte in rawData) {

@@ -55,7 +55,7 @@ class ScanAnalyzerAdapter(
         val hashEntry = hashes[data.hashCode()]
         if (hashEntry != null) {
             val (index, beaconPair) = hashEntry
-            if ((data.timestamp / 1000) - (beaconPair.first.timestamp / 1000) < 2500) {
+            if ((data.timestamp) - (beaconPair.first.timestamp) < 2500) {
                 beaconPair.second++
                 beaconPair.first.timestamp = data.timestamp
                 notifyItemChanged(index, null)
@@ -103,7 +103,7 @@ class ScanAnalyzerAdapter(
         private var initialized = false
 
         fun bind(data: MutablePair<ScanResult, Int>) {
-            view.time.text = formatTimestamp(data.first.timestamp / 1000, longItemClickListener as Context)
+            view.time.text = formatTimestamp(data.first.timestamp, longItemClickListener as Context)
             view.repeating.text = "x${data.second}"
 
             if (!initialized) {
@@ -132,10 +132,14 @@ class ScanAnalyzerAdapter(
                             Triple(
                                     d.name,
                                     if (start > size || end > size) "Bad Indexes"
-                                    else d.type.converter.deserialize(
-                                            if (start <= end) advertisementData.copyOfRange(start, end + 1)
-                                            else advertisementData.inversedCopyOfRangeInclusive(start, end)
-                                    ).toString(),
+                                    else try {
+                                        d.type.converter.deserialize(
+                                                if (start <= end) advertisementData.copyOfRange(start, end + 1)
+                                                else advertisementData.inversedCopyOfRangeInclusive(start, end)
+                                        ).toString()
+                                    } catch (e: IllegalArgumentException) {
+                                        "Invalid Byte Data"
+                                    },
                                     d.color
                             )
                         }.let {

@@ -1,6 +1,7 @@
 package com.aconno.acnsensa.domain
 
 import io.reactivex.Single
+import java.io.InputStream
 
 /**
  * @aconno
@@ -10,9 +11,9 @@ interface JsonFileStorage<T> {
 
     fun storeItems(items: List<T>, fileName: String): String
 
-    fun readItem(fileName: String): Single<T?> {
+    fun readItem(inputStream: InputStream, charset: String = "UTF-8"): Single<T?> {
         TODO("Reimplement")
     }
 
-    fun readItems(fileName: String): Single<List<T>>
+    fun readItems(inputStream: InputStream, charset: String = "UTF-8"): Single<List<T>>
 }

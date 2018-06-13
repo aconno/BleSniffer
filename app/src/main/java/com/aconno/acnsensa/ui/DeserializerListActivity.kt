@@ -2,7 +2,9 @@ package com.aconno.acnsensa.ui
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
@@ -20,7 +22,6 @@ import com.aconno.acnsensa.adapter.LongItemClickListener
 import com.aconno.acnsensa.dagger.deserializerlistactivity.DaggerDeserializerListActivityComponent
 import com.aconno.acnsensa.dagger.deserializerlistactivity.DeserializerListActivityComponent
 import com.aconno.acnsensa.dagger.deserializerlistactivity.DeserializerListActivityModule
-import com.aconno.acnsensa.device.PathUtils
 import com.aconno.acnsensa.device.storage.DeserializerFileStorage
 import com.aconno.acnsensa.domain.deserializing.Deserializer
 import com.aconno.acnsensa.domain.interactor.deserializing.*
@@ -31,7 +32,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_deserializer_list.*
 import kotlinx.android.synthetic.main.dialog_input_text.view.*
-import timber.log.Timber
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -215,7 +215,14 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     }
 
     private fun openFileDialog() {
-        startActivityForResult(PathUtils.createGetContentIntent(), REQUEST_CODE_OPEN_FILE)
+        startActivityForResult(createGetContentIntent(), REQUEST_CODE_OPEN_FILE)
+    }
+
+    private fun createGetContentIntent(): Intent {
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "*/*"
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        return intent
     }
 
     private fun showExportAllDeserializersDialog() {
@@ -253,7 +260,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
             AcnSensaPermission.WRITE_EXTERNAL_STORAGE_CODE -> {
                 Toast.makeText(
                         this,
-                        "Permission denied, you will not be able to use any exporting/importing features...",
+                        "Permission denied, you probably will not be able to use any exporting/importing features...",
                         Toast.LENGTH_LONG
                 ).show()
             }
@@ -284,39 +291,40 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                     }
                 }
                 data?.data?.let {
-                    val path = PathUtils.getPath(this, it)
-                    if (path != null) {
-                        deserializerFileStorage.readItems(path).subscribe({ list ->
-                            Toast.makeText(this, "Loaded file with ${list.size} deserializer definitions!", Toast.LENGTH_LONG).show()
-                            addDeserializersUseCase.execute(list)
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe {
-                                        Toast.makeText(this, "Loaded ${list.size} definitions!", Toast.LENGTH_LONG).show()
-                                        updateDeserializers()
-                                    }
-                        }, {
-                            if (it.message?.contains("Permission denied") == true && !permissionViewModel.hasSelfPermission(AcnSensaPermission.READ_EXTERNAL_STORAGE)) {
-                                permissionViewModel.checkRequestAndRun(AcnSensaPermission.WRITE_EXTERNAL_STORAGE, {
-                                    onActivityResult(requestCode, resultCode, data)
-                                }, {
-                                    runOnUiThread {
-                                        Timber.e("Permission Denied")
-                                        Toast.makeText(this, "Permission denied, unable to load items. Please grant the permission.", Toast.LENGTH_LONG).show()
-                                    }
-                                })
-                            } else {
-                                Toast.makeText(this, "ERROR CODE 4: There was an error reading the file.", Toast.LENGTH_LONG).show()
-                                Crashlytics.logException(it)
-                            }
-                        })
-                    } else {
-                        Toast.makeText(this, "ERROR CODE 5: Path for uri $it is null", Toast.LENGTH_LONG).show()
-                        Crashlytics.logException(Exception("Path for uri $it is null"))
-                    }
+                    deserializerFileStorage.readItems(this.contentResolver.openInputStream(it)).subscribe({ list ->
+                        Toast.makeText(this, "Loaded file with ${list.size} deserializer definitions!", Toast.LENGTH_LONG).show()
+                        addDeserializersUseCase.execute(list)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe {
+                                    Toast.makeText(this, "Loaded ${list.size} definitions!", Toast.LENGTH_LONG).show()
+                                    updateDeserializers()
+                                }
+                    }, {
+                        if (it.message?.contains("Permission denied") == true && !permissionViewModel.hasSelfPermission(AcnSensaPermission.READ_EXTERNAL_STORAGE)) {
+                            permissionViewModel.checkRequestAndRun(AcnSensaPermission.WRITE_EXTERNAL_STORAGE, {
+                                onActivityResult(requestCode, resultCode, data)
+                            }, {
+                                runOnUiThread {
+                                    Toast.makeText(this, "Permission denied, unable to load items. Please grant the permission and try again.", Toast.LENGTH_LONG).show()
+                                    openPermissionSettingsScreen()
+                                }
+                            })
+                        } else {
+                            Toast.makeText(this, "ERROR CODE 4: There was an error reading the file.", Toast.LENGTH_LONG).show()
+                            Crashlytics.logException(it)
+                        }
+                    })
                 }
             }
         }
+    }
+
+    private fun openPermissionSettingsScreen() {
+        val settings = Intent(ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
+        settings.addCategory(Intent.CATEGORY_DEFAULT)
+        settings.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(settings)
     }
 
     override fun onRequestPermissionsResult(
