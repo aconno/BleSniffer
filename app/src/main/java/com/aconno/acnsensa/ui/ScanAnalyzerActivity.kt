@@ -37,6 +37,7 @@ import javax.inject.Inject
 
 
 const val EXTRA_FILTER_MAC: String = "com.acconno.acnsensa.FILTER_MAC"
+const val EXTRA_SAMPLE_DATA: String = "com.acconno.acnsensa.SAMPLE_DATA"
 
 class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.PermissionCallbacks, ScanRecordListener, LongItemClickListener<ScanResult> {
 
@@ -190,6 +191,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     override fun onLongItemClick(item: ScanResult): Boolean {
         startActivityForResult(Intent(this, DeserializerListActivity::class.java).apply {
             putExtra(EXTRA_FILTER_MAC, item.device.macAddress)
+            putExtra(EXTRA_SAMPLE_DATA, item.advertisement.rawData)
         }, 0x00)
         return true
     }

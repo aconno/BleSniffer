@@ -1,6 +1,8 @@
 package com.aconno.acnsensa.dagger.application
 
+import android.arch.persistence.db.SupportSQLiteDatabase
 import android.arch.persistence.room.Room
+import android.arch.persistence.room.migration.Migration
 import android.bluetooth.BluetoothAdapter
 import android.support.v4.content.LocalBroadcastManager
 import com.aconno.acnsensa.AcnSensaApplication
@@ -78,6 +80,12 @@ class AppModule(private val acnSensaApplication: AcnSensaApplication) {
     @Singleton
     fun provideAcnSensaDatabase(): AcnSensaDatabase {
         return Room.databaseBuilder(acnSensaApplication, AcnSensaDatabase::class.java, "AcnSensa")
+                .addMigrations(object : Migration(9, 11) {
+                    override fun migrate(database: SupportSQLiteDatabase) {
+                        database.execSQL("ALTER TABLE deserializers ADD COLUMN sampleData BLOB")
+                    }
+
+                })
                 .fallbackToDestructiveMigration()
                 .build()
 

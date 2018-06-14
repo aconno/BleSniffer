@@ -33,9 +33,10 @@
         </activity>
         <activity
             android:name=".ui.DeserializerListActivity"
-            android:label="AcnSensa Deserializer"
-            android:screenOrientation="portrait" />
-        <activity android:name=".ui.EditDeserializerActivity" />
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".ui.EditDeserializerActivity"
+            android:screenOrientation="landscape" />
 
 
         <provider

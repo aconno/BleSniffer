@@ -49,7 +49,8 @@ class DeserializerRepositoryImpl(
                 name = deserializer.name,
                 filter = deserializer.filter,
                 filterType = deserializer.filterType.name,
-                fieldDeserializers = Gson().toJson(deserializer.fieldDeserializers)
+                fieldDeserializers = Gson().toJson(deserializer.fieldDeserializers),
+                sampleData = deserializer.sampleData
         )
     }
 
@@ -62,7 +63,8 @@ class DeserializerRepositoryImpl(
                 fieldDeserializers = Gson().fromJson(
                         deserializerEntity.fieldDeserializers,
                         valueDeserializersTypeToken.type
-                )
+                ),
+                sampleData = deserializerEntity.sampleData
         )
     }
 }

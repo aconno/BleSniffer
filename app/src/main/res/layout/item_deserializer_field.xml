@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:padding="4dp">
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toStartOf="@+id/converter_type"
+        app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <android.support.design.widget.TextInputEditText
+            android:imeOptions="flagNoExtractUi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Name" />
@@ -27,8 +25,7 @@
         android:id="@+id/converter_type"
         android:layout_width="144dp"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="2dp"
         app:layout_constraintBottom_toBottomOf="@+id/name"
         app:layout_constraintEnd_toStartOf="@+id/color_button"
         app:layout_constraintStart_toEndOf="@+id/name"
@@ -38,44 +35,44 @@
         android:id="@+id/color_button"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="2dp"
         android:background="@android:color/holo_red_dark"
-        app:layout_constraintBottom_toTopOf="@+id/remove"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/converter_type"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteY="16dp" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/start"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="2dp"
         app:layout_constraintEnd_toStartOf="@+id/end"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/name">
+        app:layout_constraintStart_toEndOf="@+id/color_button"
+        app:layout_constraintTop_toTopOf="parent">
 
         <android.support.design.widget.TextInputEditText
+            android:imeOptions="flagNoExtractUi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:ems="3"
             android:hint="Start Index Inclusive"
             android:inputType="number" />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/end"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
         app:layout_constraintEnd_toEndOf="@+id/remove"
         app:layout_constraintStart_toEndOf="@+id/start"
-        app:layout_constraintTop_toTopOf="@+id/start"
-        tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="430dp">
+        app:layout_constraintTop_toTopOf="parent">
 
         <android.support.design.widget.TextInputEditText
+            android:imeOptions="flagNoExtractUi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:ems="3"
             android:hint="End Index Inclusive"
             android:inputType="number" />
     </android.support.design.widget.TextInputLayout>
@@ -84,12 +81,10 @@
         android:id="@+id/remove"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="2dp"
         android:text="Remove"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/end"
-        app:layout_constraintTop_toBottomOf="@+id/name" />
+        app:layout_constraintTop_toTopOf="parent" />
 </android.support.constraint.ConstraintLayout>

@@ -7,7 +7,8 @@ data class GeneralDeserializer(
         override var name: String = "",
         override val filter: String = "",
         override var filterType: Deserializer.Type = Deserializer.Type.MAC,
-        override val fieldDeserializers: MutableList<FieldDeserializer> = mutableListOf()
+        override val fieldDeserializers: MutableList<FieldDeserializer> = mutableListOf(),
+        override var sampleData: ByteArray = byteArrayOf()
 ) : Deserializer {
     override val pattern: Regex = Pattern.compile(filter).toRegex()
 }

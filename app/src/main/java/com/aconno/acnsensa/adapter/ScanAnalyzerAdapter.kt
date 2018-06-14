@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-fun ByteArray.toHex() = this.joinToString(separator = "") { "0x" + it.toInt().and(0xff).toString(16).padStart(2, '0') + " " }
+fun ByteArray.toHex() = this.joinToString(separator = "") { "0x" + it.toInt().and(0xff).toString(16).padStart(2, '0').toUpperCase() + " " }
 fun ByteArray.inversedCopyOfRangeInclusive(start: Int, end: Int) = this.reversedArray().copyOfRange((size - 1) - start, (size - 1) - end + 1)
 class ScanAnalyzerAdapter(
         private val scanRecordListener: ScanRecordListener,

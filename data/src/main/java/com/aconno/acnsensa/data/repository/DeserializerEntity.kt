@@ -1,5 +1,6 @@
 package com.aconno.acnsensa.data.repository
 
+import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 
@@ -9,5 +10,7 @@ data class DeserializerEntity(
         val name: String,
         val filter: String,
         val filterType: String,
-        val fieldDeserializers: String
+        val fieldDeserializers: String,
+        @Suppress("ArrayInDataClass") @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
+        val sampleData: ByteArray
 )

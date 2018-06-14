@@ -6,7 +6,7 @@ import android.arch.persistence.room.RoomDatabase
 
 @Database(
         entities = [DeserializerEntity::class],
-        version = 9
+        version = 11
 )
 abstract class AcnSensaDatabase : RoomDatabase() {
 

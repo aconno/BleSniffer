@@ -32,6 +32,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_deserializer_list.*
 import kotlinx.android.synthetic.main.dialog_input_text.view.*
+import timber.log.Timber
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -90,7 +91,8 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
 
         intent.extras?.let {
             if (it.containsKey(EXTRA_FILTER_MAC)) {
-                startEditActivity(it.getString(EXTRA_FILTER_MAC), Deserializer.Type.MAC, true)
+                startEditActivity(it.getString(EXTRA_FILTER_MAC, null), Deserializer.Type.MAC, it.getByteArray(EXTRA_SAMPLE_DATA)
+                        ?: byteArrayOf(), true)
             }
         }
     }
@@ -99,17 +101,19 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         startEditActivity(item.filter, item.filterType)
     }
 
-    private fun startEditActivity(filter: String, type: String, quitOnResult: Boolean = false) {
+    private fun startEditActivity(filter: String, type: String, sampleData: ByteArray = byteArrayOf(), quitOnResult: Boolean = false) {
         startActivityForResult(Intent(this, EditDeserializerActivity::class.java).apply {
             putExtra("filter", filter)
             putExtra("type", type)
+            putExtra("sampleData", sampleData)
         }, if (quitOnResult) REQUEST_CODE_EDIT_QUIT_ON_RESULT else REQUEST_CODE_EDIT)
     }
 
     private fun startEditActivity(filter: String,
                                   type: Deserializer.Type,
+                                  sampleData: ByteArray = byteArrayOf(),
                                   quitOnResult: Boolean = false) =
-            startEditActivity(filter, type.name, quitOnResult)
+            startEditActivity(filter, type.name, sampleData, quitOnResult)
 
     override fun onLongItemClick(item: Deserializer): Boolean {
         AlertDialog.Builder(this)
@@ -312,6 +316,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                             })
                         } else {
                             Toast.makeText(this, "ERROR CODE 4: There was an error reading the file.", Toast.LENGTH_LONG).show()
+                            Timber.e(it)
                             Crashlytics.logException(it)
                         }
                     })

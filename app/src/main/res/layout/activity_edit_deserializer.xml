@@ -17,16 +17,87 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/deserializer_list"
+    <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:scrollbars="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/add_value_deserializer_button"
+        app:layout_constraintBottom_toTopOf="@+id/save"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/deserializer_filter"
-        tools:listitem="@layout/item_deserializer_field" />
+        app:layout_constraintTop_toBottomOf="@+id/custom_toolbar">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/deserializer_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:imeOptions="flagNoExtractUi"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <android.support.design.widget.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Name"
+                    android:imeOptions="flagNoExtractUi" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/deserializer_filter"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:imeOptions="flagNoExtractUi"
+                app:layout_constraintEnd_toStartOf="@+id/deserializer_filter_type"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/deserializer_name">
+
+                <android.support.design.widget.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Filter"
+                    android:imeOptions="flagNoExtractUi" />
+            </android.support.design.widget.TextInputLayout>
+
+            <Spinner
+                android:id="@+id/deserializer_filter_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/deserializer_filter"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/deserializer_filter" />
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/deserializer_sample_data"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:imeOptions="flagNoExtractUi"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/deserializer_filter">
+
+                <android.support.design.widget.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Sample Data (Not Required)"
+                    android:imeOptions="flagNoExtractUi" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/deserializer_list"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/deserializer_sample_data"
+                tools:itemCount="25" />
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
 
     <Button
         android:id="@+id/save"
@@ -43,8 +114,17 @@
         android:layout_height="wrap_content"
         android:text="Add Field"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/cancel"
+        app:layout_constraintEnd_toStartOf="@+id/preview"
         app:layout_constraintStart_toEndOf="@+id/save" />
+
+    <Button
+        android:id="@+id/preview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Preview"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/cancel"
+        app:layout_constraintStart_toEndOf="@+id/add_value_deserializer_button" />
 
     <Button
         android:id="@+id/cancel"
@@ -53,46 +133,6 @@
         android:text="Cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/add_value_deserializer_button" />
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/deserializer_filter"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toStartOf="@+id/deserializer_filter_type"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/deserializer_name"
-        tools:layout_editor_absoluteX="71dp"
-        tools:layout_editor_absoluteY="39dp">
-
-        <android.support.design.widget.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Filter" />
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/deserializer_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/custom_toolbar"
-        tools:layout_editor_absoluteX="71dp"
-        tools:layout_editor_absoluteY="39dp">
-
-        <android.support.design.widget.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Name" />
-    </android.support.design.widget.TextInputLayout>
-
-    <Spinner
-        android:id="@+id/deserializer_filter_type"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/deserializer_filter"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/deserializer_filter" />
+        app:layout_constraintStart_toEndOf="@+id/preview" />
 
 </android.support.constraint.ConstraintLayout>
