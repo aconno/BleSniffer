@@ -42,4 +42,9 @@ class EditDeserializerActivityModule(private val editDeserializerActivity: EditD
     fun provideGetDeserializerByIdUseCase(deserializerRepository: DeserializerRepository): GetDeserializerByIdUseCase {
         return GetDeserializerByIdUseCase(deserializerRepository)
     }
+    @Provides
+    @EditDeserializerActivityScope
+    fun provideGetDeserializerByFilterUseCase(deserializerRepository: DeserializerRepository): GetDeserializerByFilterUseCase {
+        return GetDeserializerByFilterUseCase(deserializerRepository)
+    }
 }

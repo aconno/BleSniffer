@@ -35,12 +35,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="06/13/2018 11:51:46 AM" />
+
     <TextView
         android:id="@+id/rssi"
-        android:layout_marginStart="4dp"
         style="@style/ListItemSecondaryText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
         app:layout_constraintStart_toEndOf="@+id/time"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="-45dB" />
@@ -65,13 +66,13 @@
         tools:text="0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00" />
 
     <android.support.v7.widget.RecyclerView
-        app:layout_constraintTop_toBottomOf="@+id/data"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         android:id="@+id/deserialized_field_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/data"
         tools:listitem="@layout/item_deserialized_field" />
 
     <TextView
@@ -79,9 +80,9 @@
         style="@style/ListItemSecondaryText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toStartOf="@+id/repeating"
         android:layout_marginStart="8dp"
-        android:text="No Deserializer"
+        android:text="@string/no_deserializer"
+        app:layout_constraintEnd_toStartOf="@+id/repeating"
         app:layout_constraintStart_toEndOf="@+id/rssi"
         app:layout_constraintTop_toTopOf="parent" />
 

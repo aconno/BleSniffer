@@ -105,8 +105,8 @@ class ScanAnalyzerAdapter(
 
         fun bind(data: MutablePair<ScanResult, Int>) {
             view.time.text = formatTimestamp(data.first.timestamp, longItemClickListener as Context)
-            view.rssi.text = "${data.first.rssi}dB"
-            view.repeating.text = "x${data.second}"
+            view.rssi.text = view.context.getString(R.string.rssi_strength, data.first.rssi)
+            view.repeating.text = view.context.getString(R.string.repeating_amount, data.second)
 
             if (!initialized) {
                 val device = data.first.device
@@ -133,14 +133,14 @@ class ScanAnalyzerAdapter(
                             val size = advertisement.rawData.size
                             Triple(
                                     d.name,
-                                    if (start > size || end > size) "Bad Indexes"
+                                    if (start > size || end > size) view.context.getString(R.string.bad_indexes)
                                     else try {
                                         d.type.converter.deserialize(
                                                 if (start <= end) advertisementData.copyOfRange(start, end + 1)
                                                 else advertisementData.inversedCopyOfRangeInclusive(start, end)
                                         ).toString()
                                     } catch (e: IllegalArgumentException) {
-                                        "Invalid Byte Data"
+                                        view.context.getString(R.string.invalid_byte_data)
                                     },
                                     d.color
                             )
@@ -169,7 +169,7 @@ fun formatTimestamp(timestamp: Long, context: Context): String =
         (sdf ?: run {
             sdf = SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa", getCurrentLocale(context))
             sdf
-        })?.format(Date(timestamp)) ?: "Invalid Timestamp"
+        })?.format(Date(timestamp)) ?: context.getString(R.string.invalid_timestamp)
 
 
 class MutablePair<A, B>(

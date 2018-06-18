@@ -32,7 +32,6 @@ import com.aconno.acnsensa.viewmodel.ScanResultViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_scan_analyzer.*
-import timber.log.Timber
 import javax.inject.Inject
 
 
@@ -56,7 +55,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     @Inject
     lateinit var getAllDeserializersUseCase: GetAllDeserializersUseCase
 
-    private lateinit var scanAnalyzerAdapter: ScanAnalyzerAdapter
+    private val scanAnalyzerAdapter: ScanAnalyzerAdapter by lazy {
+        ScanAnalyzerAdapter(this, this)
+    }
     private var adapterDataObserver: Observer<ScanResult>? = null
 
     private var mainMenu: Menu? = null
@@ -84,7 +85,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
         snackbar?.setActionTextColor(resources.getColor(R.color.primaryColor))
 
-        custom_toolbar.title = getString(R.string.scanner_app_name)
+        custom_toolbar.title = getString(R.string.app_name)
         setSupportActionBar(custom_toolbar)
 
         invalidateOptionsMenu()
@@ -96,7 +97,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
 
     private fun initViews() {
-        scanAnalyzerAdapter = ScanAnalyzerAdapter(this, this)
         val linearLayoutManager = LinearLayoutManager(this)
         linearLayoutManager.reverseLayout = true
         scan_list.layoutManager = linearLayoutManager
@@ -118,7 +118,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private fun createAdapterDataObserver(): Observer<ScanResult> {
         return Observer {
             it?.let { result ->
-                Timber.e("Test: %s", result.device.macAddress)
                 filter.let {
                     if (it == null || (result.device.macAddress.contains(it, ignoreCase = true) || result.device.name.contains(it, ignoreCase = true))) {
                         scanAnalyzerAdapter.logScan(result)

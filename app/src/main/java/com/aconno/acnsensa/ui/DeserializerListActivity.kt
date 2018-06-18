@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -24,7 +23,10 @@ import com.aconno.acnsensa.dagger.deserializerlistactivity.DeserializerListActiv
 import com.aconno.acnsensa.dagger.deserializerlistactivity.DeserializerListActivityModule
 import com.aconno.acnsensa.device.storage.DeserializerFileStorage
 import com.aconno.acnsensa.domain.deserializing.Deserializer
-import com.aconno.acnsensa.domain.interactor.deserializing.*
+import com.aconno.acnsensa.domain.interactor.deserializing.AddDeserializersUseCase
+import com.aconno.acnsensa.domain.interactor.deserializing.DeleteDeserializerUseCase
+import com.aconno.acnsensa.domain.interactor.deserializing.DeleteDeserializersUseCase
+import com.aconno.acnsensa.domain.interactor.deserializing.GetAllDeserializersUseCase
 import com.aconno.acnsensa.model.AcnSensaPermission
 import com.aconno.acnsensa.viewmodel.PermissionViewModel
 import com.crashlytics.android.Crashlytics
@@ -40,16 +42,14 @@ import javax.inject.Inject
 const val REQUEST_CODE_EDIT: Int = 0x00
 const val REQUEST_CODE_EDIT_QUIT_ON_RESULT: Int = 0x01
 const val REQUEST_CODE_OPEN_FILE: Int = 0x02
+const val DEFAULT_EXPORT_FILE_NAME = "all.json"
 
 class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserializer>, LongItemClickListener<Deserializer>, PermissionViewModel.PermissionCallbacks {
 
-    private var snackbar: Snackbar? = null
     private val deserializerAdapter: DeserializerAdapter = DeserializerAdapter(mutableListOf(), this, this)
 
     @Inject
     lateinit var getAllDeserializersUseCase: GetAllDeserializersUseCase
-    @Inject
-    lateinit var addDeserializerUseCase: AddDeserializerUseCase
     @Inject
     lateinit var addDeserializersUseCase: AddDeserializersUseCase
     @Inject
@@ -77,7 +77,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
 
         editDeserializerActivityComponent.inject(this)
 
-        custom_toolbar.title = getString(R.string.scanner_app_name)
+        custom_toolbar.title = getString(R.string.app_name)
         deserializer_list.layoutManager = LinearLayoutManager(this)
         deserializer_list.adapter = deserializerAdapter
         setSupportActionBar(custom_toolbar)
@@ -86,7 +86,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         updateDeserializers()
 
         add_deserializer.setOnClickListener {
-            startEditActivity("", Deserializer.Type.MAC)
+            startEditActivity()
         }
 
         intent.extras?.let {
@@ -98,7 +98,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     }
 
     override fun onItemClick(item: Deserializer) {
-        startEditActivity(item.filter, item.filterType)
+        startEditActivity(item.id)
     }
 
     private fun startEditActivity(filter: String, type: String, sampleData: ByteArray = byteArrayOf(), quitOnResult: Boolean = false) {
@@ -107,6 +107,12 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
             putExtra("type", type)
             putExtra("sampleData", sampleData)
         }, if (quitOnResult) REQUEST_CODE_EDIT_QUIT_ON_RESULT else REQUEST_CODE_EDIT)
+    }
+
+    private fun startEditActivity(id: Long? = -1) {
+        startActivityForResult(Intent(this, EditDeserializerActivity::class.java).apply {
+            putExtra("id", id)
+        }, REQUEST_CODE_EDIT)
     }
 
     private fun startEditActivity(filter: String,
@@ -118,13 +124,13 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     override fun onLongItemClick(item: Deserializer): Boolean {
         AlertDialog.Builder(this)
                 .setTitle(R.string.deserializer_actions_title)
-                .setItems(R.array.deserializer_actions, { dialog, which ->
+                .setItems(R.array.deserializer_actions) { dialog, which ->
                     when (which) {
-                        0 -> showDeleteItemDialog(item)
+                        0 -> showRemoveItemDialog(item)
                         1 -> showExportItemDialog(item)
                     }
                     dialog.dismiss()
-                }).create().show()
+                }.create().show()
         return true
     }
 
@@ -132,41 +138,41 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
             item: Deserializer,
             defaultFileName: String = item.filter.replace(Pattern.compile("[\\\\/:*?\"<>|]").toRegex(), "") + ".json"
     ) {
-        val view: View = layoutInflater.inflate(R.layout.dialog_input_text, null)
+        val view: View = layoutInflater.inflate(R.layout.dialog_input_text, findViewById(android.R.id.content), false)
         val textInput: EditText = view.text_input.editText ?: return
         textInput.hint = defaultFileName
         AlertDialog.Builder(this)
-                .setMessage("Export item: " + item.filter)
+                .setMessage(getString(R.string.export_deserializer_x, item.filter))
                 .setView(view)
-                .setPositiveButton("Export") { dialog, _ ->
+                .setPositiveButton(R.string.export) { dialog, _ ->
                     deserializerFileStorage.storeItem(item,
                             if (textInput.text.isEmpty()) defaultFileName
                             else textInput.text.toString()
                     ).let {
-                        Toast.makeText(this, "Successfully exported file to: $it", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.successfully_exported_file_to_x, it), Toast.LENGTH_SHORT).show()
                     }
                     dialog.dismiss()
                 }
-                .setNegativeButton("Cancel") { dialog, _ ->
+                .setNegativeButton(R.string.cancel) { dialog, _ ->
                     dialog.dismiss()
                 }
                 .show()
     }
 
-    private fun showDeleteItemDialog(item: Deserializer) {
+    private fun showRemoveItemDialog(item: Deserializer) {
         AlertDialog.Builder(this)
-                .setMessage("Delete deserializer?")
-                .setPositiveButton("Delete") { dialog, _ ->
+                .setMessage(getString(R.string.remove_deserializer))
+                .setPositiveButton(getString(R.string.remove)) { dialog, _ ->
                     deleteDeserializerUseCase.execute(item)
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe {
                                 updateDeserializers()
-                                Toast.makeText(this, "Deserializer removed!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this, R.string.deserializer_removed, Toast.LENGTH_SHORT).show()
                             }
                     dialog.dismiss()
                 }
-                .setNegativeButton("No") { dialog, _ ->
+                .setNegativeButton(R.string.cancel) { dialog, _ ->
                     dialog.dismiss()
                 }.show()
     }
@@ -197,8 +203,8 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
 
     private fun showRemoveAllDeserializersDialog() {
         AlertDialog.Builder(this)
-                .setMessage("Remove all deserializers?")
-                .setPositiveButton("Remove") { dialog, which ->
+                .setMessage(R.string.remove_all_deserializers)
+                .setPositiveButton(R.string.remove) { _, _ ->
                     getAllDeserializersUseCase.execute()
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
@@ -208,13 +214,13 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe {
                                             updateDeserializers()
-                                            Toast.makeText(this@DeserializerListActivity, "${it.size} deserializers removed!", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(this@DeserializerListActivity, getString(R.string.x_deserializers_removed, it.size), Toast.LENGTH_SHORT).show()
                                         }
                             }, {
-                                Toast.makeText(this@DeserializerListActivity, "An error occurred while getting all the deserializers to be removed...", Toast.LENGTH_LONG).show()
+                                Toast.makeText(this@DeserializerListActivity, R.string.error_removing_deserializers, Toast.LENGTH_LONG).show()
                             })
                 }
-                .setNegativeButton("Cancel") { _, _ -> }
+                .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
                 .show()
     }
 
@@ -231,27 +237,25 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
 
     private fun showExportAllDeserializersDialog() {
         if (deserializerAdapter.deserializers.isEmpty()) {
-            Toast.makeText(this, "No deserializers to export!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.no_deserializers_to_export, Toast.LENGTH_SHORT).show()
             return
         }
-        val view: View = layoutInflater.inflate(R.layout.dialog_input_text, null)
+        val view: View = layoutInflater.inflate(R.layout.dialog_input_text, findViewById(android.R.id.content), false)
         val textInput: EditText = view.text_input.editText ?: return
-        textInput.hint = "all.json"
+        textInput.hint = DEFAULT_EXPORT_FILE_NAME
         AlertDialog.Builder(this)
-                .setMessage("Export all deserializers")
+                .setMessage(R.string.export_all_deserializers)
                 .setView(view)
-                .setPositiveButton("Export") { dialog, _ ->
+                .setPositiveButton(R.string.export) { dialog, _ ->
                     deserializerFileStorage.storeItems(deserializerAdapter.deserializers,
-                            if (textInput.text.isEmpty()) "all.json"
+                            if (textInput.text.isEmpty()) DEFAULT_EXPORT_FILE_NAME
                             else textInput.text.toString()
                     ).let {
-                        Toast.makeText(this, "Successfully exported file to: $it", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.successfully_exported_file_to_x, it), Toast.LENGTH_SHORT).show()
                     }
                     dialog.dismiss()
                 }
-                .setNegativeButton("Cancel") { dialog, _ ->
-                    dialog.dismiss()
-                }
+                .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
                 .show()
     }
 
@@ -264,7 +268,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
             AcnSensaPermission.WRITE_EXTERNAL_STORAGE_CODE -> {
                 Toast.makeText(
                         this,
-                        "Permission denied, you probably will not be able to use any exporting/importing features...",
+                        R.string.permission_denied_export_import,
                         Toast.LENGTH_LONG
                 ).show()
             }
@@ -280,40 +284,37 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
             REQUEST_CODE_EDIT -> {
                 updateDeserializers()
                 when (resultCode) {
-                    RESULT_UPDATED -> Toast.makeText(applicationContext, "Updated deserializer!", Toast.LENGTH_LONG).show()
-                    RESULT_ADDED -> Toast.makeText(applicationContext, "Created deserializer!", Toast.LENGTH_LONG).show()
+                    RESULT_UPDATED -> Toast.makeText(applicationContext, R.string.updated_deserializer, Toast.LENGTH_LONG).show()
+                    RESULT_ADDED -> Toast.makeText(applicationContext, R.string.created_deserializer, Toast.LENGTH_LONG).show()
                 }
             }
             REQUEST_CODE_EDIT_QUIT_ON_RESULT -> {
                 when (resultCode) {
-                    RESULT_UPDATED -> Toast.makeText(applicationContext, "Updated deserializer!", Toast.LENGTH_LONG).show()
-                    RESULT_ADDED -> Toast.makeText(applicationContext, "Created deserializer!", Toast.LENGTH_LONG).show()
+                    RESULT_UPDATED -> Toast.makeText(applicationContext, R.string.updated_deserializer, Toast.LENGTH_LONG).show()
+                    RESULT_ADDED -> Toast.makeText(applicationContext, R.string.created_deserializer, Toast.LENGTH_LONG).show()
                 }
                 finish()
             }
             REQUEST_CODE_OPEN_FILE -> {
                 if (resultCode != Activity.RESULT_OK) {
-                    Toast.makeText(this, "ERROR CODE 1: RESULT_OK != true", Toast.LENGTH_LONG).show()
                     Crashlytics.logException(Exception("Result: $resultCode"))
                     return
                 }
                 if (data == null) {
-                    Toast.makeText(this, "ERROR CODE 2: Data == null", Toast.LENGTH_LONG).show()
                     Crashlytics.logException(Exception("Data == null"))
                 } else {
                     if (data.data == null) {
-                        Toast.makeText(this, "ERROR CODE 3: Data.data == null", Toast.LENGTH_LONG).show()
                         Crashlytics.logException(Exception("data.data == null"))
                     }
                 }
                 data?.data?.let {
                     deserializerFileStorage.readItems(this.contentResolver.openInputStream(it)).subscribe({ list ->
-                        Toast.makeText(this, "Loaded file with ${list.size} deserializer definitions!", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, getString(R.string.loaded_file_with_x_deserializer_definitions, list.size), Toast.LENGTH_LONG).show()
                         addDeserializersUseCase.execute(list)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe {
-                                    Toast.makeText(this, "Loaded ${list.size} definitions!", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(this, getString(R.string.imported_x_deserializer_definitions, list.size), Toast.LENGTH_LONG).show()
                                     updateDeserializers()
                                 }
                     }, {
@@ -322,12 +323,11 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                                 onActivityResult(requestCode, resultCode, data)
                             }, {
                                 runOnUiThread {
-                                    Toast.makeText(this, "Permission denied, unable to load items. Please grant the permission and try again.", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(this, R.string.permission_denied_loading_items, Toast.LENGTH_LONG).show()
                                     openPermissionSettingsScreen()
                                 }
                             })
                         } else {
-                            Toast.makeText(this, "ERROR CODE 4: There was an error reading the file.", Toast.LENGTH_LONG).show()
                             Timber.e(it)
                             Crashlytics.logException(it)
                         }

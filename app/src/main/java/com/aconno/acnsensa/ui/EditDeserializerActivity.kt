@@ -21,6 +21,7 @@ import com.aconno.acnsensa.domain.deserializing.Deserializer
 import com.aconno.acnsensa.domain.deserializing.GeneralDeserializer
 import com.aconno.acnsensa.domain.deserializing.GeneralFieldDeserializer
 import com.aconno.acnsensa.domain.interactor.deserializing.AddDeserializerUseCase
+import com.aconno.acnsensa.domain.interactor.deserializing.GetDeserializerByFilterUseCase
 import com.aconno.acnsensa.domain.interactor.deserializing.GetDeserializerByIdUseCase
 import com.aconno.acnsensa.domain.interactor.deserializing.UpdateDeserializerUseCase
 import com.google.common.io.BaseEncoding
@@ -39,6 +40,8 @@ class EditDeserializerActivity : AppCompatActivity() {
 
     @Inject
     lateinit var addDeserializersUseCase: AddDeserializerUseCase
+    @Inject
+    lateinit var getDeserializerByFilterUseCase: GetDeserializerByFilterUseCase
     @Inject
     lateinit var getDeserializerByIdUseCase: GetDeserializerByIdUseCase
     @Inject
@@ -79,30 +82,45 @@ class EditDeserializerActivity : AppCompatActivity() {
 
         editDeserializerActivityComponent.inject(this)
 
-        custom_toolbar.title = getString(R.string.scanner_app_name)
+        custom_toolbar.title = getString(R.string.app_name)
         setSupportActionBar(custom_toolbar)
 
         deserializer_list.adapter = deserializerEditorAdapter
         deserializer_list.layoutManager = LinearLayoutManager(this)
         if (intent.extras != null) {
-            val filterContent: String = intent.extras.getString("filter", "")
-            val type: String = intent.extras.getString("type", "")
-            val sampleData = intent.extras.getByteArray("sampleData") ?: byteArrayOf()
-            getDeserializerByIdUseCase.execute(filterContent, type)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                            {
-                                deserializer = it
-                                existing = true
-                            },
-                            {
-                                deserializer = GeneralDeserializer(
-                                        filter = filterContent,
-                                        sampleData = sampleData
-                                )
-                            }
-                    )
+            if (intent.extras.getLong("id", -2L) != -2L) {
+                getDeserializerByIdUseCase.execute(intent.extras.getLong("id"))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                {
+                                    deserializer = it
+                                    existing = true
+                                },
+                                {
+                                    deserializer = GeneralDeserializer()
+                                }
+                        )
+            } else {
+                val filterContent: String = intent.extras.getString("filter", "")
+                val type: String = intent.extras.getString("type", "")
+                val sampleData = intent.extras.getByteArray("sampleData") ?: byteArrayOf()
+                getDeserializerByFilterUseCase.execute(filterContent, type)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                {
+                                    deserializer = it
+                                    existing = true
+                                },
+                                {
+                                    deserializer = GeneralDeserializer(
+                                            filter = filterContent,
+                                            sampleData = sampleData
+                                    )
+                                }
+                        )
+            }
         } else {
             deserializer = GeneralDeserializer()
         }
@@ -163,19 +181,19 @@ class EditDeserializerActivity : AppCompatActivity() {
                 val size = rawData.size
                 Triple(
                         d.name,
-                        if (start > size || end > size) "Bad Indexes"
+                        if (start > size || end > size) getString(R.string.bad_indexes)
                         else try {
                             d.type.converter.deserialize(
                                     if (start <= end) rawData.copyOfRange(start, end + 1)
                                     else rawData.inversedCopyOfRangeInclusive(start, end)
                             ).toString()
                         } catch (e: IllegalArgumentException) {
-                            "Invalid Byte Data"
+                            getString(R.string.invalid_byte_data)
                         },
                         d.color
                 )
             }.let {
-                val view = layoutInflater.inflate(R.layout.popup_field_list_preview, findViewById(android.R.id.content))
+                val view = layoutInflater.inflate(R.layout.popup_field_list_preview, findViewById(android.R.id.content), false)
 
                 val deserializedFieldsAdapter = DeserializedFieldsAdapter()
                 view.deserialized_field_list_preview.adapter = deserializedFieldsAdapter
@@ -204,7 +222,7 @@ class EditDeserializerActivity : AppCompatActivity() {
 
     private fun updateDeserializerFromInputData(): Deserializer {
         return deserializer.apply {
-            name = deserializer_name.editText?.text?.toString() ?: name ?: "Unnamed"
+            name = deserializer_name.editText?.text?.toString() ?: name ?: getString(R.string.deserializer_default_name)
             filter = deserializer_filter.editText?.text?.toString() ?: filter ?: ""
             filterType = filterType
             sampleData = getSampleDataBytes()

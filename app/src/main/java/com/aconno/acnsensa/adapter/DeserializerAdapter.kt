@@ -41,8 +41,8 @@ class DeserializerAdapter(
     inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
 
         fun bind(deserializer: Deserializer) {
-            view.deserializer_filter.text = deserializer.name
-            view.deserializer_filter_type.text = "${deserializer.filterType.name} - ${deserializer.filter}"
+            view.deserializer_name.text = deserializer.name
+            view.deserializer_filter_and_type.text = view.context.getString(R.string.deserializer_filter_and_type, deserializer.filterType.name, deserializer.filter)
             view.setOnClickListener { clickListener.onItemClick(deserializer) }
             view.setOnLongClickListener { longClickListener.onLongItemClick(deserializer) }
         }

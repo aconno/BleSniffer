@@ -3,30 +3,29 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/list_item_height">
+    android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/deserializer_filter"
+        android:id="@+id/deserializer_name"
         style="@style/ListItemText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/screen_edge_left_right_margin"
-        app:layout_constraintBottom_toTopOf="@id/deserializer_filter_type"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed"
         tools:text="Deserializer Filter" />
 
     <TextView
-        android:id="@+id/deserializer_filter_type"
+        android:id="@+id/deserializer_filter_and_type"
         style="@style/ListItemSecondaryText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/screen_edge_left_right_margin"
-        android:layout_marginTop="@dimen/list_item_text_padding"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/deserializer_filter"
-        tools:text="Filter Type" />
+        app:layout_constraintTop_toBottomOf="@+id/deserializer_name"
+        tools:text="Filter and Filter Type" />
 
 </android.support.constraint.ConstraintLayout>

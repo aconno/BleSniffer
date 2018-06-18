@@ -15,10 +15,9 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <android.support.design.widget.TextInputEditText
-            android:imeOptions="flagNoExtractUi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Name" />
+            android:hint="@string/name" />
     </android.support.design.widget.TextInputLayout>
 
     <Spinner
@@ -51,11 +50,10 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <android.support.design.widget.TextInputEditText
-            android:imeOptions="flagNoExtractUi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="3"
-            android:hint="Start Index Inclusive"
+            android:hint="@string/start_index_inclusive"
             android:inputType="number" />
     </android.support.design.widget.TextInputLayout>
 
@@ -69,11 +67,10 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <android.support.design.widget.TextInputEditText
-            android:imeOptions="flagNoExtractUi"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="3"
-            android:hint="End Index Inclusive"
+            android:hint="@string/end_index_inclusive"
             android:inputType="number" />
     </android.support.design.widget.TextInputLayout>
 
@@ -82,7 +79,7 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginStart="2dp"
-        android:text="Remove"
+        android:text="@string/remove"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/end"

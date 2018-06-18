@@ -12,7 +12,7 @@
         style="@style/Toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
+        android:minHeight="?android:attr/actionBarSize"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -34,7 +34,6 @@
                 android:id="@+id/deserializer_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:imeOptions="flagNoExtractUi"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -42,15 +41,13 @@
                 <android.support.design.widget.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Name"
-                    android:imeOptions="flagNoExtractUi" />
+                    android:hint="@string/name" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/deserializer_filter"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:imeOptions="flagNoExtractUi"
                 app:layout_constraintEnd_toStartOf="@+id/deserializer_filter_type"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/deserializer_name">
@@ -58,8 +55,7 @@
                 <android.support.design.widget.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Filter"
-                    android:imeOptions="flagNoExtractUi" />
+                    android:hint="@string/filter" />
             </android.support.design.widget.TextInputLayout>
 
             <Spinner
@@ -74,7 +70,6 @@
                 android:id="@+id/deserializer_sample_data"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:imeOptions="flagNoExtractUi"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/deserializer_filter">
@@ -82,8 +77,7 @@
                 <android.support.design.widget.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Sample Data (Not Required)"
-                    android:imeOptions="flagNoExtractUi" />
+                    android:hint="@string/sample_data_hint" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.v7.widget.RecyclerView
@@ -103,7 +97,7 @@
         android:id="@+id/save"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Save"
+        android:text="@string/save"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/add_value_deserializer_button"
         app:layout_constraintStart_toStartOf="parent" />
@@ -112,7 +106,7 @@
         android:id="@+id/add_value_deserializer_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Add Field"
+        android:text="@string/add_field"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/preview"
         app:layout_constraintStart_toEndOf="@+id/save" />
@@ -121,7 +115,7 @@
         android:id="@+id/preview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Preview"
+        android:text="@string/preview"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/cancel"
         app:layout_constraintStart_toEndOf="@+id/add_value_deserializer_button" />
@@ -130,7 +124,7 @@
         android:id="@+id/cancel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Cancel"
+        android:text="@string/cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/preview" />
