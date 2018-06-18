@@ -46,7 +46,7 @@ class DeserializerFileStorage(
                     val json = JsonObject()
                     src?.let {
                         json.addProperty("name", src.name)
-                        json.addProperty("filter", src.filter)
+                        json.addProperty("ficp lter", src.filter)
                         json.addProperty("filterType", src.filterType.name)
                         json.add("fieldDeserializers", JsonArray().apply {
                             src.fieldDeserializers.map { context.serialize(it) }.forEach { this.add(it) }

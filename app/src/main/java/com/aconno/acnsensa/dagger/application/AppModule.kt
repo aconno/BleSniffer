@@ -82,7 +82,7 @@ class AppModule(private val acnSensaApplication: AcnSensaApplication) {
         return Room.databaseBuilder(acnSensaApplication, AcnSensaDatabase::class.java, "AcnSensa")
                 .addMigrations(object : Migration(9, 11) {
                     override fun migrate(database: SupportSQLiteDatabase) {
-                        database.execSQL("ALTER TABLE deserializers ADD COLUMN sampleData BLOB")
+                        database.execSQL("ALTER TABLE deserializers ADD COLUMN sampleData BLOB NOT NULL")
                     }
 
                 })

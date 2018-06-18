@@ -277,8 +277,20 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
-            REQUEST_CODE_EDIT -> updateDeserializers()
-            REQUEST_CODE_EDIT_QUIT_ON_RESULT -> finish()
+            REQUEST_CODE_EDIT -> {
+                updateDeserializers()
+                when (resultCode) {
+                    RESULT_UPDATED -> Toast.makeText(applicationContext, "Updated deserializer!", Toast.LENGTH_LONG).show()
+                    RESULT_ADDED -> Toast.makeText(applicationContext, "Created deserializer!", Toast.LENGTH_LONG).show()
+                }
+            }
+            REQUEST_CODE_EDIT_QUIT_ON_RESULT -> {
+                when (resultCode) {
+                    RESULT_UPDATED -> Toast.makeText(applicationContext, "Updated deserializer!", Toast.LENGTH_LONG).show()
+                    RESULT_ADDED -> Toast.makeText(applicationContext, "Created deserializer!", Toast.LENGTH_LONG).show()
+                }
+                finish()
+            }
             REQUEST_CODE_OPEN_FILE -> {
                 if (resultCode != Activity.RESULT_OK) {
                     Toast.makeText(this, "ERROR CODE 1: RESULT_OK != true", Toast.LENGTH_LONG).show()

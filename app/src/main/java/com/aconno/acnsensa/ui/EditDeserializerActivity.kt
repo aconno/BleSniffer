@@ -1,7 +1,6 @@
 package com.aconno.acnsensa.ui
 
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
@@ -9,7 +8,6 @@ import android.support.v7.widget.helper.ItemTouchHelper
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Toast
 import com.aconno.acnsensa.AcnSensaApplication
 import com.aconno.acnsensa.R
 import com.aconno.acnsensa.adapter.DeserializedFieldsAdapter
@@ -19,7 +17,6 @@ import com.aconno.acnsensa.adapter.toHex
 import com.aconno.acnsensa.dagger.editdeserializeractivity.DaggerEditDeserializerActivityComponent
 import com.aconno.acnsensa.dagger.editdeserializeractivity.EditDeserializerActivityComponent
 import com.aconno.acnsensa.dagger.editdeserializeractivity.EditDeserializerActivityModule
-import com.aconno.acnsensa.domain.ValueConverter
 import com.aconno.acnsensa.domain.deserializing.Deserializer
 import com.aconno.acnsensa.domain.deserializing.GeneralDeserializer
 import com.aconno.acnsensa.domain.deserializing.GeneralFieldDeserializer
@@ -35,9 +32,10 @@ import timber.log.Timber
 import javax.inject.Inject
 
 
-class EditDeserializerActivity : AppCompatActivity() {
+const val RESULT_UPDATED: Int = 0x10
+const val RESULT_ADDED: Int = 0x11
 
-    private var snackbar: Snackbar? = null
+class EditDeserializerActivity : AppCompatActivity() {
 
     @Inject
     lateinit var addDeserializersUseCase: AddDeserializerUseCase
@@ -46,10 +44,9 @@ class EditDeserializerActivity : AppCompatActivity() {
     @Inject
     lateinit var updateDeserializerUseCase: UpdateDeserializerUseCase
 
-    var deserializer: Deserializer? = null
+    var deserializer: Deserializer = GeneralDeserializer()
         set(value) {
-            field = (value
-                    ?: GeneralDeserializer(null, "Unnamed", "", Deserializer.Type.MAC, mutableListOf())).apply {
+            field = value.apply {
                 deserializer_list.adapter = DeserializerEditorAdapter(this, this@EditDeserializerActivity).apply {
                     ItemTouchHelper(createItemTouchHelper()).attachToRecyclerView(deserializer_list)
                 }
@@ -96,16 +93,13 @@ class EditDeserializerActivity : AppCompatActivity() {
                             },
                             {
                                 deserializer = GeneralDeserializer(
-                                        name = "Unnamed",
                                         filter = filterContent,
-                                        filterType = Deserializer.Type.MAC,
-                                        fieldDeserializers = mutableListOf(),
                                         sampleData = sampleData
                                 )
                             }
                     )
         } else {
-            deserializer = null
+            deserializer = GeneralDeserializer()
         }
 
         deserializer_filter_type.adapter = ArrayAdapter<String>(
@@ -113,50 +107,44 @@ class EditDeserializerActivity : AppCompatActivity() {
                 android.R.layout.simple_spinner_item,
                 Deserializer.Type.values().map { it.name }
         )
+
         deserializer_filter_type.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 deserializer_filter_type.setSelection(0)
-                deserializer?.filterType = Deserializer.Type.values()[0]
+                deserializer.filterType = Deserializer.Type.values()[0]
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                deserializer?.filterType = Deserializer.Type.values()[position]
+                deserializer.filterType = Deserializer.Type.values()[position]
             }
         }
 
         add_value_deserializer_button.setOnClickListener {
-            deserializer?.fieldDeserializers?.add(
-                    GeneralFieldDeserializer(
-                            "",
-                            0, 0,
-                            ValueConverter.BOOLEAN,
-                            resources.getColor(android.R.color.holo_red_dark)
-                    )
+            deserializer.fieldDeserializers.add(
+                    GeneralFieldDeserializer()
             )
             deserializer_list.adapter.notifyDataSetChanged()
         }
 
         save.setOnClickListener {
             if (existing) {
-                deserializer?.let { deserializer ->
-                    updateDeserializerUseCase.execute(createDeserializerFromInputData()).subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(
-                                    {
-                                        Toast.makeText(this, "Updated deserializer!", Toast.LENGTH_LONG).show()
-                                        finish()
-                                    },
-                                    {
-                                        Timber.e(it)
-                                    }
-                            )
-                }
-            } else {
-                addDeserializersUseCase.execute(createDeserializerFromInputData()).subscribeOn(Schedulers.io())
+                updateDeserializerUseCase.execute(updateDeserializerFromInputData()).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
                                 {
-                                    Toast.makeText(this, "Created deserializer!", Toast.LENGTH_LONG).show()
+                                    setResult(RESULT_UPDATED)
+                                    finish()
+                                },
+                                {
+                                    Timber.e(it)
+                                }
+                        )
+            } else {
+                addDeserializersUseCase.execute(updateDeserializerFromInputData()).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                {
+                                    setResult(RESULT_ADDED)
                                     finish()
                                 },
                                 {
@@ -166,23 +154,9 @@ class EditDeserializerActivity : AppCompatActivity() {
             }
         }
 
-//        preview.setOnTouchListener { v, event ->
-//            when (event.action) {
-//                MotionEvent.ACTION_DOWN -> {
-//
-//                }
-//                MotionEvent.ACTION_UP -> {
-//
-//                }
-//                else -> {
-//                }
-//            }
-//            true
-//        }
-
         preview.setOnClickListener {
             val rawData = getSampleDataBytes()
-            createDeserializerFromInputData().fieldDeserializers.map { d ->
+            updateDeserializerFromInputData().fieldDeserializers.map { d ->
                 val start = d.startIndexInclusive
                 val end = d.endIndexExclusive
                 val size = rawData.size
@@ -209,9 +183,18 @@ class EditDeserializerActivity : AppCompatActivity() {
                 view.deserialized_field_list_preview.adapter = deserializedFieldsAdapter
                 view.deserialized_field_list_preview.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
                 deserializedFieldsAdapter.setFields(it)
-
                 AlertDialog.Builder(this)
                         .setView(view)
+                        .setOnDismissListener {
+                            deserializedFieldsAdapter.setFields(mutableListOf())
+                            it.dismiss()
+                        }
+                        .create().also { dialog ->
+                            view.setOnTouchListener { v, event ->
+                                dialog.dismiss()
+                                true
+                            }
+                        }
                         .show()
             }
         }
@@ -221,18 +204,13 @@ class EditDeserializerActivity : AppCompatActivity() {
         }
     }
 
-    private fun createDeserializerFromInputData(): GeneralDeserializer {
-        return GeneralDeserializer(
-                id = this.deserializer?.id,
-                name = deserializer_name.editText?.text?.toString() ?: this.deserializer?.name
-                ?: "Unnamed",
-                filter = deserializer_filter.editText?.text?.toString() ?: deserializer?.filter
-                ?: "",
-                filterType = this.deserializer?.filterType ?: deserializer?.filterType
-                ?: Deserializer.Type.MAC,
-                fieldDeserializers = this.deserializer?.fieldDeserializers ?: mutableListOf(),
-                sampleData = getSampleDataBytes()
-        )
+    private fun updateDeserializerFromInputData(): Deserializer {
+        return deserializer.apply {
+            name = deserializer_name.editText?.text?.toString() ?: name ?: "Unnamed"
+            filter = deserializer_filter.editText?.text?.toString() ?: filter ?: ""
+            filterType = filterType
+            sampleData = getSampleDataBytes()
+        }
     }
 
     private fun getSampleDataBytes(): ByteArray {

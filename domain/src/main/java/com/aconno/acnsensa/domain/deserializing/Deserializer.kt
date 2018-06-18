@@ -6,7 +6,7 @@ package com.aconno.acnsensa.domain.deserializing
 interface Deserializer {
     var id: Long?
     var name: String
-    val filter: String
+    var filter: String
     var filterType: Type
     val fieldDeserializers: MutableList<FieldDeserializer>
     val pattern: Regex
