@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.aconno.acnsensa">
+    package="com.aconno.blesniffer">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
-        android:name=".AcnSensaApplication"
+        android:name=".BleSnifferApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -41,7 +41,7 @@
 
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="com.aconno.acnsensa.device.fileprovider"
+            android:authorities="com.aconno.blesniffer.device.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

@@ -8,7 +8,7 @@ android {
     compileSdkVersion 27
 
     defaultConfig {
-        applicationId "com.aconno.acnsensa"
+        applicationId "com.aconno.blesniffer"
         minSdkVersion 21
         targetSdkVersion 27
         versionCode rootProject.ext.bleScannerVersionCode
