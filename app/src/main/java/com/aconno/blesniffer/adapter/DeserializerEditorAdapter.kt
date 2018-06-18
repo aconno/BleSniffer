@@ -54,9 +54,7 @@ class DeserializerEditorAdapter(
         }
 
         override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-            when (parent) {
-                view.converter_type -> deserializer!!.fieldDeserializers[adapterPosition].type = ValueConverter.values()[position]
-            }
+            deserializer!!.fieldDeserializers[adapterPosition].type = ValueConverter.values()[position]
         }
 
         override fun onClick(v: View) {
