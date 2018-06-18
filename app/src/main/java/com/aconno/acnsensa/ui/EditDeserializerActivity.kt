@@ -47,9 +47,7 @@ class EditDeserializerActivity : AppCompatActivity() {
     var deserializer: Deserializer = GeneralDeserializer()
         set(value) {
             field = value.apply {
-                deserializer_list.adapter = DeserializerEditorAdapter(this, this@EditDeserializerActivity).apply {
-                    ItemTouchHelper(createItemTouchHelper()).attachToRecyclerView(deserializer_list)
-                }
+                deserializerEditorAdapter.deserializer = this
                 deserializer_filter_type.setSelection(Deserializer.Type.values().indexOf(
                         Deserializer.Type.valueOf(this.filterType.name)
                 ))
@@ -65,6 +63,12 @@ class EditDeserializerActivity : AppCompatActivity() {
                 .appComponent(acnSensaApplication?.appComponent)
                 .editDeserializerActivityModule(EditDeserializerActivityModule(this))
                 .build()
+    }
+
+    val deserializerEditorAdapter: DeserializerEditorAdapter by lazy {
+        DeserializerEditorAdapter(this@EditDeserializerActivity).apply {
+            ItemTouchHelper(createItemTouchHelper()).attachToRecyclerView(deserializer_list)
+        }
     }
 
     private var existing: Boolean = false
@@ -190,7 +194,7 @@ class EditDeserializerActivity : AppCompatActivity() {
                             it.dismiss()
                         }
                         .create().also { dialog ->
-                            view.setOnTouchListener { v, event ->
+                            view.setOnTouchListener { _, _ ->
                                 dialog.dismiss()
                                 true
                             }
