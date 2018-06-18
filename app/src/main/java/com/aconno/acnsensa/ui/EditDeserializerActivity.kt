@@ -82,6 +82,7 @@ class EditDeserializerActivity : AppCompatActivity() {
         custom_toolbar.title = getString(R.string.scanner_app_name)
         setSupportActionBar(custom_toolbar)
 
+        deserializer_list.adapter = deserializerEditorAdapter
         deserializer_list.layoutManager = LinearLayoutManager(this)
         if (intent.extras != null) {
             val filterContent: String = intent.extras.getString("filter", "")
@@ -139,9 +140,7 @@ class EditDeserializerActivity : AppCompatActivity() {
                                     setResult(RESULT_UPDATED)
                                     finish()
                                 },
-                                {
-                                    Timber.e(it)
-                                }
+                                { Timber.e(it) }
                         )
             } else {
                 addDeserializersUseCase.execute(updateDeserializerFromInputData()).subscribeOn(Schedulers.io())
@@ -151,9 +150,7 @@ class EditDeserializerActivity : AppCompatActivity() {
                                     setResult(RESULT_ADDED)
                                     finish()
                                 },
-                                {
-                                    Timber.e(it)
-                                }
+                                { Timber.e(it) }
                         )
             }
         }
@@ -178,10 +175,7 @@ class EditDeserializerActivity : AppCompatActivity() {
                         d.color
                 )
             }.let {
-
-                // Inflate and set the layout for the dialog
-                // Pass null as the parent view because its going in the dialog layout
-                val view = layoutInflater.inflate(R.layout.popup_field_list_preview, null)
+                val view = layoutInflater.inflate(R.layout.popup_field_list_preview, findViewById(android.R.id.content))
 
                 val deserializedFieldsAdapter = DeserializedFieldsAdapter()
                 view.deserialized_field_list_preview.adapter = deserializedFieldsAdapter
@@ -218,7 +212,7 @@ class EditDeserializerActivity : AppCompatActivity() {
     }
 
     private fun getSampleDataBytes(): ByteArray {
-        return BaseEncoding.base16().decode(deserializer_sample_data?.editText?.text?.toString()?.replace("0x", "")?.replace(" ", "")
-                ?: "")
+        return BaseEncoding.base16().decode(deserializer_sample_data?.editText?.text?.toString()
+                ?.replace("0x", "")?.replace(" ", "") ?: "")
     }
 }
