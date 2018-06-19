@@ -44,9 +44,9 @@ class DeserializerEditorAdapter(
         holder.bind(deserializer!!.fieldDeserializers[position])
     }
 
-    inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view), ColorPickerDialogListener, TextWatcher, AdapterView.OnItemSelectedListener, View.OnClickListener {
+    inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view), ColorPickerDialogListener, TextWatcher, AdapterView.OnItemSelectedListener, View.OnClickListener {
         override fun afterTextChanged(s: Editable) {
-            when (s) {
+            when (activity.currentFocus) {
                 view.name.editText -> deserializer!!.fieldDeserializers[adapterPosition].name = s.toString()
                 view.start.editText -> deserializer!!.fieldDeserializers[adapterPosition].startIndexInclusive = Integer.parseInt(s.toString())
                 view.end.editText -> deserializer!!.fieldDeserializers[adapterPosition].endIndexExclusive = Integer.parseInt(s.toString())

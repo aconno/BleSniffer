@@ -136,13 +136,13 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
 
     private fun showExportItemDialog(
             item: Deserializer,
-            defaultFileName: String = item.filter.replace(Pattern.compile("[\\\\/:*?\"<>|]").toRegex(), "") + ".json"
+            defaultFileName: String = item.name.replace(Pattern.compile("[\\\\/:*?\"<>|]").toRegex(), "") + ".json"
     ) {
         val view: View = layoutInflater.inflate(R.layout.dialog_input_text, findViewById(android.R.id.content), false)
         val textInput: EditText = view.text_input.editText ?: return
         textInput.hint = defaultFileName
         AlertDialog.Builder(this)
-                .setMessage(getString(R.string.export_deserializer_x, item.filter))
+                .setMessage(getString(R.string.export_deserializer_x, item.name))
                 .setView(view)
                 .setPositiveButton(R.string.export) { dialog, _ ->
                     deserializerFileStorage.storeItem(item,
