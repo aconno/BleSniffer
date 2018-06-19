@@ -1,6 +1,12 @@
 # BLE Sniffer
 
-Android app for dynamic BLE advertisement analysis.
+The purpose of this app is to take raw data BLE advertisements and interpret their data as primitive type such as ints or doubles and show them as clear values.
+
+#### Before
+![](./tutorial/before.png?raw=true "Before")
+#### After
+![](./tutorial/after.png?raw=true "After")
+
 
 ## Main Screen
 ![](./tutorial/img1.png?raw=true "Main Screen")

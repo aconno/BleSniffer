@@ -10,5 +10,5 @@ data class GeneralDeserializer(
         override val fieldDeserializers: MutableList<FieldDeserializer> = mutableListOf(),
         override var sampleData: ByteArray = byteArrayOf()
 ) : Deserializer {
-    override val pattern: Regex = Pattern.compile(filter).toRegex()
+    override val pattern: Regex = Pattern.compile(filter, Pattern.CASE_INSENSITIVE).toRegex()
 }
