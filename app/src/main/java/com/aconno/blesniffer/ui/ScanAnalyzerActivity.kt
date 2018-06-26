@@ -89,6 +89,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         setSupportActionBar(custom_toolbar)
 
         invalidateOptionsMenu()
+        if(BluetoothScanningService.isRunning()) startScan()
 
         if (savedInstanceState == null) {
             initViews()
@@ -184,7 +185,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     }
 
     private fun onScanFailedAlreadyStarted() {
-        //Do nothing.
+        startScan()
     }
 
     override fun onLongItemClick(item: ScanResult): Boolean {
@@ -200,6 +201,10 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     }
 
     private fun onScanStart() {
+        startScan()
+    }
+
+    private fun startScan() {
         mainMenu?.let {
             val menuItem: MenuItem? = it.findItem(R.id.action_toggle_scan)
             menuItem?.let {
