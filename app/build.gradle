@@ -41,7 +41,7 @@ dependencies {
     implementation "com.android.support:design:$supportLibraryVersion"
 
     // ConstraintLayout
-    implementation 'com.android.support.constraint:constraint-layout:1.1.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
 
     // Unit Testing
     testImplementation 'junit:junit:4.12'
@@ -66,9 +66,9 @@ dependencies {
 //    implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
 
     // Room + RxJava support
-    implementation 'android.arch.persistence.room:rxjava2:1.1.0'
-    implementation 'android.arch.persistence.room:runtime:1.1.0'
-    kapt "android.arch.persistence.room:compiler:1.1.0"
+    implementation 'android.arch.persistence.room:rxjava2:1.1.1'
+    implementation 'android.arch.persistence.room:runtime:1.1.1'
+    kapt "android.arch.persistence.room:compiler:1.1.1"
 
     // Flexbox
     implementation 'com.google.android:flexbox:0.3.2'
