@@ -32,14 +32,14 @@ import com.aconno.blesniffer.viewmodel.ScanResultViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_scan_analyzer.*
+import timber.log.Timber
 import javax.inject.Inject
 
 
 const val EXTRA_FILTER_MAC: String = "com.acconno.blesniffer.FILTER_MAC"
 const val EXTRA_SAMPLE_DATA: String = "com.acconno.blesniffer.SAMPLE_DATA"
 
-class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.PermissionCallbacks, ScanRecordListener, LongItemClickListener<ScanResult> {
-
+class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.PermissionCallbacks, ScanRecordListener, LongItemClickListener<ScanResult>, Observer<ScanResult> {
     @Inject
     lateinit var bluetoothViewModel: BluetoothViewModel
 
@@ -58,7 +58,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private val scanAnalyzerAdapter: ScanAnalyzerAdapter by lazy {
         ScanAnalyzerAdapter(this, this)
     }
-    private var adapterDataObserver: Observer<ScanResult>? = null
 
     private var mainMenu: Menu? = null
 
@@ -89,11 +88,12 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         setSupportActionBar(custom_toolbar)
 
         invalidateOptionsMenu()
-        if(BluetoothScanningService.isRunning()) startScan()
+        if (BluetoothScanningService.isRunning()) onScanStart()
+        else onScanStop()
 
-        if (savedInstanceState == null) {
-            initViews()
-        }
+//        if (savedInstanceState == null) {
+        initViews()
+//        }
     }
 
 
@@ -116,17 +116,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 }
     }
 
-    private fun createAdapterDataObserver(): Observer<ScanResult> {
-        return Observer {
-            it?.let { result ->
-                filter.let {
-                    if (it == null || (result.device.macAddress.contains(it, ignoreCase = true) || result.device.name.contains(it, ignoreCase = true))) {
-                        scanAnalyzerAdapter.logScan(result)
-                    }
-                }
-            }
-        }
-    }
+    private var lastObserverCreateTime: Long = 0
 
     override fun onRecordAdded(size: Int) {
         scan_list.scrollToPosition(size)
@@ -134,22 +124,33 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
     override fun onResume() {
         super.onResume()
+        if (BluetoothScanningService.isRunning()) onScanStart()
+        else onScanStop()
         bluetoothScanningViewModel.getResult().observe(this, Observer { handleScanEvent(it) })
         bluetoothViewModel.observeBluetoothState()
         bluetoothViewModel.bluetoothState.observe(this, Observer { onBluetoothStateChange(it) })
-    }
-
-    override fun onSaveInstanceState(outState: Bundle?) {
-        super.onSaveInstanceState(outState)
+        Timber.e("Observer Added")
+        scanResultViewModel.getScanResultsLiveData().observe(this, this)
     }
 
     override fun onPause() {
         super.onPause()
         bluetoothViewModel.stopObservingBluetoothState()
-        adapterDataObserver?.let {
-            scanResultViewModel.getScanResultsLiveData().removeObserver(it)
+        Timber.e("Observer Removed")
+        scanResultViewModel.getScanResultsLiveData().removeObserver(this)
+    }
+
+    override fun onChanged(it: ScanResult?) {
+        Timber.e("IT")
+        it?.let { result ->
+            filter.let {
+                if (it == null || ((result.device.macAddress.contains(it, ignoreCase = true) || result.device.name.contains(it, ignoreCase = true) && result.timestamp >= lastObserverCreateTime))) {
+                    scanAnalyzerAdapter.logScan(result)
+                }
+            }
         }
     }
+
 
     private fun onBluetoothStateChange(bluetoothState: BluetoothState?) {
         when (bluetoothState?.state) {
@@ -197,6 +198,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     }
 
     private fun onScanFailed() {
+        Timber.e("Failed scan")
         onScanStop()
     }
 
@@ -212,13 +214,10 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 it.setTitle(getString(R.string.stop_scan))
             }
         }
-        if (adapterDataObserver != null) {
-            scanResultViewModel.getScanResultsLiveData().removeObservers(this)
-        }
-        adapterDataObserver = createAdapterDataObserver()
-        adapterDataObserver?.apply {
-            scanResultViewModel.getScanResultsLiveData().observe(this@ScanAnalyzerActivity, this)
-        }
+        Timber.e("Observer Removed")
+        scanResultViewModel.getScanResultsLiveData().removeObserver(this)
+        Timber.e("Observer Added")
+        scanResultViewModel.getScanResultsLiveData().observe(this, this)
     }
 
     private fun onScanStop() {
@@ -229,6 +228,8 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 it.setTitle(getString(R.string.start_scan))
             }
         }
+        Timber.e("Observer Removed")
+        scanResultViewModel.getScanResultsLiveData().removeObservers(this)
     }
 
 

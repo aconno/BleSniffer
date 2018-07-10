@@ -11,6 +11,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.webkit.MimeTypeMap
 import android.widget.EditText
 import android.widget.Toast
 import com.aconno.blesniffer.BleSnifferApplication
@@ -85,7 +86,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
 
         updateDeserializers()
 
-        add_deserializer.setOnClickListener {
+        fab_add_deserializer.setOnClickListener {
             startEditActivity()
         }
 
@@ -230,8 +231,8 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
 
     private fun createGetContentIntent(): Intent {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.type = "*/*"
         intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.type = "text/*"
         return intent
     }
 
