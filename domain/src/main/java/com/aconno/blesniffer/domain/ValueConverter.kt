@@ -54,10 +54,10 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         override fun fromString(string: String): String = string
 
         override fun serializeInternal(data: String): ByteArray =
-                data.split(':').map { it.toByte() }.toList().toByteArray()
+            data.split(':').map { it.toByte() }.toList().toByteArray()
 
         override fun deserializeInternal(data: ByteArray): String =
-                data.joinToString(":") { String.format("%02x", it) }
+            data.joinToString(":") { String.format("%02x", it) }
     }),
     SINT8(0, object : Converter<Byte>(0) {
         override fun fromString(string: String): Byte {
@@ -98,9 +98,11 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         override fun deserializeInternal(data: ByteArray): Short {
             var short: Short = 0
             var i = 1
-            short = short or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 0).toShort()
+            short = short or
+                    ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 0).toShort()
             i = 0
-            short = short or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 8).toShort()
+            short = short or
+                    ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 8).toShort()
             return short
         }
     }),
@@ -116,9 +118,11 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         override fun deserializeInternal(data: ByteArray): Int {
             var v: Short = 0
             var i = 1
-            v = v or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 0).toShort()
+            v = v or
+                    ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 0).toShort()
             i = 0
-            v = v or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 8).toShort()
+            v = v or
+                    ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl 8).toShort()
             return (if (v < 0) v.toInt() + 65536 else v.toInt())
         }
 
@@ -135,7 +139,8 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         override fun deserializeInternal(data: ByteArray): Int {
             var int = 0
             for (i in 3 downTo 0) {
-                int = int or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl ((3 - i) * 8))
+                int = int or
+                        ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl ((3 - i) * 8))
             }
             return int
         }
@@ -153,7 +158,8 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         override fun deserializeInternal(data: ByteArray): Long {
             var v = 0
             for (i in 3 downTo 0) {
-                v = v or ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl ((3 - i) * 8))
+                v = v or
+                        ((if (data[i].toShort() < 0) (data[i].toShort() + 256).toShort() else data[i].toShort()).toInt() shl ((3 - i) * 8))
             }
             return (if (v < 0) v.toLong() + 4294967296L else v.toLong())
         }
@@ -195,6 +201,22 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
             return time
         }
 
+    }),
+    FLOAT(0f, object : Converter<Float>(0f) {
+        override fun fromString(string: String): Float {
+            return string.toFloat()
+        }
+
+        override fun serializeInternal(data: Float): ByteArray {
+            val byteBuffer = ByteBuffer.allocate(4)
+            byteBuffer.putFloat(data)
+            return byteBuffer.array()
+        }
+
+        override fun deserializeInternal(data: ByteArray): Float {
+            val byteBuffer = ByteBuffer.wrap(data)
+            return byteBuffer.getFloat(0)
+        }
     });
 
     abstract class Converter<T>(val default: T, val length: Int = -1) {
