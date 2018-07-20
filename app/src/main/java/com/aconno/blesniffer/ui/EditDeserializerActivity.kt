@@ -230,7 +230,11 @@ class EditDeserializerActivity : AppCompatActivity() {
     }
 
     private fun getSampleDataBytes(): ByteArray {
-        return BaseEncoding.base16().decode(deserializer_sample_data?.editText?.text?.toString()
-                ?.replace("0x", "")?.replace(" ", "") ?: "")
+        return try {
+            BaseEncoding.base16().decode(deserializer_sample_data?.editText?.text?.toString()
+                    ?.replace("0x", "")?.replace(" ", "") ?: "")
+        } catch (e: BaseEncoding.DecodingException) {
+            byteArrayOf()
+        }
     }
 }
