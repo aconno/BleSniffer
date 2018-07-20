@@ -75,7 +75,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scan_analyzer)
-
         scanAnalyzerActivityComponent.inject(this)
 
         snackbar =
