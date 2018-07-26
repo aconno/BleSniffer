@@ -232,7 +232,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     private fun createGetContentIntent(): Intent {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
-        intent.type = "text/*"
+        intent.type = "*/*"
         return intent
     }
 
