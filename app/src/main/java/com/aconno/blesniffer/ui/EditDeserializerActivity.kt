@@ -233,7 +233,7 @@ class EditDeserializerActivity : AppCompatActivity() {
         return try {
             BaseEncoding.base16().decode(deserializer_sample_data?.editText?.text?.toString()
                     ?.replace("0x", "")?.replace(" ", "") ?: "")
-        } catch (e: BaseEncoding.DecodingException) {
+        } catch (e: Exception) {
             byteArrayOf()
         }
     }
