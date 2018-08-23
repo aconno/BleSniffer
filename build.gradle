@@ -33,6 +33,6 @@ ext {
 
     daggerVersion = '2.14.1'
     timberVersion = '4.7.0'
-    bleScannerVersionCode = 24
-    bleScannerVersionName = "3.0.2"
+    bleScannerVersionCode = 25
+    bleScannerVersionName = "3.0.3"
 }

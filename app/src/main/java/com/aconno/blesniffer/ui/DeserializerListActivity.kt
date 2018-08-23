@@ -36,6 +36,7 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_deserializer_list.*
 import kotlinx.android.synthetic.main.dialog_input_text.view.*
 import timber.log.Timber
+import java.io.FileNotFoundException
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -309,30 +310,36 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                     }
                 }
                 data?.data?.let {
-                    deserializerFileStorage.readItems(this.contentResolver.openInputStream(it)).subscribe({ list ->
-                        Toast.makeText(this, getString(R.string.loaded_file_with_x_deserializer_definitions, list.size), Toast.LENGTH_LONG).show()
-                        addDeserializersUseCase.execute(list)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe {
-                                    Toast.makeText(this, getString(R.string.imported_x_deserializer_definitions, list.size), Toast.LENGTH_LONG).show()
-                                    updateDeserializers()
-                                }
-                    }, {
-                        if (it.message?.contains("Permission denied") == true && !permissionViewModel.hasSelfPermission(BleSnifferPermission.READ_EXTERNAL_STORAGE)) {
-                            permissionViewModel.checkRequestAndRun(BleSnifferPermission.WRITE_EXTERNAL_STORAGE, {
-                                onActivityResult(requestCode, resultCode, data)
-                            }, {
-                                runOnUiThread {
-                                    Toast.makeText(this, R.string.permission_denied_loading_items, Toast.LENGTH_LONG).show()
-                                    openPermissionSettingsScreen()
-                                }
-                            })
-                        } else {
-                            Timber.e(it)
-                            Crashlytics.logException(it)
+                    try {
+                        deserializerFileStorage.readItems(this.contentResolver.openInputStream(it)).subscribe({ list ->
+                            Toast.makeText(this, getString(R.string.loaded_file_with_x_deserializer_definitions, list.size), Toast.LENGTH_LONG).show()
+                            addDeserializersUseCase.execute(list)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe {
+                                        Toast.makeText(this, getString(R.string.imported_x_deserializer_definitions, list.size), Toast.LENGTH_LONG).show()
+                                        updateDeserializers()
+                                    }
+                        }, {
+                            if (it.message?.contains("Permission denied") == true && !permissionViewModel.hasSelfPermission(BleSnifferPermission.READ_EXTERNAL_STORAGE)) {
+                                permissionViewModel.checkRequestAndRun(BleSnifferPermission.WRITE_EXTERNAL_STORAGE, {
+                                    onActivityResult(requestCode, resultCode, data)
+                                }, {
+                                    runOnUiThread {
+                                        Toast.makeText(this, R.string.permission_denied_loading_items, Toast.LENGTH_LONG).show()
+                                        openPermissionSettingsScreen()
+                                    }
+                                })
+                            } else {
+                                Timber.e(it)
+                                Crashlytics.logException(it)
+                            }
+                        })
+                    } catch (e: FileNotFoundException) {
+                        runOnUiThread {
+                            Toast.makeText(this, getString(R.string.file_not_found), Toast.LENGTH_LONG).show()
                         }
-                    })
+                    }
                 }
             }
         }
