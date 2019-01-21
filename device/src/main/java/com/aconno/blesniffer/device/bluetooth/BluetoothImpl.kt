@@ -1,12 +1,13 @@
 package com.aconno.blesniffer.device.bluetooth
 
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanSettings
-import com.aconno.blesniffer.domain.scanning.Bluetooth
-import com.aconno.blesniffer.domain.scanning.BluetoothState
 import com.aconno.blesniffer.domain.model.ScanEvent
 import com.aconno.blesniffer.domain.model.ScanResult
+import com.aconno.blesniffer.domain.scanning.Bluetooth
+import com.aconno.blesniffer.domain.scanning.BluetoothState
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -14,9 +15,9 @@ import io.reactivex.subjects.PublishSubject
 
 //TODO: This needs refactoring.
 class BluetoothImpl(
-    private val bluetoothAdapter: BluetoothAdapter,
-    private val bluetoothPermission: BluetoothPermission,
-    private val bluetoothStateListener: BluetoothStateListener
+        private val bluetoothAdapter: BluetoothAdapter,
+        private val bluetoothPermission: BluetoothPermission,
+        private val bluetoothStateListener: BluetoothStateListener
 ) : Bluetooth {
 
     private val scanResults: PublishSubject<ScanResult> = PublishSubject.create()
@@ -41,15 +42,17 @@ class BluetoothImpl(
 
     override fun startScanning() {
 
-        val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        val bluetoothLeScanner: BluetoothLeScanner? = bluetoothAdapter.bluetoothLeScanner
         if (bluetoothPermission.isGranted) {
             val settingsBuilder = ScanSettings.Builder()
 
             settingsBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).setReportDelay(0)
-            scanEvents.onNext(
-                ScanEvent(ScanEvent.SCAN_START, "Scan start at ${System.currentTimeMillis()}")
-            )
-            bluetoothLeScanner.startScan(null, settingsBuilder.build(), scanCallback)
+            bluetoothLeScanner?.let {
+                it.startScan(null, settingsBuilder.build(), scanCallback)
+                scanEvents.onNext(
+                        ScanEvent(ScanEvent.SCAN_START, "Scan start at ${System.currentTimeMillis()}")
+                )
+            }
         } else {
             throw BluetoothException("Bluetooth permission not granted")
         }
@@ -58,7 +61,7 @@ class BluetoothImpl(
     override fun stopScanning() {
         val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
         scanEvents.onNext(
-            ScanEvent(ScanEvent.SCAN_STOP, "Scan stop at ${System.currentTimeMillis()}")
+                ScanEvent(ScanEvent.SCAN_STOP, "Scan stop at ${System.currentTimeMillis()}")
         )
         bluetoothLeScanner.stopScan(scanCallback)
     }
@@ -81,6 +84,6 @@ class BluetoothImpl(
         }
 
         return currentState.mergeWith(bluetoothStateListener.getBluetoothStates())
-            .toFlowable(BackpressureStrategy.LATEST)
+                .toFlowable(BackpressureStrategy.LATEST)
     }
 }
