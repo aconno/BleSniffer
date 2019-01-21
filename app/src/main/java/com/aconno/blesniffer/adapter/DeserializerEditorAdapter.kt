@@ -18,6 +18,8 @@ import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
 import kotlinx.android.synthetic.main.item_deserializer_field.view.*
 
+fun String.strip() = this.replace("\\s","")
+
 class DeserializerEditorAdapter(
         private val activity: Activity
 ) : RecyclerView.Adapter<DeserializerEditorAdapter.ViewHolder>() {
@@ -49,8 +51,8 @@ class DeserializerEditorAdapter(
             if (s.toString().isEmpty()) return
             when (activity.currentFocus) {
                 view.name.editText -> deserializer!!.fieldDeserializers[adapterPosition].name = s.toString()
-                view.start.editText -> deserializer!!.fieldDeserializers[adapterPosition].startIndexInclusive = Integer.parseInt(s.toString())
-                view.end.editText -> deserializer!!.fieldDeserializers[adapterPosition].endIndexExclusive = Integer.parseInt(s.toString())
+                view.start.editText -> deserializer!!.fieldDeserializers[adapterPosition].startIndexInclusive = Integer.parseInt(s.toString().strip())
+                view.end.editText -> deserializer!!.fieldDeserializers[adapterPosition].endIndexExclusive = Integer.parseInt(s.toString().strip())
             }
         }
 
