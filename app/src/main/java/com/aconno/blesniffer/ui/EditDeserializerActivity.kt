@@ -1,5 +1,6 @@
 package com.aconno.blesniffer.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
@@ -76,6 +77,7 @@ class EditDeserializerActivity : AppCompatActivity() {
 
     private var existing: Boolean = false
 
+    @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_deserializer)
@@ -146,7 +148,7 @@ class EditDeserializerActivity : AppCompatActivity() {
             deserializer.fieldDeserializers.add(
                     GeneralFieldDeserializer()
             )
-            deserializer_list.adapter.notifyDataSetChanged()
+            deserializer_list.adapter?.notifyDataSetChanged()
         }
 
         save.setOnClickListener {
