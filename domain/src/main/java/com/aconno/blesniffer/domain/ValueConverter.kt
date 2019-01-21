@@ -59,7 +59,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         override fun deserializeInternal(data: ByteArray): String =
             data.joinToString(":") { String.format("%02x", it) }
     }),
-    SINT8(0, object : Converter<Byte>(0) {
+    SINT8(0, object : Converter<Byte>(0, 1) {
         override fun fromString(string: String): Byte {
             return string.toByte()
         }
@@ -72,7 +72,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
             return data[0]
         }
     }),
-    UINT8(0, object : Converter<Short>(0) {
+    UINT8(0, object : Converter<Short>(0, 1) {
         override fun fromString(string: String): Short {
             return string.toShort()
         }
@@ -86,7 +86,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
             return (if (v < 0) (v + 256).toShort() else v)
         }
     }),
-    SINT16(0, object : Converter<Short>(0) {
+    SINT16(0, object : Converter<Short>(0, 2) {
         override fun fromString(string: String): Short {
             return string.toShort()
         }
@@ -106,7 +106,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
             return short
         }
     }),
-    UINT16(0, object : Converter<Int>(0) {
+    UINT16(0, object : Converter<Int>(0, 2) {
         override fun fromString(string: String): Int {
             return string.toInt()
         }
@@ -127,7 +127,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         }
 
     }),
-    SINT32(0, object : Converter<Int>(0) {
+    SINT32(0, object : Converter<Int>(0, 4) {
         override fun fromString(string: String): Int {
             return string.toInt()
         }
@@ -146,7 +146,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         }
 
     }),
-    UINT32(0, object : Converter<Long>(0) {
+    UINT32(0, object : Converter<Long>(0, 4) {
         override fun fromString(string: String): Long {
             return string.toLong()
         }
@@ -184,7 +184,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         }
 
     }),
-    TIME(0, object : Converter<Long>(0) {
+    TIME(0, object : Converter<Long>(0, 6) {
         override fun fromString(string: String): Long {
             return string.toLong()
         }
@@ -202,7 +202,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         }
 
     }),
-    FLOAT(0f, object : Converter<Float>(0f) {
+    FLOAT(0f, object : Converter<Float>(0f, 4) {
         override fun fromString(string: String): Float {
             return string.toFloat()
         }
