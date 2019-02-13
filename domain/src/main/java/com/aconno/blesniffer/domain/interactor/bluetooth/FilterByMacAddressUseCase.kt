@@ -6,9 +6,9 @@ import io.reactivex.Maybe
 
 class FilterByMacAddressUseCase : MaybeUseCaseWithTwoParameters<ScanResult, ScanResult, String> {
 
-    override fun execute(scanResult: ScanResult, macAddress: String): Maybe<ScanResult> {
-        return if (scanResult.device.macAddress == macAddress) {
-            Maybe.just(scanResult)
+    override fun execute(firstParameter: ScanResult, secondParameter: String): Maybe<ScanResult> {
+        return if (firstParameter.device.macAddress == secondParameter) {
+            Maybe.just(firstParameter)
         } else {
             Maybe.empty()
         }
