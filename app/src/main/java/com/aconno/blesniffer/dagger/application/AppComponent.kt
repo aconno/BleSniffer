@@ -24,5 +24,5 @@ interface AppComponent {
 
     fun bluetoothStateReceiver(): BluetoothStateReceiver
 
-    fun localBroadcastManager(): androidx.localbroadcastmanager.content.LocalBroadcastManager
+    fun localBroadcastManager(): LocalBroadcastManager
 }

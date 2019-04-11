@@ -29,7 +29,7 @@ class AppModule(private val bleSnifferApplication: BleSnifferApplication) {
     @Provides
     @Singleton
     fun provideLocalBroadcastManager() =
-            androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(bleSnifferApplication.applicationContext)
+            LocalBroadcastManager.getInstance(bleSnifferApplication.applicationContext)
 
     @Provides
     @Singleton
