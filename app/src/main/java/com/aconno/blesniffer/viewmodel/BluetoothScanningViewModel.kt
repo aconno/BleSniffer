@@ -1,9 +1,9 @@
 package com.aconno.blesniffer.viewmodel
 
-import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MutableLiveData
 import android.content.Intent
-import android.support.v4.content.LocalBroadcastManager
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.aconno.blesniffer.BleSnifferApplication
 import com.aconno.blesniffer.BluetoothScanningService
 import com.aconno.blesniffer.domain.scanning.Bluetooth
@@ -38,7 +38,7 @@ class BluetoothScanningViewModel(
     fun stopScanning() {
         Timber.d("stopScanning")
 
-        val localBroadcastManager = LocalBroadcastManager.getInstance(getApplication())
+        val localBroadcastManager = androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(getApplication())
         localBroadcastManager.sendBroadcast(Intent("com.aconno.blesniffer.STOP"))
     }
 

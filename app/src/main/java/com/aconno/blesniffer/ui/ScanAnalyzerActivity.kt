@@ -1,17 +1,13 @@
 package com.aconno.blesniffer.ui
 
-import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.SimpleItemAnimator
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.SearchView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import com.aconno.blesniffer.BleSnifferApplication
 import com.aconno.blesniffer.BluetoothScanningService
 import com.aconno.blesniffer.R
@@ -29,6 +25,7 @@ import com.aconno.blesniffer.viewmodel.BluetoothScanningViewModel
 import com.aconno.blesniffer.viewmodel.BluetoothViewModel
 import com.aconno.blesniffer.viewmodel.PermissionViewModel
 import com.aconno.blesniffer.viewmodel.ScanResultViewModel
+import com.google.android.material.snackbar.Snackbar
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_scan_analyzer.*
@@ -97,14 +94,14 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
 
     private fun initViews() {
-        val linearLayoutManager = LinearLayoutManager(this)
+        val linearLayoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         linearLayoutManager.reverseLayout = true
         scan_list.layoutManager = linearLayoutManager
         scan_list.adapter = scanAnalyzerAdapter
-        scan_list.addItemDecoration(DividerItemDecoration(
+        scan_list.addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(
                 this, linearLayoutManager.orientation
         ))
-        (scan_list.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        (scan_list.itemAnimator as androidx.recyclerview.widget.SimpleItemAnimator).supportsChangeAnimations = false
         scan_list.itemAnimator = null
 
         getAllDeserializersUseCase.execute()

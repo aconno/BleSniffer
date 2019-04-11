@@ -1,7 +1,7 @@
 package com.aconno.blesniffer.viewmodel.factory
 
 import android.app.Application
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.ViewModel
 import com.aconno.blesniffer.BluetoothStateReceiver
 import com.aconno.blesniffer.domain.scanning.Bluetooth
 import com.aconno.blesniffer.viewmodel.BluetoothViewModel

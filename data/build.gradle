@@ -10,7 +10,7 @@ android {
         targetSdkVersion 28
         versionCode rootProject.ext.bleScannerVersionCode
         versionName rootProject.ext.bleScannerVersionName
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
 
@@ -33,44 +33,10 @@ dependencies {
     implementation project(':domain')
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    // Timber
-    implementation "com.jakewharton.timber:timber:$timberVersion"
-
-    // Support Library
-    implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
-
-    // Unit Testing
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-
-    //RXJava
-    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
-    implementation 'io.reactivex.rxjava2:rxkotlin:2.2.0'
-
-    // MQTT
-//    implementation('org.eclipse.paho:org.eclipse.paho.android.service:1.1.1') {
-//        exclude module: 'support-v4'
-//    }
-//    implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
-
-    // Room + RxJava support
-    implementation 'android.arch.persistence.room:runtime:1.1.1'
-    kapt "android.arch.persistence.room:compiler:1.1.1"
-    implementation 'android.arch.persistence.room:rxjava2:1.1.1'
-
-    // JSON
-    implementation 'com.google.code.gson:gson:2.8.5'
-
-    // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-
-    // Web
-//    implementation "io.jsonwebtoken:jjwt:0.9.0"
-
-    // OkHttp
-//    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
-//    implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
+    implementation 'androidx.room:room-runtime:2.1.0-alpha06'
+    implementation 'androidx.room:room-rxjava2:2.1.0-alpha06'
+    implementation 'androidx.room:room-guava:2.1.0-alpha06'
+    kapt "androidx.room:room-compiler:2.1.0-alpha06"
 
     // javax inject
     implementation 'javax.inject:javax.inject:1'

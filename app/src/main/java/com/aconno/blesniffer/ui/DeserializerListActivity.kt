@@ -5,9 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -80,7 +80,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         editDeserializerActivityComponent.inject(this)
 
         custom_toolbar.title = getString(R.string.app_name)
-        deserializer_list.layoutManager = LinearLayoutManager(this)
+        deserializer_list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         deserializer_list.adapter = deserializerAdapter
         setSupportActionBar(custom_toolbar)
         permissionViewModel.requestWriteExternalStoragePermission()

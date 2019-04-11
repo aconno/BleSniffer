@@ -1,10 +1,10 @@
 package com.aconno.blesniffer.dagger.application
 
-import android.arch.persistence.db.SupportSQLiteDatabase
-import android.arch.persistence.room.Room
-import android.arch.persistence.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.room.Room
+import androidx.room.migration.Migration
 import android.bluetooth.BluetoothAdapter
-import android.support.v4.content.LocalBroadcastManager
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.aconno.blesniffer.BleSnifferApplication
 import com.aconno.blesniffer.BluetoothStateReceiver
 import com.aconno.blesniffer.IntentProviderImpl
@@ -29,7 +29,7 @@ class AppModule(private val bleSnifferApplication: BleSnifferApplication) {
     @Provides
     @Singleton
     fun provideLocalBroadcastManager() =
-            LocalBroadcastManager.getInstance(bleSnifferApplication.applicationContext)
+            androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(bleSnifferApplication.applicationContext)
 
     @Provides
     @Singleton

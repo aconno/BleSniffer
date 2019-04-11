@@ -2,8 +2,8 @@ package com.aconno.blesniffer.adapter
 
 import android.content.Context
 import android.os.Build
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +20,7 @@ fun ByteArray.inversedCopyOfRangeInclusive(start: Int, end: Int) = this.reversed
 class ScanAnalyzerAdapter(
         private val scanRecordListener: ScanRecordListener,
         private val longItemClickListener: LongItemClickListener<ScanResult>
-) : RecyclerView.Adapter<ScanAnalyzerAdapter.ViewHolder>() {
+) : androidx.recyclerview.widget.RecyclerView.Adapter<ScanAnalyzerAdapter.ViewHolder>() {
     val scanLog: MutableList<MutablePair<ScanResult, Int>> = mutableListOf()
     private val hashes: MutableMap<Int, Pair<Int, MutablePair<ScanResult, Int>>> = mutableMapOf()
     var deserializers: MutableList<Deserializer> = mutableListOf()
@@ -100,7 +100,7 @@ class ScanAnalyzerAdapter(
         notifyDataSetChanged()
     }
 
-    inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(val view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
         private var initialized = false
 
         fun bind(data: MutablePair<ScanResult, Int>) {
@@ -147,7 +147,7 @@ class ScanAnalyzerAdapter(
                         }.let {
                             val deserializedFieldsAdapter = DeserializedFieldsAdapter()
                             view.deserialized_field_list.adapter = deserializedFieldsAdapter
-                            view.deserialized_field_list.layoutManager = LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
+                            view.deserialized_field_list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false)
                             deserializedFieldsAdapter.setFields(it)
                         }
                     }

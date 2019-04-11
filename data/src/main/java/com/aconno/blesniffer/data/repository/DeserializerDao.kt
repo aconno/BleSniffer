@@ -1,6 +1,6 @@
 package com.aconno.blesniffer.data.repository
 
-import android.arch.persistence.room.*
+import androidx.room.*
 import io.reactivex.Single
 
 /**

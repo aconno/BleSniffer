@@ -1,6 +1,6 @@
 package com.aconno.blesniffer.dagger.application
 
-import android.support.v4.content.LocalBroadcastManager
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.aconno.blesniffer.BleSnifferApplication
 import com.aconno.blesniffer.BluetoothStateReceiver
 import com.aconno.blesniffer.domain.deserializing.DeserializerRepository
@@ -24,5 +24,5 @@ interface AppComponent {
 
     fun bluetoothStateReceiver(): BluetoothStateReceiver
 
-    fun localBroadcastManager(): LocalBroadcastManager
+    fun localBroadcastManager(): androidx.localbroadcastmanager.content.LocalBroadcastManager
 }
