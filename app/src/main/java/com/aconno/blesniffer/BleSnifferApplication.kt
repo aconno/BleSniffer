@@ -9,10 +9,9 @@ import com.aconno.blesniffer.dagger.application.DaggerAppComponent
 import com.aconno.blesniffer.work.SyncDeserializersWorker
 import com.aconno.blesniffer.work.factory.BleSnifferWorkerFactory
 import com.crashlytics.android.Crashlytics
-import io.fabric.sdk.android.Fabric
 import com.squareup.leakcanary.LeakCanary
+import io.fabric.sdk.android.Fabric
 import timber.log.Timber
-import javax.inject.Inject
 
 
 /**
@@ -34,15 +33,6 @@ class BleSnifferApplication : Application() {
 
         bleSnifferWorkerFactory = appComponent.bleSnifferWorkerFactory()
 
-        val configuration = Configuration.Builder()
-            .setWorkerFactory(bleSnifferWorkerFactory)
-            .build()
-
-        WorkManager.initialize(
-            this,
-            configuration
-        )
-
         if (LeakCanary.isInAnalyzerProcess(this)) {
             // This process is dedicated to LeakCanary for heap analysis.
             // You should not init your app in this process.
@@ -53,5 +43,20 @@ class BleSnifferApplication : Application() {
             Timber.plant(Timber.DebugTree())
         }
         Fabric.with(this, Crashlytics())
+
+        initAndStartSyncWorker()
+    }
+
+    private fun initAndStartSyncWorker() {
+        val configuration = Configuration.Builder()
+            .setWorkerFactory(bleSnifferWorkerFactory)
+            .build()
+
+        WorkManager.initialize(
+            this,
+            configuration
+        )
+
+        SyncDeserializersWorker.createAndEnqueue()
     }
 }

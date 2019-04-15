@@ -66,12 +66,8 @@ class SyncRepositoryImpl(
     }
 
     private fun getBeaconFormatsToInsert(parameters: Array<out Any>): List<DeserializerEntity> {
-        val formatsToInsert = arrayListOf<DeserializerEntity>()
-
-        parameters.filterIsInstance<BeaconFormat>()
+        return parameters.filterIsInstance<BeaconFormat>()
             .map { mapBeaconToEntity(it) }
-
-        return formatsToInsert.toList()
     }
 
     private fun mapBeaconToEntity(beaconFormat: BeaconFormat): DeserializerEntity {

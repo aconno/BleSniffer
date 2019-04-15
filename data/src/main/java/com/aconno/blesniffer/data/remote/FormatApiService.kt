@@ -17,6 +17,6 @@ interface FormatApiService {
     fun getLatestVersion(@Query("version") version: String): Single<LatestVersion>
 
 
-    @GET()
+    @GET
     fun getFormat(@Url formatPath: String): Single<BeaconFormat>
 }
