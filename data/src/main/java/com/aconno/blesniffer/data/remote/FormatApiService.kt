@@ -4,6 +4,7 @@ import com.aconno.blesniffer.data.remote.model.BeaconFormat
 import com.aconno.blesniffer.data.remote.model.LatestVersion
 import io.reactivex.Single
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface FormatApiService {
@@ -16,6 +17,6 @@ interface FormatApiService {
     fun getLatestVersion(@Query("version") version: String): Single<LatestVersion>
 
 
-    @GET
-    fun getFormat(formatPath: String): Single<BeaconFormat>
+    @GET("{path}")
+    fun getFormat(@Path("path") formatPath: String): Single<BeaconFormat>
 }
