@@ -8,11 +8,11 @@ import com.aconno.blesniffer.domain.deserializing.Deserializer
 import com.aconno.blesniffer.domain.deserializing.FieldDeserializer
 import com.aconno.blesniffer.domain.deserializing.GeneralDeserializer
 import com.aconno.blesniffer.domain.deserializing.GeneralFieldDeserializer
-import java.lang.StringBuilder
 
 class DeserializerMapper {
     fun map(beaconFormat: BeaconFormat): Deserializer {
         return GeneralDeserializer(
+            id = beaconFormat.id.toLong(16),
             name = beaconFormat.name,
             filterType = Deserializer.Type.DATA,
             fieldDeserializers = getFieldDeserializers(beaconFormat.dataFormats),
