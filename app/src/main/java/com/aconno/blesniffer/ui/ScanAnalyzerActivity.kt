@@ -25,6 +25,7 @@ import com.aconno.blesniffer.viewmodel.BluetoothScanningViewModel
 import com.aconno.blesniffer.viewmodel.BluetoothViewModel
 import com.aconno.blesniffer.viewmodel.PermissionViewModel
 import com.aconno.blesniffer.viewmodel.ScanResultViewModel
+import com.aconno.blesniffer.work.SyncDeserializersWorker
 import com.google.android.material.snackbar.Snackbar
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -90,6 +91,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 //        if (savedInstanceState == null) {
         initViews()
 //        }
+
+        Timber.d("WTF")
+        SyncDeserializersWorker.createAndEnqueue()
     }
 
 
