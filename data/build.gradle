@@ -43,8 +43,9 @@ dependencies {
     compileOnly 'javax.annotation:jsr250-api:1.0'
 
     api 'com.squareup.retrofit2:retrofit:2.5.0'
-    api  'com.squareup.retrofit2:converter-gson:2.5.0'
+    api 'com.squareup.retrofit2:converter-gson:2.5.0'
     api "com.squareup.retrofit2:adapter-rxjava2:2.5.0"
 
     api 'com.squareup.okhttp3:okhttp:3.14.1'
+    api 'com.squareup.okhttp3:logging-interceptor:3.14.1'
 }

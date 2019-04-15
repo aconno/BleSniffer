@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName
 data class LatestVersion(
         @SerializedName("files_to_be_updated")
         @Expose
-        val filesToBeUpdated: List<FilesToBeUpdatedJsonModel>,
+        val filesToBeUpdated: List<File>,
         @SerializedName("is_update_needed")
         @Expose
         val isUpdateNeeded: Boolean,
@@ -14,12 +14,12 @@ data class LatestVersion(
         @Expose
         val latestVersion: Int
 ) {
-    data class FilesToBeUpdatedJsonModel(
+    data class File(
             @SerializedName("file_last_modified_date")
             @Expose
             val fileLastModifiedDate: Long,
             @SerializedName("file_name")
             @Expose
-            val fileName: String
+            val path: String
     )
 }

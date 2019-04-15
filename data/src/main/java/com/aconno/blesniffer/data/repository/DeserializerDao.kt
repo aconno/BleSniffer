@@ -1,6 +1,7 @@
 package com.aconno.blesniffer.data.repository
 
 import androidx.room.*
+import io.reactivex.Completable
 import io.reactivex.Single
 
 /**
@@ -20,6 +21,9 @@ abstract class DeserializerDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insert(beacon: DeserializerEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun insertAll(beaconList: List<DeserializerEntity>): Completable
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     abstract fun update(beacon: DeserializerEntity)

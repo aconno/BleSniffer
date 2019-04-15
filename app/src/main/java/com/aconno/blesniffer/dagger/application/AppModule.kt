@@ -10,6 +10,7 @@ import com.aconno.blesniffer.BluetoothStateReceiver
 import com.aconno.blesniffer.IntentProviderImpl
 import com.aconno.blesniffer.data.repository.BleSnifferDatabase
 import com.aconno.blesniffer.data.repository.DeserializerRepositoryImpl
+import com.aconno.blesniffer.data.repository.mappers.DeserializerEntityMapper
 import com.aconno.blesniffer.device.bluetooth.BluetoothImpl
 import com.aconno.blesniffer.device.bluetooth.BluetoothPermission
 import com.aconno.blesniffer.device.bluetooth.BluetoothPermissionImpl
@@ -29,12 +30,12 @@ class AppModule(private val bleSnifferApplication: BleSnifferApplication) {
     @Provides
     @Singleton
     fun provideLocalBroadcastManager() =
-            LocalBroadcastManager.getInstance(bleSnifferApplication.applicationContext)
+        LocalBroadcastManager.getInstance(bleSnifferApplication.applicationContext)
 
     @Provides
     @Singleton
     fun provideBluetoothStateReceiver(bluetoothStateListener: BluetoothStateListener) =
-            BluetoothStateReceiver(bluetoothStateListener)
+        BluetoothStateReceiver(bluetoothStateListener)
 
     @Provides
     @Singleton
@@ -43,9 +44,9 @@ class AppModule(private val bleSnifferApplication: BleSnifferApplication) {
     @Provides
     @Singleton
     fun provideBluetooth(
-            bluetoothAdapter: BluetoothAdapter,
-            bluetoothPermission: BluetoothPermission,
-            bluetoothStateListener: BluetoothStateListener
+        bluetoothAdapter: BluetoothAdapter,
+        bluetoothPermission: BluetoothPermission,
+        bluetoothStateListener: BluetoothStateListener
     ): Bluetooth = BluetoothImpl(bluetoothAdapter, bluetoothPermission, bluetoothStateListener)
 
     @Provides
@@ -63,7 +64,7 @@ class AppModule(private val bleSnifferApplication: BleSnifferApplication) {
     @Provides
     @Singleton
     fun provideScanResultsFlowable(
-            bluetooth: Bluetooth
+        bluetooth: Bluetooth
     ): Flowable<ScanResult> {
         return bluetooth.getScanResults()
     }
@@ -71,23 +72,36 @@ class AppModule(private val bleSnifferApplication: BleSnifferApplication) {
     @Provides
     @Singleton
     fun provideDeserializerRepository(
-            bleSnifferDatabase: BleSnifferDatabase
+        bleSnifferDatabase: BleSnifferDatabase, deserializerEntityMapper: DeserializerEntityMapper
     ): DeserializerRepository {
-        return DeserializerRepositoryImpl(bleSnifferDatabase.deserializerDao())
+        return DeserializerRepositoryImpl(
+            bleSnifferDatabase.deserializerDao(),
+            deserializerEntityMapper
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideDeserializerEntityMapper(): DeserializerEntityMapper {
+        return DeserializerEntityMapper()
     }
 
     @Provides
     @Singleton
     fun provideBleSnifferDatabase(): BleSnifferDatabase {
-        return Room.databaseBuilder(bleSnifferApplication, BleSnifferDatabase::class.java, "BleSniffer")
-                .addMigrations(object : Migration(9, 11) {
-                    override fun migrate(database: SupportSQLiteDatabase) {
-                        database.execSQL("ALTER TABLE deserializers ADD COLUMN sampleData BLOB NOT NULL")
-                    }
+        return Room.databaseBuilder(
+            bleSnifferApplication,
+            BleSnifferDatabase::class.java,
+            "BleSniffer"
+        )
+            .addMigrations(object : Migration(9, 11) {
+                override fun migrate(database: SupportSQLiteDatabase) {
+                    database.execSQL("ALTER TABLE deserializers ADD COLUMN sampleData BLOB NOT NULL")
+                }
 
-                })
-                .fallbackToDestructiveMigration()
-                .build()
+            })
+            .fallbackToDestructiveMigration()
+            .build()
 
     }
 

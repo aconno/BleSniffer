@@ -6,7 +6,7 @@ import io.reactivex.Single
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface ConfigApiService {
+interface FormatApiService {
 
     companion object {
         const val BASE_URL = "http://playground.simvelop.de:8095/"
