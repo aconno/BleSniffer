@@ -74,6 +74,10 @@ dependencies {
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.2'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.2'
 
+    //Work Manager
+    implementation "androidx.work:work-runtime-ktx:2.0.1"
+    implementation "androidx.work:work-rxjava2:2.0.1"
+
 }
 
 repositories {
