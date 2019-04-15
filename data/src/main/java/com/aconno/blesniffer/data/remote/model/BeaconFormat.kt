@@ -10,7 +10,7 @@ data class BeaconFormat(
     @SerializedName("format_required")
     @Expose
     var formatsRequired: List<ByteFormatRequired>,
-    @SerializedName("dataFormats")
+    @SerializedName("format")
     @Expose
     var dataFormats: List<ByteFormat>
 )

@@ -93,6 +93,6 @@ class SyncRepositoryImpl(
         private const val JSON_FORMAT = ".json"
         private const val FORMATS_KEYWORD = "formats"
         const val LATEST_VERSION = "LATEST_VERSION"
-        const val LATEST_ASSETS_VERSION = 9945044754L
+        const val LATEST_ASSETS_VERSION = 0L
     }
 }
