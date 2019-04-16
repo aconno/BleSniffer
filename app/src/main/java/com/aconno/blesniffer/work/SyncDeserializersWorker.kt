@@ -47,6 +47,7 @@ class SyncDeserializersWorker(
         private val REPEAT_INTERVAL = if (BuildConfig.DEBUG) 30L else 2L
         private val REPEAT_INTERVAL_TIME_UNIT =
             if (BuildConfig.DEBUG) TimeUnit.SECONDS else TimeUnit.HOURS
+        private const val NAME = "SyncDeserializersWorker"
 
         fun createAndEnqueue() {
             val constraints = Constraints.Builder()
@@ -64,7 +65,8 @@ class SyncDeserializersWorker(
                 )
                 .build()
 
-            WorkManager.getInstance().enqueue(workRequest)
+            WorkManager.getInstance()
+                .enqueueUniquePeriodicWork(NAME, ExistingPeriodicWorkPolicy.REPLACE, workRequest)
         }
 
     }

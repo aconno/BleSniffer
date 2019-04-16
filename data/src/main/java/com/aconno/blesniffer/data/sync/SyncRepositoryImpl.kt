@@ -33,7 +33,9 @@ class SyncRepositoryImpl(
     private fun updateFormats(latestVersion: LatestVersion): Completable {
         return if (latestVersion.isUpdateNeeded) {
             val downloadSingles = downloadFormats(latestVersion.filesToBeUpdated)
-            getCompletableFromDownloadSingles(downloadSingles)
+            getCompletableFromDownloadSingles(downloadSingles).doOnComplete {
+                updateVersion(latestVersion.latestVersion.toLong())
+            }
         } else {
             Completable.create { emitter ->
                 emitter.onComplete()
