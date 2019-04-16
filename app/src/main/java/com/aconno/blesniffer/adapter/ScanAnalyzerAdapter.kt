@@ -12,12 +12,13 @@ import com.aconno.blesniffer.domain.deserializing.Deserializer
 import com.aconno.blesniffer.domain.deserializing.FieldDeserializer
 import com.aconno.blesniffer.domain.model.Device
 import com.aconno.blesniffer.domain.model.ScanResult
+import com.aconno.blesniffer.domain.util.ByteOperations
 import kotlinx.android.synthetic.main.item_scan_record.view.*
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
 
-
+//TODO (This needs a refactor, this adapter is doing all the business logic)
 fun ByteArray.toHex() = this.joinToString(separator = "") {
     "0x" + it.toInt().and(0xff).toString(16).padStart(
         2,
@@ -219,8 +220,10 @@ class ScanAnalyzerAdapter(
         }
 
         private fun getDataRange(start: Int, end: Int, advertisementData: ByteArray): ByteArray {
-            return if (start <= end) advertisementData.copyOfRange(start, end)
-            else advertisementData.inversedCopyOfRangeInclusive(start - 1, end)
+            val validRange = ByteOperations.isolateMsd(advertisementData)
+
+            return if (start <= end) validRange.copyOfRange(start, end)
+            else validRange.inversedCopyOfRangeInclusive(start - 1, end)
         }
     }
 }

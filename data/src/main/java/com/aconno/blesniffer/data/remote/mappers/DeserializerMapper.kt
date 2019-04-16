@@ -33,8 +33,8 @@ class DeserializerMapper {
     private fun getFieldDeserializer(byteFormat: ByteFormat): FieldDeserializer {
         val name = byteFormat.name
         val type = getFieldDeserializerType(byteFormat.dataType) ?: ValueConverter.BOOLEAN
-        val startIndex = byteFormat.startIndexInclusive + BYTE_SWITCH
-        val endIndex = byteFormat.endIndexExclusive + BYTE_SWITCH
+        val startIndex = byteFormat.startIndexInclusive
+        val endIndex = byteFormat.endIndexExclusive
         val formula = byteFormat.formula
 
 
@@ -91,10 +91,5 @@ class DeserializerMapper {
 
     companion object {
         private const val ADVERTISEMENT_DATA_TYPE = "0xFF "
-        /**
-         * Number of bytes to add to the format indexes, beacuse the format doesn't count neither
-         * the length nor the advertisement data type bytes.
-         */
-        private const val BYTE_SWITCH = 2
     }
 }
