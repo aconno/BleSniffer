@@ -14,7 +14,7 @@ data class GeneralDeserializer(
     override val pattern: Regex by lazy {
         if (filter.isNotBlank()) {
             try {
-                Pattern.compile("^$filter", Pattern.CASE_INSENSITIVE).toRegex()
+                Pattern.compile(filter, Pattern.CASE_INSENSITIVE).toRegex()
             } catch (exception: PatternSyntaxException) {
                 Pattern.compile(".*", Pattern.CASE_INSENSITIVE).toRegex()
             }
