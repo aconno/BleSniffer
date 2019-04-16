@@ -15,5 +15,8 @@ data class BeaconFormat(
     var formatsRequired: List<ByteFormatRequired>,
     @SerializedName("format")
     @Expose
-    var dataFormats: List<ByteFormat>
+    var dataFormats: List<ByteFormat>,
+    @SerializedName("settings_supoort")
+    @Expose
+    var settingsSupport: BeaconSettingsSupport?
 )
