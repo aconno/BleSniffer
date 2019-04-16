@@ -137,7 +137,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     }
 
     override fun onChanged(it: ScanResult?) {
-        Timber.e("IT")
         it?.let { result ->
             filter.let {
                 if (it == null || ((result.device.macAddress.contains(it, ignoreCase = true) || result.device.name.contains(it, ignoreCase = true) && result.timestamp >= lastObserverCreateTime))) {
