@@ -68,7 +68,7 @@ class DeserializerMapper {
         val filterBuilder = StringBuilder()
 
         val formatsList =
-            replaceFormatBySettings(beaconFormat.formatsRequired, beaconFormat.settingsSupport)
+            getFormatList(beaconFormat.formatsRequired, beaconFormat.settingsSupport)
 
 
         filterBuilder.append(ADVERTISEMENT_DATA_TYPE)
@@ -84,7 +84,7 @@ class DeserializerMapper {
         return filter
     }
 
-    private fun replaceFormatBySettings(
+    private fun getFormatList(
         deviceFormatList: List<ByteFormatRequired>,
         beaconSettingsSupport: BeaconSettingsSupport?
     ): List<ByteFormatRequired> {
@@ -99,12 +99,11 @@ class DeserializerMapper {
     }
 
     private fun getDataByteCount(currentByteCount: Int, dataFormats: List<ByteFormat>): String {
-        //The byte describing the length and the advertisement data type must be counted
+        //The byte describing the advertisement data type must be counted
         var byteCount = currentByteCount + 1
 
         dataFormats.forEach {
             byteCount += (it.endIndexExclusive - it.startIndexInclusive)
-            Timber.d(byteCount.toString())
         }
 
         val countHexa = if (byteCount < 16) "0${byteCount.toString(16)}"
