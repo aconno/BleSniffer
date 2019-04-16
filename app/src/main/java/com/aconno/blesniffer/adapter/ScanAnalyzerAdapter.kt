@@ -210,7 +210,7 @@ class ScanAnalyzerAdapter(
             } else {
                 try {
                     val dataRange = getDataRange(start, end, advertisementData)
-                    fieldDeserializer.type.converter.deserialize(dataRange).toString()
+                    fieldDeserializer.deserialize(dataRange)
                 } catch (e: IllegalArgumentException) {
                     Timber.e("${fieldDeserializer.name}: ${e.message ?: "Error parsing data"}")
                     view.context.getString(R.string.invalid_byte_data)

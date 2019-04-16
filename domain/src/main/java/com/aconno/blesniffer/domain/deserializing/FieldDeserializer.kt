@@ -8,4 +8,7 @@ interface FieldDeserializer {
     var endIndexExclusive: Int
     var type: ValueConverter
     var color: Int
+    var formula: String?
+
+    fun deserialize(data: ByteArray): String
 }

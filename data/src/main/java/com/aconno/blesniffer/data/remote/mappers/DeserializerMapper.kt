@@ -35,6 +35,7 @@ class DeserializerMapper {
         val type = getFieldDeserializerType(byteFormat.dataType) ?: ValueConverter.BOOLEAN
         val startIndex = byteFormat.startIndexInclusive + BYTE_SWITCH
         val endIndex = byteFormat.endIndexExclusive + BYTE_SWITCH
+        val formula = byteFormat.formula
 
 
         return GeneralFieldDeserializer(
@@ -42,7 +43,8 @@ class DeserializerMapper {
             type = type,
             startIndexInclusive = startIndex,
             endIndexExclusive = endIndex,
-            color = generateRandomColor()
+            color = generateRandomColor(),
+            formula = formula
         )
     }
 

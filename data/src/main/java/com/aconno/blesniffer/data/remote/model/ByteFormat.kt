@@ -13,10 +13,10 @@ data class ByteFormat(
     @SerializedName("end_index_exclusive")
     @Expose
     var endIndexExclusive: Int,
-    @SerializedName("reversed")
-    @Expose
-    var reversed: Boolean,
     @SerializedName("data_type")
     @Expose
-    var dataType: String
+    var dataType: String,
+    @SerializedName("formula")
+    @Expose
+    var formula: String?
 )
