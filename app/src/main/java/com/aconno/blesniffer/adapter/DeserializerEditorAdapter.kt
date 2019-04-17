@@ -1,8 +1,8 @@
 package com.aconno.blesniffer.adapter
 
 import android.app.Activity
-import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.helper.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ItemTouchHelper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
@@ -22,7 +22,7 @@ fun String.strip() = this.replace("\\s","")
 
 class DeserializerEditorAdapter(
         private val activity: Activity
-) : RecyclerView.Adapter<DeserializerEditorAdapter.ViewHolder>() {
+) : androidx.recyclerview.widget.RecyclerView.Adapter<DeserializerEditorAdapter.ViewHolder>() {
     var deserializer: Deserializer? = null
         set(value) {
             field = value
@@ -46,7 +46,7 @@ class DeserializerEditorAdapter(
         holder.bind(deserializer!!.fieldDeserializers[position])
     }
 
-    inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view), ColorPickerDialogListener, TextWatcher, AdapterView.OnItemSelectedListener, View.OnClickListener {
+    inner class ViewHolder(private val view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view), ColorPickerDialogListener, TextWatcher, AdapterView.OnItemSelectedListener, View.OnClickListener {
         override fun afterTextChanged(s: Editable) {
             if (s.toString().isEmpty()) return
             when (activity.currentFocus) {
@@ -125,7 +125,7 @@ class DeserializerEditorAdapter(
 
     fun createItemTouchHelper(): ItemTouchHelper.SimpleCallback =
             object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT) {
-                override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder): Boolean {
+                override fun onMove(recyclerView: androidx.recyclerview.widget.RecyclerView, viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, target: androidx.recyclerview.widget.RecyclerView.ViewHolder): Boolean {
                     val oldPos = viewHolder.adapterPosition
                     val newPos = target.adapterPosition
                     val item = deserializer!!.fieldDeserializers[oldPos]
@@ -135,7 +135,7 @@ class DeserializerEditorAdapter(
                     return true
                 }
 
-                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                override fun onSwiped(viewHolder: androidx.recyclerview.widget.RecyclerView.ViewHolder, direction: Int) {
                     deserializer!!.fieldDeserializers.removeAt(viewHolder.adapterPosition)
                 }
             }

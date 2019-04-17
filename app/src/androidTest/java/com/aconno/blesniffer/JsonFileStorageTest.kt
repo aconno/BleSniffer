@@ -1,6 +1,6 @@
 package com.aconno.blesniffer
 
-import android.support.test.runner.AndroidJUnit4
+import androidx.test.runner.AndroidJUnit4
 import com.aconno.blesniffer.device.storage.JsonFileStorageImpl
 import com.aconno.blesniffer.domain.JsonFileStorage
 import com.google.gson.Gson

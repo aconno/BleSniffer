@@ -4,17 +4,21 @@ import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
 
 data class GeneralDeserializer(
-        override var id: Long? = null,
-        override var name: String = "Unnamed",
-        override var filter: String = "",
-        override var filterType: Deserializer.Type = Deserializer.Type.MAC,
-        override val fieldDeserializers: MutableList<FieldDeserializer> = mutableListOf(),
-        override var sampleData: ByteArray = byteArrayOf()
+    override var id: Long? = null,
+    override var name: String = "Unnamed",
+    override var filter: String = "",
+    override var filterType: Deserializer.Type = Deserializer.Type.MAC,
+    override val fieldDeserializers: MutableList<FieldDeserializer> = mutableListOf(),
+    override var sampleData: ByteArray = byteArrayOf()
 ) : Deserializer {
     override val pattern: Regex by lazy {
-        try {
-            Pattern.compile(filter, Pattern.CASE_INSENSITIVE).toRegex()
-        } catch (exception: PatternSyntaxException) {
+        if (filter.isNotBlank()) {
+            try {
+                Pattern.compile(filter, Pattern.CASE_INSENSITIVE).toRegex()
+            } catch (exception: PatternSyntaxException) {
+                Pattern.compile(".*", Pattern.CASE_INSENSITIVE).toRegex()
+            }
+        } else {
             Pattern.compile(".*", Pattern.CASE_INSENSITIVE).toRegex()
         }
     }

@@ -1,0 +1,25 @@
+package com.aconno.blesniffer.data.remote.model
+
+import com.google.gson.annotations.Expose
+import com.google.gson.annotations.SerializedName
+
+data class LatestVersion(
+        @SerializedName("files_to_be_updated")
+        @Expose
+        val filesToBeUpdated: List<File>,
+        @SerializedName("is_update_needed")
+        @Expose
+        val isUpdateNeeded: Boolean,
+        @SerializedName("latest_version")
+        @Expose
+        val latestVersion: Int
+) {
+    data class File(
+            @SerializedName("file_last_modified_date")
+            @Expose
+            val fileLastModifiedDate: Long,
+            @SerializedName("file_name")
+            @Expose
+            val path: String
+    )
+}

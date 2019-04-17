@@ -1,6 +1,6 @@
 package com.aconno.blesniffer.viewmodel.factory
 
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.ViewModel
 import com.aconno.blesniffer.domain.model.ScanResult
 import com.aconno.blesniffer.viewmodel.ScanResultViewModel
 import io.reactivex.Flowable

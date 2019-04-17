@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.aconno.blesniffer">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -8,6 +9,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-feature android:name="android.hardware.bluetooth" />
 
     <application
@@ -17,11 +19,13 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_sniffer_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".ui.ScanAnalyzerActivity"
             android:configChanges="orientation|screenSize"
             android:icon="@mipmap/ic_launcher_sniffer"
+            android:usesCleartextTraffic="true"
             android:label="@string/app_name"
             android:screenOrientation="landscape">
             <intent-filter>
@@ -41,7 +45,7 @@
 
 
         <provider
-            android:name="android.support.v4.content.FileProvider"
+            android:name="androidx.core.content.FileProvider"
             android:authorities="com.aconno.blesniffer.device.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -53,6 +57,12 @@
         <service
             android:name=".BluetoothScanningService"
             android:exported="false" />
+
+        <provider
+            android:name="androidx.work.impl.WorkManagerInitializer"
+            android:authorities="${applicationId}.workmanager-init"
+            android:exported="false"
+            tools:node="remove" />
 
         <meta-data
             android:name="io.fabric.ApiKey"

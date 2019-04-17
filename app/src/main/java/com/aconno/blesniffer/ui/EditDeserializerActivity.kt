@@ -2,10 +2,10 @@ package com.aconno.blesniffer.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.helper.ItemTouchHelper
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -88,7 +88,7 @@ class EditDeserializerActivity : AppCompatActivity() {
         setSupportActionBar(custom_toolbar)
 
         deserializer_list.adapter = deserializerEditorAdapter
-        deserializer_list.layoutManager = LinearLayoutManager(this)
+        deserializer_list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         if (intent.extras != null) {
             if (intent.extras.getLong("id", -2L) != -2L) {
                 getDeserializerByIdUseCase.execute(intent.extras.getLong("id"))
@@ -199,7 +199,7 @@ class EditDeserializerActivity : AppCompatActivity() {
 
                 val deserializedFieldsAdapter = DeserializedFieldsAdapter()
                 view.deserialized_field_list_preview.adapter = deserializedFieldsAdapter
-                view.deserialized_field_list_preview.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+                view.deserialized_field_list_preview.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false)
                 deserializedFieldsAdapter.setFields(it)
                 AlertDialog.Builder(this)
                         .setView(view)
