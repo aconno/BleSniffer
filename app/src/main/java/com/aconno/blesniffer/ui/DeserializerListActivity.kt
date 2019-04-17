@@ -92,8 +92,8 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         }
 
         intent.extras?.let {
-            if (it.containsKey(EXTRA_FILTER_MAC)) {
-                startEditActivity(it.getString(EXTRA_FILTER_MAC, null), Deserializer.Type.MAC, it.getByteArray(EXTRA_SAMPLE_DATA)
+            if (it.containsKey(ScanAnalyzerActivity.EXTRA_FILTER_MAC)) {
+                startEditActivity(it.getString(ScanAnalyzerActivity.EXTRA_FILTER_MAC, null), Deserializer.Type.MAC, it.getByteArray(ScanAnalyzerActivity.EXTRA_SAMPLE_DATA)
                         ?: byteArrayOf(), true)
             }
         }

@@ -7,6 +7,7 @@ import com.aconno.blesniffer.domain.interactor.sync.SyncDeserializersUseCase
 import com.aconno.blesniffer.work.factory.WorkerCreator
 import io.reactivex.Single
 import timber.log.Timber
+import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Provider
@@ -48,6 +49,7 @@ class SyncDeserializersWorker(
         private val REPEAT_INTERVAL_TIME_UNIT =
             if (BuildConfig.DEBUG) TimeUnit.SECONDS else TimeUnit.HOURS
         private const val NAME = "SyncDeserializersWorker"
+        lateinit var WORKER_ID: UUID
 
         fun createAndEnqueue() {
             val constraints = Constraints.Builder()
@@ -64,6 +66,8 @@ class SyncDeserializersWorker(
                     TimeUnit.MILLISECONDS
                 )
                 .build()
+
+            WORKER_ID = workRequest.id
 
             WorkManager.getInstance()
                 .enqueueUniquePeriodicWork(NAME, ExistingPeriodicWorkPolicy.REPLACE, workRequest)
