@@ -13,6 +13,7 @@ import com.aconno.blesniffer.domain.deserializing.FieldDeserializer
 import com.aconno.blesniffer.domain.model.Device
 import com.aconno.blesniffer.domain.model.ScanResult
 import com.aconno.blesniffer.domain.util.ByteOperations
+import com.udojava.evalex.Expression.e
 import kotlinx.android.synthetic.main.item_scan_record.view.*
 import timber.log.Timber
 import java.text.SimpleDateFormat
@@ -117,9 +118,7 @@ class ScanAnalyzerAdapter(
         notifyDataSetChanged()
     }
 
-    inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        private var initialized = false
-
+    inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         fun bind(scanLog: MutablePair<ScanResult, Int>) {
             val device = scanLog.first.device
             val advertisementData = scanLog.first.advertisement.rawData
@@ -127,11 +126,6 @@ class ScanAnalyzerAdapter(
             val scanResult = scanLog.first
 
             initViews(scanLog)
-
-            if (initialized) {
-                return
-            }
-
             initUninitializedViews(device, dataHex, scanResult)
 
             val deserializer = findDeserializer(device, dataHex)
@@ -139,7 +133,7 @@ class ScanAnalyzerAdapter(
             deserializer?.let {
                 view.deserializer_name.text = it.name
 
-                val fields = it.fieldDeserializers.map { fieldDeserializer ->
+                val fields = it.fieldDeserializers.mapNotNull { fieldDeserializer ->
                     getField(fieldDeserializer, advertisementData)
                 }
 
@@ -148,8 +142,6 @@ class ScanAnalyzerAdapter(
 
                 deserializedFieldsAdapter.setFields(fields)
             }
-
-            initialized = true
         }
 
         private fun initViews(scanLog: MutablePair<ScanResult, Int>) {
@@ -186,44 +178,51 @@ class ScanAnalyzerAdapter(
         private fun getField(
             fieldDeserializer: FieldDeserializer,
             advertisementData: ByteArray
-        ): Triple<String, String, Int> {
+        ): Triple<String, String, Int>? {
 
             val deserializedData =
                 deserializeAdvertisementData(fieldDeserializer, advertisementData)
 
-            return Triple(
-                fieldDeserializer.name,
-                deserializedData,
-                fieldDeserializer.color
-            )
+            return if (deserializedData != null)
+                Triple(
+                    fieldDeserializer.name,
+                    deserializedData,
+                    fieldDeserializer.color
+                )
+            else null
         }
 
         private fun deserializeAdvertisementData(
             fieldDeserializer: FieldDeserializer,
             advertisementData: ByteArray
-        ): String {
+        ): String? {
+            val validData = ByteOperations.isolateMsd(advertisementData)
             val start = fieldDeserializer.startIndexInclusive
             val end = fieldDeserializer.endIndexExclusive
-            val size = advertisementData.size
+            val size = validData.size
+
+            if (start > size || end > size) {
+
+
+            }
 
             return if (start > size || end > size) {
-                view.context.getString(R.string.bad_indexes)
+                Timber.e("${fieldDeserializer.name}: Error parsing data, Bad indexes")
+                null
             } else {
                 try {
-                    val dataRange = getDataRange(start, end, advertisementData)
+                    val dataRange = getDataRange(start, end, validData)
                     fieldDeserializer.deserialize(dataRange)
                 } catch (e: IllegalArgumentException) {
                     Timber.e("${fieldDeserializer.name}: ${e.message ?: "Error parsing data"}")
-                    view.context.getString(R.string.invalid_byte_data)
+                    null
                 }
             }
         }
 
-        private fun getDataRange(start: Int, end: Int, advertisementData: ByteArray): ByteArray {
-            val validRange = ByteOperations.isolateMsd(advertisementData)
-
-            return if (start <= end) validRange.copyOfRange(start, end)
-            else validRange.inversedCopyOfRangeInclusive(start - 1, end)
+        private fun getDataRange(start: Int, end: Int, validData: ByteArray): ByteArray {
+            return if (start <= end) validData.copyOfRange(start, end)
+            else validData.inversedCopyOfRangeInclusive(start - 1, end)
         }
     }
 }
