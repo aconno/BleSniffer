@@ -1,6 +1,6 @@
 package com.aconno.blesniffer.adapter
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +15,7 @@ class DeserializerAdapter(
         val deserializers: MutableList<Deserializer>,
         private val clickListener: ItemClickListener<Deserializer>,
         private val longClickListener: LongItemClickListener<Deserializer>
-) : RecyclerView.Adapter<DeserializerAdapter.ViewHolder>() {
+) : androidx.recyclerview.widget.RecyclerView.Adapter<DeserializerAdapter.ViewHolder>() {
 
 
     fun setDeserializers(deserializers: List<Deserializer>) {
@@ -38,7 +38,7 @@ class DeserializerAdapter(
         holder.bind(deserializers[position])
     }
 
-    inner class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(val view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
 
         fun bind(deserializer: Deserializer) {
             view.deserializer_name.text = deserializer.name

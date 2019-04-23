@@ -1,6 +1,6 @@
 package com.aconno.blesniffer.dagger.scananalyzeractivity
 
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProviders
 import com.aconno.blesniffer.BleSnifferApplication
 import com.aconno.blesniffer.BluetoothStateReceiver
 import com.aconno.blesniffer.device.permissons.PermissionActionFactory

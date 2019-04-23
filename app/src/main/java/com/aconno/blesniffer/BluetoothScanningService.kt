@@ -8,11 +8,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.IBinder
-import android.support.v4.content.LocalBroadcastManager
 import com.aconno.blesniffer.dagger.bluetoothscanning.BluetoothScanningServiceComponent
 import com.aconno.blesniffer.dagger.bluetoothscanning.BluetoothScanningServiceModule
 import com.aconno.blesniffer.dagger.bluetoothscanning.DaggerBluetoothScanningServiceComponent
 import com.aconno.blesniffer.domain.scanning.Bluetooth
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import javax.inject.Inject
 
 /**
