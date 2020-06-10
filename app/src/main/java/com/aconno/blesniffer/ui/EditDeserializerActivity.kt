@@ -31,6 +31,7 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_edit_deserializer.*
 import kotlinx.android.synthetic.main.popup_field_list_preview.view.*
 import timber.log.Timber
+import java.lang.IndexOutOfBoundsException
 import javax.inject.Inject
 
 
@@ -190,6 +191,8 @@ class EditDeserializerActivity : AppCompatActivity() {
                                     else rawData.inversedCopyOfRangeInclusive(start, end)
                             ).toString()
                         } catch (e: IllegalArgumentException) {
+                            getString(R.string.invalid_byte_data)
+                        } catch (e: IndexOutOfBoundsException) {
                             getString(R.string.invalid_byte_data)
                         },
                         d.color

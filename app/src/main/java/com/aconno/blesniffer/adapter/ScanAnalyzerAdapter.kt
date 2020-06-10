@@ -15,6 +15,7 @@ import com.aconno.blesniffer.domain.model.ScanResult
 import com.aconno.blesniffer.domain.util.ByteOperations
 import kotlinx.android.synthetic.main.item_scan_record.view.*
 import timber.log.Timber
+import java.lang.IndexOutOfBoundsException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -218,6 +219,9 @@ class ScanAnalyzerAdapter(
                     val dataRange = getDataRange(start, end, validData)
                     fieldDeserializer.deserialize(dataRange)
                 } catch (e: IllegalArgumentException) {
+                    Timber.e("${fieldDeserializer.name}: ${e.message ?: "Error parsing data"}")
+                    null
+                } catch (e: IndexOutOfBoundsException) {
                     Timber.e("${fieldDeserializer.name}: ${e.message ?: "Error parsing data"}")
                     null
                 }

@@ -41,12 +41,16 @@ class PermissionViewModel(
     private val random = Random()
 
     fun checkRequestAndRunIfGranted(bleSnifferPermission: BleSnifferPermission, runnable: () -> Unit) {
-        var key = random.nextInt(0xFFFF)
-        while(runMap.containsKey(key)) {
-            key = random.nextInt(0xFFFF)
+        if (permissionAction.hasSelfPermission(bleSnifferPermission.permission)){
+            runnable.invoke()
+        } else {
+            var key = random.nextInt(0xFFFF)
+            while (runMap.containsKey(key)) {
+                key = random.nextInt(0xFFFF)
+            }
+            requestPermission(bleSnifferPermission, key)
+            runMap[key] = runnable
         }
-        requestPermission(bleSnifferPermission, key)
-        runMap[key] = runnable
     }
 
     fun checkRequestAndRun(bleSnifferPermission: BleSnifferPermission, runnableGranted: () -> Unit, runnableDenied: () -> Unit) {
