@@ -13,6 +13,8 @@ import com.aconno.blesniffer.dagger.bluetoothscanning.BluetoothScanningServiceMo
 import com.aconno.blesniffer.dagger.bluetoothscanning.DaggerBluetoothScanningServiceComponent
 import com.aconno.blesniffer.domain.scanning.Bluetooth
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import kotlinx.coroutines.*
+import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -34,6 +36,8 @@ class BluetoothScanningService : Service() {
 
     @Inject
     lateinit var localBroadcastManager: LocalBroadcastManager
+
+    private lateinit var scanTimerDisposable: Job
 
 
     private val bluetoothScanningServiceComponent: BluetoothScanningServiceComponent by lazy {
@@ -59,18 +63,46 @@ class BluetoothScanningService : Service() {
 
         startForeground(1, notification)
 
-        bluetooth.startScanning()
-        running = true
+        startScanning()
         return START_STICKY
     }
 
-    fun stopScanning() {
+    /**
+     * Restart scanning before Android BLE Scanning Timeout
+     */
+    private fun startScanningTimer() {
+        //Launches non-blocking coroutine
+        scanTimerDisposable = GlobalScope.launch(context = Dispatchers.Main) {
+            delay(ANDROID_N_MAX_SCAN_DURATION - 60 * 1000)
+            Timber.d("Restarting scanning to avoid Android BLE Scanning Timeout")
+            restartScanning()
+        }
+    }
+
+    private fun startScanning() {
+        startScanningTimer()
+        bluetooth.startScanning()
+        running = true
+    }
+
+    fun stopScanning(stopService : Boolean = true) {
+        scanTimerDisposable.cancel()
+
         bluetooth.stopScanning()
         running = false
-        stopSelf()
+
+        if(stopService) {
+            stopSelf()
+        }
+    }
+
+    private fun restartScanning() {
+        stopScanning(stopService = false)
+        startScanning()
     }
 
     companion object {
+        private const val ANDROID_N_MAX_SCAN_DURATION =  30 * 60 * 1000L // 30 minutes
 
         fun start(context: Context) {
             val intent = Intent(context, BluetoothScanningService::class.java)
