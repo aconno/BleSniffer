@@ -148,10 +148,18 @@ class ScanAnalyzerAdapter(
         private fun initViews(scanLog: MutablePair<ScanResult, Int>) {
             view.time.text =
                     formatTimestamp(scanLog.first.timestamp, longItemClickListener as Context)
-            view.time_between_advs.text = view.context.getString(
-                    R.string.time_between_advs,
-                    scanLog.first.timeFromLastTimestamp
-            )
+
+            scanLog.first.timeFromLastTimestamp.let { deltaTime ->
+                view.time_between_advs.text = if(deltaTime == -1L) {
+                    view.context.getString(R.string.time_between_advs_not_available)
+                } else {
+                    view.context.getString(
+                        R.string.time_between_advs,
+                        deltaTime
+                    )
+                }
+            }
+
             view.rssi.text = view.context.getString(R.string.rssi_strength, scanLog.first.rssi)
             view.repeating.text = view.context.getString(R.string.repeating_amount, scanLog.second)
             view.deserialized_field_list.adapter = DeserializedFieldsAdapter()
