@@ -43,11 +43,11 @@ class DeserializedFieldsAdapter(
     inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
 
         fun bind(triple: Triple<String, String, Int>) {
-            view.name.text = triple.first
+            view.til_name.text = triple.first
             view.value.text = triple.second
             val textColor = getTextColor(triple.third)
 
-            view.name.setTextColor(textColor)
+            view.til_name.setTextColor(textColor)
             view.value.setTextColor(textColor)
 
             view.backgroundTintList = ColorStateList.valueOf(triple.third)
