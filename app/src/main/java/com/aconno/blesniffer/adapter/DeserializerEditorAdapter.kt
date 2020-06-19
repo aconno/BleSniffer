@@ -63,9 +63,9 @@ class DeserializerEditorAdapter(
         override fun afterTextChanged(s: Editable) {
             val fieldDeserializer = fieldDeserializers[adapterPosition]
 
-            when (activity.currentFocus) {
-                view.til_name.editText -> fieldDeserializer.name = s.toString()
-                view.til_start.editText -> {
+            when (s) {
+                view.til_name.editText?.editableText -> fieldDeserializer.name = s.toString()
+                view.til_start.editText?.editableText -> {
                     view.til_start.error = if (s.toString().isBlank()) {
                         "Defaulting to 0"
                     } else null
@@ -74,12 +74,13 @@ class DeserializerEditorAdapter(
                     fieldDeserializer.startIndexInclusive = value
 
                     if (!view.til_end.isEnabled) {
-                        val endValue = value + fieldDeserializer.type.converter.length
+                        val endValue = (value + fieldDeserializer.type.converter.length)
                         view.til_end.editText?.setText(endValue.toString())
                         fieldDeserializer.endIndexExclusive = endValue
                     }
                 }
-                view.til_end.editText -> {
+                view.til_end.editText?.editableText -> {
+                    if (!view.til_end.isEnabled) return
                     view.til_end.error = if (s.toString().isBlank()) {
                         "Defaulting to 0"
                     } else null
