@@ -77,4 +77,5 @@
     <string name="service_notification_title">BLE Sniffer</string>
     <string name="service_notification_content">BLE Sniffer is scanning</string>
     <string name="file_not_found">File not found! Please make sure the file is there or use another file browser!</string>
+    <string name="generate">Generate</string>
 </resources>

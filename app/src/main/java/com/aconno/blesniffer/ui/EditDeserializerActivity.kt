@@ -2,11 +2,12 @@ package com.aconno.blesniffer.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.aconno.blesniffer.BleSnifferApplication
@@ -20,11 +21,11 @@ import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerAct
 import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerActivityModule
 import com.aconno.blesniffer.domain.deserializing.Deserializer
 import com.aconno.blesniffer.domain.deserializing.GeneralDeserializer
-import com.aconno.blesniffer.domain.deserializing.GeneralFieldDeserializer
 import com.aconno.blesniffer.domain.interactor.deserializing.AddDeserializerUseCase
 import com.aconno.blesniffer.domain.interactor.deserializing.GetDeserializerByFilterUseCase
 import com.aconno.blesniffer.domain.interactor.deserializing.GetDeserializerByIdUseCase
 import com.aconno.blesniffer.domain.interactor.deserializing.UpdateDeserializerUseCase
+import com.aconno.blesniffer.ui.base.BaseActivity
 import com.google.common.io.BaseEncoding
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -37,7 +38,7 @@ import javax.inject.Inject
 const val RESULT_UPDATED: Int = 0x10
 const val RESULT_ADDED: Int = 0x11
 
-class EditDeserializerActivity : AppCompatActivity() {
+class EditDeserializerActivity : BaseActivity() {
 
     @Inject
     lateinit var addDeserializersUseCase: AddDeserializerUseCase
@@ -152,32 +153,6 @@ class EditDeserializerActivity : AppCompatActivity() {
             deserializerEditorAdapter.addEmptyValueDeserializer()
         }
 
-        save.setOnClickListener {
-            if (existing) {
-                updateDeserializerUseCase.execute(updateDeserializerFromInputData())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                        {
-                            setResult(RESULT_UPDATED)
-                            finish()
-                        },
-                        { Timber.e(it) }
-                    )
-            } else {
-                addDeserializersUseCase.execute(updateDeserializerFromInputData())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                        {
-                            setResult(RESULT_ADDED)
-                            finish()
-                        },
-                        { Timber.e(it) }
-                    )
-            }
-        }
-
         preview.setOnClickListener {
             val rawData = getSampleDataBytes()
             updateDeserializerFromInputData().fieldDeserializers.map { d ->
@@ -220,8 +195,32 @@ class EditDeserializerActivity : AppCompatActivity() {
             }
         }
 
-        cancel.setOnClickListener {
-            finish()
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    private fun saveDeserializer() {
+        if (existing) {
+            updateDeserializerUseCase.execute(updateDeserializerFromInputData())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    {
+                        setResult(RESULT_UPDATED)
+                        finish()
+                    },
+                    { Timber.e(it) }
+                ).also { addDisposable(it) }
+        } else {
+            addDeserializersUseCase.execute(updateDeserializerFromInputData())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    {
+                        setResult(RESULT_ADDED)
+                        finish()
+                    },
+                    { Timber.e(it) }
+                ).also { addDisposable(it) }
         }
     }
 
@@ -247,4 +246,21 @@ class EditDeserializerActivity : AppCompatActivity() {
             byteArrayOf()
         }
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.deserializer_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id: Int? = item.itemId
+        when (id) {
+            R.id.action_save -> saveDeserializer()
+            android.R.id.home -> finish()
+            else -> return false
+        }
+
+        return true
+    }
+
 }
