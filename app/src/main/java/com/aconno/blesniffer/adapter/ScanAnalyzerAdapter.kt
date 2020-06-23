@@ -13,7 +13,6 @@ import com.aconno.blesniffer.domain.deserializing.FieldDeserializer
 import com.aconno.blesniffer.domain.model.Device
 import com.aconno.blesniffer.domain.model.ScanResult
 import com.aconno.blesniffer.domain.util.ByteOperations
-import com.udojava.evalex.Expression.e
 import kotlinx.android.synthetic.main.item_scan_record.view.*
 import timber.log.Timber
 import java.text.SimpleDateFormat
@@ -34,59 +33,45 @@ class ScanAnalyzerAdapter(
     private val scanRecordListener: ScanRecordListener,
     private val longItemClickListener: LongItemClickListener<ScanResult>
 ) : RecyclerView.Adapter<ScanAnalyzerAdapter.ViewHolder>() {
-    val scanLog: MutableList<MutablePair<ScanResult, Int>> = mutableListOf()
-    private val hashes: MutableMap<Int, Pair<Int, MutablePair<ScanResult, Int>>> = mutableMapOf()
+    private val scanLog: MutableList<Item> = mutableListOf()
+    private val hashes: MutableMap<Int, Int> = mutableMapOf()
+
+    data class Item(
+        val scanResult: ScanResult,
+        var occurrences: Int
+    )
+
+
     var deserializers: MutableList<Deserializer> = mutableListOf()
 
     init {
         setHasStableIds(true)
     }
 
-    var filter: String = ""
-        set(value) {
-            field = value
-            if (value.isNotEmpty()) {
-                notifyDataSetChanged()
-            }
-        }
-
-
     fun updateDeserializers(items: List<Deserializer>) {
         deserializers.clear()
         deserializers.addAll(items)
     }
 
-    fun setBeaconData(beaconData: List<ScanResult>) {
-        this.scanLog.clear()
-        this.hashes.clear()
-        this.hashes.putAll(beaconData.mapIndexed { i, it ->
-            Pair(
-                i,
-                Pair(it.hashCode(), MutablePair(it, 1))
-            )
-        })
-        this.scanLog.addAll(beaconData.map { MutablePair(it, 1) })
-        notifyDataSetChanged()
-    }
-
     fun logScan(data: ScanResult) {
-        val hashEntry = hashes[data.hashCode()]
-        if (hashEntry != null) {
-            val (index, beaconPair) = hashEntry
-            if ((data.timestamp) - (beaconPair.first.timestamp) < 2500) {
-                beaconPair.second++
-                beaconPair.first.timestamp = data.timestamp
-                beaconPair.first.rssi = data.rssi
-                notifyItemChanged(index, null)
-                return
+        hashes[data.hashCode()]?.let { entryIndex ->
+            scanLog.getOrNull(entryIndex)?.takeIf {
+                (data.timestamp) - (it.scanResult.timestamp) < 2500
+            }?.let { item ->
+                item.occurrences++
+                item.scanResult.timestamp = data.timestamp
+                item.scanResult.rssi = data.rssi
+                notifyItemChanged(entryIndex, null)
             }
+        } ?: run {
+            val size = scanLog.size
+            hashes[data.hashCode()] = size
+            scanLog.add(Item(
+                data, 1
+            ))
+            notifyItemInserted(size)
+            scanRecordListener.onRecordAdded(size)
         }
-        val pair = MutablePair(data, 1)
-        val size = scanLog.size
-        hashes[data.hashCode()] = Pair(size, pair)
-        scanLog.add(pair)
-        notifyItemInserted(size)
-        scanRecordListener.onRecordAdded(size)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -119,50 +104,49 @@ class ScanAnalyzerAdapter(
     }
 
     inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
-        fun bind(scanLog: MutablePair<ScanResult, Int>) {
-            val device = scanLog.first.device
-            val advertisementData = scanLog.first.advertisement.rawData
+        private var initialized: Boolean = false
+
+        fun bind(scanLog: Item) {
+            val device = scanLog.scanResult.device
+            val advertisementData = scanLog.scanResult.advertisement.rawData
             val dataHex = advertisementData.toHex()
-            val scanResult = scanLog.first
+            val scanResult = scanLog.scanResult
 
-            initViews(scanLog)
-            initUninitializedViews(device, dataHex, scanResult)
+            view.time.text = formatTimestamp(
+                scanLog.scanResult.timestamp,
+                longItemClickListener as Context
+            )
+            view.rssi.text = view.context.getString(
+                R.string.rssi_strength,
+                scanLog.scanResult.rssi
+            )
+            view.repeating.text = view.context.getString(
+                R.string.repeating_amount, scanLog.occurrences
+            )
 
-            val deserializer = findDeserializer(device, dataHex)
+            if (!initialized) {
+                view.address.text = device.macAddress
+                view.til_name.text = device.name
+                view.data.text = dataHex
+                view.setOnLongClickListener { longItemClickListener.onLongItemClick(scanResult) }
 
-            deserializer?.let {
-                view.deserializer_name.text = it.name
+                findDeserializer(device, dataHex)?.let { deserializer ->
+                    view.deserializer_name.text = deserializer.name
 
-                val fields = it.fieldDeserializers.mapNotNull { fieldDeserializer ->
-                    getField(fieldDeserializer, advertisementData)
+                    view.deserialized_field_list.layoutManager = LinearLayoutManager(
+                        view.context,
+                        LinearLayoutManager.HORIZONTAL,
+                        false
+                    )
+
+                    view.deserialized_field_list.adapter = DeserializedFieldsAdapter().also {
+                        it.setFields(deserializer.fieldDeserializers.mapNotNull { fieldDeserializer ->
+                            getField(fieldDeserializer, advertisementData)
+                        })
+                    }
                 }
-
-                val deserializedFieldsAdapter =
-                    view.deserialized_field_list.adapter as DeserializedFieldsAdapter
-
-                deserializedFieldsAdapter.setFields(fields)
+                initialized = true
             }
-        }
-
-        private fun initViews(scanLog: MutablePair<ScanResult, Int>) {
-            view.time.text =
-                formatTimestamp(scanLog.first.timestamp, longItemClickListener as Context)
-            view.rssi.text = view.context.getString(R.string.rssi_strength, scanLog.first.rssi)
-            view.repeating.text = view.context.getString(R.string.repeating_amount, scanLog.second)
-            view.deserialized_field_list.adapter = DeserializedFieldsAdapter()
-            view.deserialized_field_list.layoutManager =
-                LinearLayoutManager(view.context, LinearLayoutManager.HORIZONTAL, false)
-        }
-
-        private fun initUninitializedViews(
-            device: Device,
-            dataHex: String,
-            scanResult: ScanResult
-        ) {
-            view.setOnLongClickListener { longItemClickListener.onLongItemClick(scanResult) }
-            view.address.text = device.macAddress
-            view.name.text = device.name
-            view.data.text = dataHex
         }
 
         private fun findDeserializer(device: Device, dataHex: String): Deserializer? {
@@ -201,11 +185,6 @@ class ScanAnalyzerAdapter(
             val end = fieldDeserializer.endIndexExclusive
             val size = validData.size
 
-            if (start > size || end > size) {
-
-
-            }
-
             return if (start > size || end > size) {
                 Timber.e("${fieldDeserializer.name}: Error parsing data, Bad indexes")
                 null
@@ -241,9 +220,3 @@ fun formatTimestamp(timestamp: Long, context: Context): String =
         sdf = SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa", getCurrentLocale(context))
         sdf
     })?.format(Date(timestamp)) ?: context.getString(R.string.invalid_timestamp)
-
-
-class MutablePair<A, B>(
-    var first: A,
-    var second: B
-)
