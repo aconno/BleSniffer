@@ -28,6 +28,9 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:paddingBottom="10dp"
             android:orientation="vertical">
 
             <com.google.android.material.textfield.TextInputLayout
@@ -84,6 +87,8 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minLines="3"
+                        android:gravity="top"
                         android:hint="@string/sample_data_hint" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -106,7 +111,6 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/deserializer_list"
                 android:layout_width="0dp"
@@ -117,13 +121,16 @@
                 app:layout_constraintTop_toBottomOf="@id/sample_data_fragment"
                 tools:itemCount="25" />
 
-            <Button
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/add_value_deserializer_button"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/add_field"
+                android:src="@drawable/ic_add"
+                android:tint="@color/secondaryIconColor"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/deserializer_list"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/deserializer_list"
+                app:fabSize="normal" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 

@@ -62,8 +62,8 @@
     <string name="add_field">Add Field</string>
 
     <!-- Deserializer Field Item-->
-    <string name="start_index_inclusive">Start Index Inclusive</string>
-    <string name="end_index_inclusive">End Index Inclusive</string>
+    <string name="start_index_inclusive">Start Index</string>
+    <string name="end_index_inclusive">End Index</string>
 
     <!-- DeserializerListActivity -->
     <string name="deserializer_actions_title">Deserializer Actions</string>
