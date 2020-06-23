@@ -78,4 +78,6 @@
     <string name="service_notification_content">BLE Sniffer is scanning</string>
     <string name="file_not_found">File not found! Please make sure the file is there or use another file browser!</string>
     <string name="generate">Generate</string>
+    <string name="time_between_advs"><![CDATA[<-> %1$dms]]></string>
+    <string name="time_between_advs_not_available">&lt;-&gt; N/A</string>
 </resources>

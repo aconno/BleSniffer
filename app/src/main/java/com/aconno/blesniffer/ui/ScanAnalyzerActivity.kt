@@ -87,6 +87,8 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         setContentView(R.layout.activity_scan_analyzer)
         scanAnalyzerActivityComponent.inject(this)
 
+        initScanResultObserver()
+
         createSnackbar()
 
         invalidateOptionsMenu()
@@ -96,8 +98,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         initViews()
 
         getAllDeserializers()
-
-        initScanResultObserver()
     }
 
     override fun onResume() {

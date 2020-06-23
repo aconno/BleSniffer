@@ -32,6 +32,7 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_edit_deserializer.*
 import kotlinx.android.synthetic.main.popup_field_list_preview.view.*
 import timber.log.Timber
+import java.lang.IndexOutOfBoundsException
 import javax.inject.Inject
 
 
@@ -140,8 +141,8 @@ class EditDeserializerActivity : BaseActivity() {
 
         deserializer_filter_type.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
-//                deserializer_filter_type.setSelection(0)
-//                deserializer.filterType = Deserializer.Type.values()[0]
+                deserializer_filter_type.setSelection(0)
+                deserializer.filterType = Deserializer.Type.values()[0]
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -160,17 +161,19 @@ class EditDeserializerActivity : BaseActivity() {
                 val end = d.endIndexExclusive
                 val size = rawData.size
                 Triple(
-                    d.name,
-                    if (start > size || end > size) getString(R.string.bad_indexes)
-                    else try {
-                        d.type.converter.deserialize(
-                            if (start <= end) rawData.copyOfRange(start, end + 1)
-                            else rawData.inversedCopyOfRangeInclusive(start, end)
-                        ).toString()
-                    } catch (e: IllegalArgumentException) {
-                        getString(R.string.invalid_byte_data)
-                    },
-                    d.color
+                        d.name,
+                        if (start > size || end > size) getString(R.string.bad_indexes)
+                        else try {
+                            d.type.converter.deserialize(
+                                    if (start <= end) rawData.copyOfRange(start, end + 1)
+                                    else rawData.inversedCopyOfRangeInclusive(start, end)
+                            ).toString()
+                        } catch (e: IllegalArgumentException) {
+                            getString(R.string.invalid_byte_data)
+                        } catch (e: IndexOutOfBoundsException) {
+                            getString(R.string.invalid_byte_data)
+                        },
+                        d.color
                 )
             }.let {
                 val view = layoutInflater.inflate(R.layout.popup_field_list_preview, findViewById(android.R.id.content), false)

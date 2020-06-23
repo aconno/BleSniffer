@@ -5,15 +5,13 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.webkit.MimeTypeMap
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import com.aconno.blesniffer.BleSnifferApplication
 import com.aconno.blesniffer.R
 import com.aconno.blesniffer.adapter.DeserializerAdapter
@@ -52,10 +50,13 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
 
     @Inject
     lateinit var getAllDeserializersUseCase: GetAllDeserializersUseCase
+
     @Inject
     lateinit var addDeserializersUseCase: AddDeserializersUseCase
+
     @Inject
     lateinit var deleteDeserializerUseCase: DeleteDeserializerUseCase
+
     @Inject
     lateinit var deleteDeserializersUseCase: DeleteDeserializersUseCase
 
@@ -147,11 +148,15 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                 .setMessage(getString(R.string.export_deserializer_x, item.name))
                 .setView(view)
                 .setPositiveButton(R.string.export) { dialog, _ ->
-                    deserializerFileStorage.storeItem(item,
-                            if (textInput.text.isEmpty()) defaultFileName
-                            else textInput.text.toString()
-                    ).let {
-                        Toast.makeText(this, getString(R.string.successfully_exported_file_to_x, it), Toast.LENGTH_SHORT).show()
+                    permissionViewModel.checkRequestAndRunIfGranted(
+                            BleSnifferPermission.WRITE_EXTERNAL_STORAGE
+                    ) {
+                        deserializerFileStorage.storeItem(item,
+                                if (textInput.text.isEmpty()) defaultFileName
+                                else textInput.text.toString()
+                        ).let {
+                            Toast.makeText(this, getString(R.string.successfully_exported_file_to_x, it), Toast.LENGTH_SHORT).show()
+                        }
                     }
                     dialog.dismiss()
                 }
@@ -249,11 +254,15 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                 .setMessage(R.string.export_all_deserializers)
                 .setView(view)
                 .setPositiveButton(R.string.export) { dialog, _ ->
-                    deserializerFileStorage.storeItems(deserializerAdapter.deserializers,
-                            if (textInput.text.isEmpty()) DEFAULT_EXPORT_FILE_NAME
-                            else textInput.text.toString()
-                    ).let {
-                        Toast.makeText(this, getString(R.string.successfully_exported_file_to_x, it), Toast.LENGTH_SHORT).show()
+                    permissionViewModel.checkRequestAndRunIfGranted(
+                            BleSnifferPermission.WRITE_EXTERNAL_STORAGE
+                    ) {
+                        deserializerFileStorage.storeItems(deserializerAdapter.deserializers,
+                                if (textInput.text.isEmpty()) DEFAULT_EXPORT_FILE_NAME
+                                else textInput.text.toString()
+                        ).let {
+                            Toast.makeText(this, getString(R.string.successfully_exported_file_to_x, it), Toast.LENGTH_SHORT).show()
+                        }
                     }
                     dialog.dismiss()
                 }
