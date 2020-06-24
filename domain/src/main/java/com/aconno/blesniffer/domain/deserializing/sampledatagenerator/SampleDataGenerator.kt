@@ -14,15 +14,13 @@ object SampleDataGenerator {
         ValueConverter.SINT8 to SignedInt8Generator(),
         ValueConverter.UINT8 to UnsignedInt8Generator(),
         ValueConverter.UINT16 to UnsignedInt16Generator(),
-        ValueConverter.UINT32 to Unsigned32Generator(),
+        ValueConverter.UINT32 to UnsignedInt32Generator(),
         ValueConverter.UTF8STRING to UTF8StringGenerator(),
         ValueConverter.TIME to TimeGenerator()
     )
 
-
     fun generateSampleValueForType(type : ValueConverter) : ByteArray {
         return type.converter.serialize(TYPES_TO_GENERATORS_MAP[type]?.generateValue().toString())
     }
-
 
 }

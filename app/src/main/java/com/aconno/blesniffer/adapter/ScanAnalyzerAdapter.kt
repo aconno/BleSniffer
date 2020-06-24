@@ -127,7 +127,7 @@ class ScanAnalyzerAdapter(
 
             if (!initialized) {
                 view.address.text = device.macAddress
-                view.til_name.text = device.name
+                view.name.text = device.name
                 view.data.text = dataHex
                 view.setOnLongClickListener { longItemClickListener.onLongItemClick(scanResult) }
 

@@ -1,8 +1,14 @@
 package com.aconno.blesniffer.domain.deserializing.sampledatagenerator.generators
 
-class UnsignedInt8Generator : UnsignedIntGenerator<Short>(0.toShort()) {
+import kotlin.random.Random
 
-    override fun getMaxValue(): Long {
-        return 255
+class UnsignedInt8Generator : ValueGenerator<Short> {
+
+    override fun generateValue(): Short {
+        return Random.nextInt(0,MAX_VALUE).toShort()
+    }
+
+    companion object {
+        const val MAX_VALUE = 255
     }
 }

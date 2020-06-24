@@ -1,9 +1,15 @@
 package com.aconno.blesniffer.domain.deserializing.sampledatagenerator.generators
 
-class UnsignedInt16Generator : UnsignedIntGenerator<Int>(0) {
+import kotlin.random.Random
 
-    override fun getMaxValue(): Long {
-        return 65535
+class UnsignedInt16Generator : ValueGenerator<Int> {
+
+    override fun generateValue(): Int {
+        return Random.nextInt(0,MAX_VALUE)
+    }
+
+    companion object {
+        const val MAX_VALUE = 65535
     }
 
 
