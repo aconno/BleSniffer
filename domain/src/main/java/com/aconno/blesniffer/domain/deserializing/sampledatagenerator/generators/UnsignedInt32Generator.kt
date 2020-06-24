@@ -4,7 +4,7 @@ import kotlin.random.Random
 
 class UnsignedInt32Generator : ValueGenerator<Long> {
 
-    override fun generateValue(): Long {
+    override fun generateValue(valueSize : Int): Long {
         return Random.nextLong(0,MAX_VALUE)
     }
 

@@ -5,7 +5,7 @@ import kotlin.random.Random
 
 class SignedInt32Generator : ValueGenerator<Int> {
 
-    override fun generateValue(): Int {
+    override fun generateValue(valueSize : Int): Int {
         return abs(Random.nextInt())
     }
 }

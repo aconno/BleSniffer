@@ -4,7 +4,7 @@ import kotlin.random.Random
 
 class ByteGenerator : ValueGenerator<Byte> {
 
-    override fun generateValue(): Byte {
+    override fun generateValue(valueSize : Int): Byte {
         return Random.nextInt(Byte.MAX_VALUE + 1).toByte()
     }
 

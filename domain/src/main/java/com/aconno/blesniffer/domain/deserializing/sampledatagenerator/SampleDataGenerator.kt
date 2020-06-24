@@ -20,7 +20,7 @@ object SampleDataGenerator {
     )
 
     fun generateSampleValueForType(type : ValueConverter) : ByteArray {
-        return type.converter.serialize(TYPES_TO_GENERATORS_MAP[type]?.generateValue().toString())
+        return type.converter.serialize(TYPES_TO_GENERATORS_MAP[type]?.generateValue(type.converter.length).toString())
     }
 
 }

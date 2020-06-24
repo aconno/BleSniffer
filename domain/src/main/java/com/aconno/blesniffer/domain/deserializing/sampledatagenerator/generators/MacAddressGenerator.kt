@@ -6,7 +6,7 @@ import kotlin.random.Random
 
 class MacAddressGenerator : ValueGenerator<String> {
 
-    override fun generateValue(): String {
+    override fun generateValue(valueSize : Int): String {
         val builder = StringBuilder()
         for(i in 0 until 6) {
             if(i>0) {

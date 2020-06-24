@@ -4,7 +4,7 @@ import kotlin.random.Random
 
 class UnsignedInt16Generator : ValueGenerator<Int> {
 
-    override fun generateValue(): Int {
+    override fun generateValue(valueSize : Int): Int {
         return Random.nextInt(0,MAX_VALUE)
     }
 
