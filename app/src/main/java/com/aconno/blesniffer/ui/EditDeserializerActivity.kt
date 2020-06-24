@@ -21,10 +21,7 @@ import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerAct
 import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerActivityModule
 import com.aconno.blesniffer.domain.deserializing.Deserializer
 import com.aconno.blesniffer.domain.deserializing.GeneralDeserializer
-import com.aconno.blesniffer.domain.interactor.deserializing.AddDeserializerUseCase
-import com.aconno.blesniffer.domain.interactor.deserializing.GetDeserializerByFilterUseCase
-import com.aconno.blesniffer.domain.interactor.deserializing.GetDeserializerByIdUseCase
-import com.aconno.blesniffer.domain.interactor.deserializing.UpdateDeserializerUseCase
+import com.aconno.blesniffer.domain.interactor.deserializing.*
 import com.aconno.blesniffer.ui.base.BaseActivity
 import com.google.common.io.BaseEncoding
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -52,6 +49,9 @@ class EditDeserializerActivity : BaseActivity() {
 
     @Inject
     lateinit var updateDeserializerUseCase: UpdateDeserializerUseCase
+
+    @Inject
+    lateinit var generateSampleDataUseCase: GenerateSampleDataUseCase
 
     var deserializer: Deserializer = GeneralDeserializer()
         set(value) {
@@ -165,7 +165,7 @@ class EditDeserializerActivity : BaseActivity() {
                         if (start > size || end > size) getString(R.string.bad_indexes)
                         else try {
                             d.type.converter.deserialize(
-                                    if (start <= end) rawData.copyOfRange(start, end + 1)
+                                    if (start <= end) rawData.copyOfRange(start, end)
                                     else rawData.inversedCopyOfRangeInclusive(start, end)
                             ).toString()
                         } catch (e: IllegalArgumentException) {
@@ -196,6 +196,14 @@ class EditDeserializerActivity : BaseActivity() {
                     }
                     .show()
             }
+        }
+
+        generate_sample_data.setOnClickListener {
+            generateSampleDataUseCase.execute(updateDeserializerFromInputData())
+                .subscribe { sampleData ->
+                    deserializer_sample_data.editText?.setText(sampleData.toHex())
+                }
+
         }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

@@ -165,7 +165,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         }
     }),
     UTF8STRING("", object : Converter<String>("") {
-        private val ASCII = Charset.forName("ASCII")
+        private val ASCII = Charset.forName("UTF8")
 
         override fun fromString(string: String): String {
             return string
