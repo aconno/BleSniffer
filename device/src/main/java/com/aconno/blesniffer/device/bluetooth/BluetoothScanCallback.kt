@@ -25,7 +25,7 @@ class BluetoothScanCallback(
     @SuppressLint("MissingPermission")
     private fun createScanResult(result: android.bluetooth.le.ScanResult?): ScanResult {
         val device = result?.device
-        val deviceName = device?.name ?: "Unknown"
+        val deviceName = device?.name ?: "Unknown device"
         val deviceAddress = device?.address ?: "Unknown"
         val scannedDevice = Device(deviceName, deviceAddress)
         val bytes = (result?.scanRecord?.bytes ?: byteArrayOf())

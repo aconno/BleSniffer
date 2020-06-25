@@ -38,6 +38,14 @@ class ScanAnalyzerAdapter(
     private val hashes: MutableMap<Int, Pair<Int, MutablePair<ScanResult, Int>>> = mutableMapOf()
     var deserializers: MutableList<Deserializer> = mutableListOf()
 
+    var hideMissingSerializer : Boolean = false
+        set(value) {
+            if(field != value) {
+                field = value
+                notifyDataSetChanged()
+            }
+        }
+
     init {
         setHasStableIds(true)
     }
@@ -132,6 +140,8 @@ class ScanAnalyzerAdapter(
             val deserializer = findDeserializer(device, dataHex)
 
             deserializer?.let {
+                view.deserializer?.visibility = View.VISIBLE
+                view.deserializer_name.visibility = View.VISIBLE
                 view.deserializer_name.text = it.name
 
                 val fields = it.fieldDeserializers.mapNotNull { fieldDeserializer ->
@@ -142,6 +152,14 @@ class ScanAnalyzerAdapter(
                         view.deserialized_field_list.adapter as DeserializedFieldsAdapter
 
                 deserializedFieldsAdapter.setFields(fields)
+            } ?: run {
+                if (hideMissingSerializer) {
+                    view.deserializer_name.visibility = View.GONE
+                    view.deserializer?.visibility = View.GONE
+                } else {
+                    view.deserializer_name.visibility = View.VISIBLE
+                    view.deserializer?.visibility = View.VISIBLE
+                }
             }
         }
 

@@ -1,6 +1,7 @@
 package com.aconno.blesniffer.ui
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -98,6 +99,8 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         initViews()
 
         getAllDeserializers()
+
+        scanAnalyzerAdapter.hideMissingSerializer = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
     }
 
     override fun onResume() {
@@ -182,6 +185,8 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         setSupportActionBar(custom_toolbar)
         custom_toolbar.title = getString(R.string.app_name)
 
+        scanAnalyzerAdapter.hideMissingSerializer = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+
         val linearLayoutManager = LinearLayoutManager(this)
         linearLayoutManager.reverseLayout = true
         scan_list.layoutManager = linearLayoutManager
@@ -194,6 +199,11 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         (scan_list.itemAnimator as SimpleItemAnimator).supportsChangeAnimations =
             false
         scan_list.itemAnimator = null
+
+        search_view?.let {
+            setSearchQueryTextListener(it)
+        }
+
     }
 
 
@@ -298,8 +308,26 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         mainMenu?.clear()
         menuInflater.inflate(R.menu.scanner_menu, menu)
 
-        val searchView = mainMenu?.findItem(R.id.search)?.actionView as SearchView
+        val searchMenuItem = mainMenu?.findItem(R.id.search)
+        searchMenuItem?.isVisible = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
+        val searchView = searchMenuItem?.actionView as SearchView
+
+        setSearchQueryTextListener(searchView)
+
+        mainMenu?.findItem(R.id.action_toggle_scan)?.let {
+            setScanMenuLabel(it)
+            val state = bluetoothViewModel.bluetoothState.value
+            when (state?.state) {
+                BluetoothState.BLUETOOTH_ON -> it.setVisible(true)
+                else -> it.setVisible(false)
+            }
+        }
+
+        return true
+    }
+
+    private fun setSearchQueryTextListener(searchView: SearchView) {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 filter = null
@@ -331,17 +359,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 return false
             }
         })
-
-        mainMenu?.findItem(R.id.action_toggle_scan)?.let {
-            setScanMenuLabel(it)
-            val state = bluetoothViewModel.bluetoothState.value
-            when (state?.state) {
-                BluetoothState.BLUETOOTH_ON -> it.setVisible(true)
-                else -> it.setVisible(false)
-            }
-        }
-
-        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
