@@ -189,7 +189,7 @@ class EditDeserializerActivity : AppCompatActivity() {
                     if (start > size || end > size) getString(R.string.bad_indexes)
                     else try {
                         d.type.converter.deserialize(
-                            if (start <= end) rawData.copyOfRange(start, end + 1)
+                            if (start <= end) rawData.copyOfRange(start, end)
                             else rawData.inversedCopyOfRangeInclusive(start, end)
                         ).toString()
                     } catch (e: IllegalArgumentException) {

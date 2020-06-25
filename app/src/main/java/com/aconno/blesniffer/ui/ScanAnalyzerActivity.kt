@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.work.WorkInfo
@@ -187,7 +188,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         scan_list.layoutManager = linearLayoutManager
         scan_list.adapter = scanAnalyzerAdapter
         scan_list.addItemDecoration(
-            androidx.recyclerview.widget.DividerItemDecoration(
+            DividerItemDecoration(
                 this, linearLayoutManager.orientation
             )
         )
