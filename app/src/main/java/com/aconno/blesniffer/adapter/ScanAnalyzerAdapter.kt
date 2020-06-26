@@ -98,6 +98,20 @@ class ScanAnalyzerAdapter(
         scanRecordListener.onRecordAdded(size)
     }
 
+    fun loadScanLog(scanLog : List<MutablePair<ScanResult,Int>>) {
+        this.scanLog.clear()
+        this.scanLog.addAll(scanLog)
+
+        hashes.clear()
+        scanLog.forEachIndexed { index, mutablePair ->
+            val scanResult = mutablePair.first
+            hashes[scanResult.hashCode()] = Pair(index,mutablePair)
+        }
+
+        notifyDataSetChanged()
+    }
+
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
                 LayoutInflater.from(parent.context).inflate(R.layout.item_scan_record, parent, false)
