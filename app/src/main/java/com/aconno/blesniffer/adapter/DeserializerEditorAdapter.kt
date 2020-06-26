@@ -101,7 +101,7 @@ class DeserializerEditorAdapter(
                 .create().apply {
                     setColorPickerDialogListener(object : ColorPickerDialogListener {
                         override fun onDialogDismissed(dialogId: Int) {
-                            TODO("Not yet implemented")
+
                         }
 
                         override fun onColorSelected(dialogId: Int, color: Int) {
@@ -130,24 +130,26 @@ class DeserializerEditorAdapter(
             view.spinner_converter_type.adapter = converterTypeAdapter
             view.spinner_converter_type.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>, v: View, position: Int, id: Long) {
-                    val valueConverter = ValueConverter.values()[position]
-                    fieldDeserializers[adapterPosition].type = valueConverter
+                    ValueConverter.values()[position].let { valueConverter ->
+                        fieldDeserializers[adapterPosition].type = valueConverter
 
-                    if (valueConverter.converter.length == -1) {
-                        view.til_end.isEnabled = true
-                    } else {
-                        view.til_end.isEnabled = false
+                        if (valueConverter.converter.length == -1) {
+                            view.til_end.isEnabled = true
+                        } else {
+                            view.til_end.isEnabled = false
 
 
-                        val value = Integer.parseInt(
-                            view.til_start.editText?.text?.toString()?.takeIf {
-                                it.isNotEmpty()
-                            } ?: "0"
-                        )
+                            val value = Integer.parseInt(
+                                view.til_start.editText?.text?.toString()?.takeIf {
+                                    it.isNotEmpty()
+                                } ?: "0"
+                            )
 
-                        view.til_end.editText?.setText(
-                            (value + fieldDeserializers[adapterPosition].type.converter.length).toString()
-                        )
+                            (value + valueConverter.converter.length).let { endIndexExclusive ->
+                                view.til_end.editText?.setText(endIndexExclusive.toString())
+                                fieldDeserializers[adapterPosition].endIndexExclusive = endIndexExclusive
+                            }
+                        }
                     }
                 }
 
