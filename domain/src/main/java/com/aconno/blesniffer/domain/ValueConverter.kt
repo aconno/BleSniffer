@@ -54,7 +54,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         override fun fromString(string: String): String = string
 
         override fun serializeInternal(data: String): ByteArray =
-            data.split(':').map { it.toByte() }.toList().toByteArray()
+            data.split(':').map {it.hexPairToByte()  }.toList().toByteArray()
 
         override fun deserializeInternal(data: ByteArray): String =
             data.joinToString(":") { String.format("%02x", it) }

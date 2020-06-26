@@ -15,7 +15,7 @@ class GenerateSampleDataUseCase : SingleUseCaseWithParameter<ByteArray,Deseriali
         bytes.forEachIndexed { index, byte -> bytes[index] = 0xFF.toByte() }
 
         parameter.fieldDeserializers.forEach {
-            SampleDataGenerator.generateSampleValueForType(it.type).copyInto(bytes,it.startIndexInclusive)
+            SampleDataGenerator.generateSampleValueForType(it.type,it.endIndexExclusive - it.startIndexInclusive).copyInto(bytes,it.startIndexInclusive)
         }
 
         return Single.just(bytes)

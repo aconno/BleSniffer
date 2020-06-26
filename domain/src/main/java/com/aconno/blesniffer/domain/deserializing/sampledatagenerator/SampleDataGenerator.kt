@@ -19,8 +19,8 @@ object SampleDataGenerator {
         ValueConverter.TIME to TimeGenerator()
     )
 
-    fun generateSampleValueForType(type : ValueConverter) : ByteArray {
-        return type.converter.serialize(TYPES_TO_GENERATORS_MAP[type]?.generateValue(type.converter.length).toString())
+    fun generateSampleValueForType(type : ValueConverter, valueSizeBytes : Int) : ByteArray {
+        return type.converter.serialize(TYPES_TO_GENERATORS_MAP[type]?.generateValue(valueSizeBytes).toString())
     }
 
 }
