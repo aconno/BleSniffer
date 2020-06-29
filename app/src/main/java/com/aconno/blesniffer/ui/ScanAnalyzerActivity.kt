@@ -431,7 +431,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         super.onSaveInstanceState(outState)
 
         val scanLog = scanAnalyzerAdapter.scanLog
-        val scanLogParcelableArray = scanLog.map { pair -> ScanLogElement(pair.first,pair.second) }.toTypedArray()
+        val scanLogParcelableArray = scanLog.map { pair -> ScanLogElement(pair.scanResult,pair.occurrences) }.toTypedArray()
         outState.putParcelableArray(SCAN_LOG_KEY,scanLogParcelableArray)
     }
 

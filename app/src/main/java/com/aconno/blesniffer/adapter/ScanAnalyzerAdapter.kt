@@ -34,7 +34,7 @@ class ScanAnalyzerAdapter(
         private val scanRecordListener: ScanRecordListener,
         private val longItemClickListener: LongItemClickListener<ScanResult>
 ) : RecyclerView.Adapter<ScanAnalyzerAdapter.ViewHolder>() {
-    private val scanLog: MutableList<Item> = mutableListOf()
+    val scanLog: MutableList<Item> = mutableListOf()
     private val hashes: MutableMap<Int, Int> = mutableMapOf()
 
     data class Item(
@@ -85,12 +85,12 @@ class ScanAnalyzerAdapter(
 
     fun loadScanLog(scanLog : List<MutablePair<ScanResult,Int>>) {
         this.scanLog.clear()
-        this.scanLog.addAll(scanLog)
+        this.scanLog.addAll(scanLog.map { Item(it.first,it.second) })
 
         hashes.clear()
         scanLog.forEachIndexed { index, mutablePair ->
             val scanResult = mutablePair.first
-            hashes[scanResult.hashCode()] = Pair(index,mutablePair)
+            hashes[scanResult.hashCode()] = index
         }
 
         notifyDataSetChanged()

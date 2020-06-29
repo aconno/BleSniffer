@@ -101,19 +101,19 @@ class DeserializerEditorAdapter(
                         fieldDeserializers[adapterPosition].type = valueConverter
 
                         if (valueConverter.converter.length == -1) {
-                            view.til_end.isEnabled = true
+                            view.end.isEnabled = true
                         } else {
-                            view.til_end.isEnabled = false
+                            view.end.isEnabled = false
 
 
                             val value = Integer.parseInt(
-                                view.til_start.editText?.text?.toString()?.takeIf {
+                                view.start.editText?.text?.toString()?.takeIf {
                                     it.isNotEmpty()
                                 } ?: "0"
                             )
 
                             (value + valueConverter.converter.length).let { endIndexExclusive ->
-                                view.til_end.editText?.setText(endIndexExclusive.toString())
+                                view.end.editText?.setText(endIndexExclusive.toString())
                                 fieldDeserializers[adapterPosition].endIndexExclusive = endIndexExclusive
                             }
                         }
@@ -132,7 +132,7 @@ class DeserializerEditorAdapter(
         }
 
         private fun registerTextWatchers() {
-            view.til_name.editText?.addTextChangedListener(object : TextWatcher {
+            view.name.editText?.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
                     fieldDeserializers[adapterPosition].name = s.toString()
                 }
@@ -141,18 +141,18 @@ class DeserializerEditorAdapter(
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             })
-            view.til_start.editText?.addTextChangedListener(object : TextWatcher {
+            view.start.editText?.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
-                    view.til_start.error = if (s.toString().isBlank()) {
+                    view.start.error = if (s.toString().isBlank()) {
                         "Defaulting to 0"
                     } else null
 
                     val value = Integer.parseInt(s.toString().takeIf { it.isNotEmpty() } ?: "0")
                     fieldDeserializers[adapterPosition].startIndexInclusive = value
 
-                    if (!view.til_end.isEnabled) {
+                    if (!view.end.isEnabled) {
                         val endValue = (value + fieldDeserializers[adapterPosition].type.converter.length)
-                        view.til_end.editText?.setText(endValue.toString())
+                        view.end.editText?.setText(endValue.toString())
                         fieldDeserializers[adapterPosition].endIndexExclusive = endValue
                     }
                 }
@@ -161,10 +161,10 @@ class DeserializerEditorAdapter(
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             })
-            view.til_end.editText?.addTextChangedListener(object : TextWatcher {
+            view.end.editText?.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
-                    if (!view.til_end.isEnabled) return
-                    view.til_end.error = if (s.toString().isBlank()) {
+                    if (!view.end.isEnabled) return
+                    view.end.error = if (s.toString().isBlank()) {
                         "Defaulting to 0"
                     } else null
 
@@ -179,12 +179,12 @@ class DeserializerEditorAdapter(
         }
 
         fun bind(fieldDeserializer: FieldDeserializer) {
-            view.til_name.editText?.setText(fieldDeserializer.name)
+            view.name.editText?.setText(fieldDeserializer.name)
             view.color_button.setBackgroundColor(fieldDeserializer.color)
             view.spinner_converter_type.setSelection(converterTypeAdapter.getPosition(fieldDeserializer.type.name))
-            view.til_start.editText?.setText(fieldDeserializer.startIndexInclusive.toString())
-            view.til_end.isEnabled = fieldDeserializer.type.converter.length == -1
-            view.til_end.editText?.setText(fieldDeserializer.endIndexExclusive.toString())
+            view.start.editText?.setText(fieldDeserializer.startIndexInclusive.toString())
+            view.end.isEnabled = fieldDeserializer.type.converter.length == -1
+            view.end.editText?.setText(fieldDeserializer.endIndexExclusive.toString())
         }
     }
 

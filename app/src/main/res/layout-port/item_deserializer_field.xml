@@ -28,11 +28,11 @@
         android:layout_marginStart="2dp"
         android:background="@android:color/holo_red_dark"
         app:layout_constraintBottom_toBottomOf="@id/name"
-        app:layout_constraintEnd_toStartOf="@+id/remove"
+        app:layout_constraintEnd_toStartOf="@+id/btn_remove"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
-        android:id="@+id/remove"
+        android:id="@+id/btn_remove"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:src="@android:drawable/ic_menu_delete"
@@ -43,7 +43,7 @@
         tools:src="@android:drawable/ic_menu_delete" />
 
     <Spinner
-        android:id="@+id/converter_type"
+        android:id="@+id/spinner_converter_type"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="2dp"
@@ -58,7 +58,7 @@
         android:layout_width="90dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="2dp"
-        app:layout_constraintStart_toEndOf="@+id/converter_type"
+        app:layout_constraintStart_toEndOf="@+id/spinner_converter_type"
         app:layout_constraintEnd_toStartOf="@id/end"
         app:layout_constraintTop_toBottomOf="@id/name">
 
