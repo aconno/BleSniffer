@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.aconno.blesniffer.BleSnifferApplication
@@ -205,6 +206,9 @@ class EditDeserializerActivity : BaseActivity() {
                 }
 
         }
+
+        deserializer_list.addItemDecoration(DividerItemDecoration(this,
+            DividerItemDecoration.VERTICAL))
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
