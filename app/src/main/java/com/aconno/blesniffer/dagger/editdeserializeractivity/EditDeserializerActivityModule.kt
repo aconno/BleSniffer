@@ -47,4 +47,10 @@ class EditDeserializerActivityModule(private val editDeserializerActivity: EditD
     fun provideGetDeserializerByFilterUseCase(deserializerRepository: DeserializerRepository): GetDeserializerByFilterUseCase {
         return GetDeserializerByFilterUseCase(deserializerRepository)
     }
+
+    @Provides
+    @EditDeserializerActivityScope
+    fun provideGenerateSampleDataUseCase(): GenerateSampleDataUseCase {
+        return GenerateSampleDataUseCase()
+    }
 }

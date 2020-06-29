@@ -1,5 +1,6 @@
 package com.aconno.blesniffer.domain.deserializing
 
+
 /**
  * @author aconno
  */
