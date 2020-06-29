@@ -37,10 +37,9 @@
         </activity>
         <activity
             android:name=".ui.DeserializerListActivity"
-            android:screenOrientation="landscape" />
+         />
         <activity
-            android:name=".ui.EditDeserializerActivity"
-            android:screenOrientation="landscape" />
+            android:name=".ui.EditDeserializerActivity" />
 
 
         <provider
