@@ -62,8 +62,8 @@
     <string name="add_field">Add Field</string>
 
     <!-- Deserializer Field Item-->
-    <string name="start_index_inclusive">Start Index Inclusive</string>
-    <string name="end_index_inclusive">End Index Inclusive</string>
+    <string name="start_index_inclusive">Start Index</string>
+    <string name="end_index_inclusive">End Index</string>
 
     <!-- DeserializerListActivity -->
     <string name="deserializer_actions_title">Deserializer Actions</string>
@@ -77,6 +77,7 @@
     <string name="service_notification_title">BLE Sniffer</string>
     <string name="service_notification_content">BLE Sniffer is scanning</string>
     <string name="file_not_found">File not found! Please make sure the file is there or use another file browser!</string>
+    <string name="generate">Generate</string>
     <string name="time_between_advs"><![CDATA[<-> %1$dms]]></string>
     <string name="time_between_advs_not_available">&lt;-&gt; N/A</string>
 </resources>

@@ -2,13 +2,14 @@ package com.aconno.blesniffer.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.ItemTouchHelper
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.aconno.blesniffer.BleSnifferApplication
 import com.aconno.blesniffer.R
 import com.aconno.blesniffer.adapter.DeserializedFieldsAdapter
@@ -20,11 +21,8 @@ import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerAct
 import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerActivityModule
 import com.aconno.blesniffer.domain.deserializing.Deserializer
 import com.aconno.blesniffer.domain.deserializing.GeneralDeserializer
-import com.aconno.blesniffer.domain.deserializing.GeneralFieldDeserializer
-import com.aconno.blesniffer.domain.interactor.deserializing.AddDeserializerUseCase
-import com.aconno.blesniffer.domain.interactor.deserializing.GetDeserializerByFilterUseCase
-import com.aconno.blesniffer.domain.interactor.deserializing.GetDeserializerByIdUseCase
-import com.aconno.blesniffer.domain.interactor.deserializing.UpdateDeserializerUseCase
+import com.aconno.blesniffer.domain.interactor.deserializing.*
+import com.aconno.blesniffer.ui.base.BaseActivity
 import com.google.common.io.BaseEncoding
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -38,23 +36,29 @@ import javax.inject.Inject
 const val RESULT_UPDATED: Int = 0x10
 const val RESULT_ADDED: Int = 0x11
 
-class EditDeserializerActivity : AppCompatActivity() {
+class EditDeserializerActivity : BaseActivity() {
 
     @Inject
     lateinit var addDeserializersUseCase: AddDeserializerUseCase
+
     @Inject
     lateinit var getDeserializerByFilterUseCase: GetDeserializerByFilterUseCase
+
     @Inject
     lateinit var getDeserializerByIdUseCase: GetDeserializerByIdUseCase
+
     @Inject
     lateinit var updateDeserializerUseCase: UpdateDeserializerUseCase
+
+    @Inject
+    lateinit var generateSampleDataUseCase: GenerateSampleDataUseCase
 
     var deserializer: Deserializer = GeneralDeserializer()
         set(value) {
             field = value.apply {
-                deserializerEditorAdapter.deserializer = this
+                deserializerEditorAdapter.fieldDeserializers = this.fieldDeserializers
                 deserializer_filter_type.setSelection(Deserializer.Type.values().indexOf(
-                        Deserializer.Type.valueOf(this.filterType.name)
+                    Deserializer.Type.valueOf(this.filterType.name)
                 ))
                 deserializer_filter.editText?.setText(this.filter)
                 deserializer_name.editText?.setText(this.name)
@@ -65,9 +69,9 @@ class EditDeserializerActivity : AppCompatActivity() {
     val editDeserializerActivityComponent: EditDeserializerActivityComponent by lazy {
         val bleSnifferApplication: BleSnifferApplication? = application as? BleSnifferApplication
         DaggerEditDeserializerActivityComponent.builder()
-                .appComponent(bleSnifferApplication?.appComponent)
-                .editDeserializerActivityModule(EditDeserializerActivityModule(this))
-                .build()
+            .appComponent(bleSnifferApplication?.appComponent)
+            .editDeserializerActivityModule(EditDeserializerActivityModule(this))
+            .build()
     }
 
     val deserializerEditorAdapter: DeserializerEditorAdapter by lazy {
@@ -89,49 +93,50 @@ class EditDeserializerActivity : AppCompatActivity() {
         setSupportActionBar(custom_toolbar)
 
         deserializer_list.adapter = deserializerEditorAdapter
-        deserializer_list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-        if (intent.extras != null) {
-            if (intent.extras.getLong("id", -2L) != -2L) {
-                getDeserializerByIdUseCase.execute(intent.extras.getLong("id"))
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                {
-                                    deserializer = it
-                                    existing = true
-                                },
-                                {
-                                    deserializer = GeneralDeserializer()
-                                }
-                        )
+        deserializer_list.isNestedScrollingEnabled = false
+        deserializer_list.layoutManager = LinearLayoutManager(this)
+        intent.extras?.let { extras ->
+            if (extras.getLong("id", -2L) != -2L) {
+                getDeserializerByIdUseCase.execute(extras.getLong("id"))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                        {
+                            deserializer = it
+                            existing = true
+                        },
+                        {
+                            deserializer = GeneralDeserializer()
+                        }
+                    )
             } else {
-                val filterContent: String = intent.extras.getString("filter", "")
-                val type: String = intent.extras.getString("type", "")
-                val sampleData = intent.extras.getByteArray("sampleData") ?: byteArrayOf()
+                val filterContent: String = extras.getString("filter", "")
+                val type: String = extras.getString("type", "")
+                val sampleData = extras.getByteArray("sampleData") ?: byteArrayOf()
                 getDeserializerByFilterUseCase.execute(filterContent, type)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                {
-                                    deserializer = it
-                                    existing = true
-                                },
-                                {
-                                    deserializer = GeneralDeserializer(
-                                            filter = filterContent,
-                                            sampleData = sampleData
-                                    )
-                                }
-                        )
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                        {
+                            deserializer = it
+                            existing = true
+                        },
+                        {
+                            deserializer = GeneralDeserializer(
+                                filter = filterContent,
+                                sampleData = sampleData
+                            )
+                        }
+                    )
             }
-        } else {
+        } ?: run {
             deserializer = GeneralDeserializer()
         }
 
-        deserializer_filter_type.adapter = ArrayAdapter<String>(
-                this,
-                android.R.layout.simple_spinner_item,
-                Deserializer.Type.values().map { it.name }
+        deserializer_filter_type.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            Deserializer.Type.values().map { it.name }
         )
 
         deserializer_filter_type.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -146,34 +151,7 @@ class EditDeserializerActivity : AppCompatActivity() {
         }
 
         add_value_deserializer_button.setOnClickListener {
-            deserializer.fieldDeserializers.add(
-                    GeneralFieldDeserializer()
-            )
-            deserializer_list.adapter?.notifyDataSetChanged()
-        }
-
-        save.setOnClickListener {
-            if (existing) {
-                updateDeserializerUseCase.execute(updateDeserializerFromInputData()).subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                {
-                                    setResult(RESULT_UPDATED)
-                                    finish()
-                                },
-                                { Timber.e(it) }
-                        )
-            } else {
-                addDeserializersUseCase.execute(updateDeserializerFromInputData()).subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                {
-                                    setResult(RESULT_ADDED)
-                                    finish()
-                                },
-                                { Timber.e(it) }
-                        )
-            }
+            deserializerEditorAdapter.addEmptyValueDeserializer()
         }
 
         preview.setOnClickListener {
@@ -187,7 +165,7 @@ class EditDeserializerActivity : AppCompatActivity() {
                         if (start > size || end > size) getString(R.string.bad_indexes)
                         else try {
                             d.type.converter.deserialize(
-                                    if (start <= end) rawData.copyOfRange(start, end + 1)
+                                    if (start <= end) rawData.copyOfRange(start, end)
                                     else rawData.inversedCopyOfRangeInclusive(start, end)
                             ).toString()
                         } catch (e: IllegalArgumentException) {
@@ -202,44 +180,98 @@ class EditDeserializerActivity : AppCompatActivity() {
 
                 val deserializedFieldsAdapter = DeserializedFieldsAdapter()
                 view.deserialized_field_list_preview.adapter = deserializedFieldsAdapter
-                view.deserialized_field_list_preview.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false)
+                view.deserialized_field_list_preview.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
                 deserializedFieldsAdapter.setFields(it)
                 AlertDialog.Builder(this)
-                        .setView(view)
-                        .setOnDismissListener {
-                            deserializedFieldsAdapter.setFields(mutableListOf())
-                            it.dismiss()
+                    .setView(view)
+                    .setOnDismissListener {
+                        deserializedFieldsAdapter.setFields(mutableListOf())
+                        it.dismiss()
+                    }
+                    .create().also { dialog ->
+                        view.setOnTouchListener { _, _ ->
+                            dialog.dismiss()
+                            true
                         }
-                        .create().also { dialog ->
-                            view.setOnTouchListener { _, _ ->
-                                dialog.dismiss()
-                                true
-                            }
-                        }
-                        .show()
+                    }
+                    .show()
             }
         }
 
-        cancel.setOnClickListener {
-            finish()
+        generate_sample_data.setOnClickListener {
+            generateSampleDataUseCase.execute(updateDeserializerFromInputData())
+                .subscribe { sampleData ->
+                    deserializer_sample_data.editText?.setText(sampleData.toHex())
+                }
+
+        }
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    private fun saveDeserializer() {
+        if (existing) {
+            updateDeserializerUseCase.execute(updateDeserializerFromInputData())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    {
+                        setResult(RESULT_UPDATED)
+                        finish()
+                    },
+                    { Timber.e(it) }
+                ).also { addDisposable(it) }
+        } else {
+            addDeserializersUseCase.execute(updateDeserializerFromInputData())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    {
+                        setResult(RESULT_ADDED)
+                        finish()
+                    },
+                    { Timber.e(it) }
+                ).also { addDisposable(it) }
         }
     }
 
     private fun updateDeserializerFromInputData(): Deserializer {
         return deserializer.apply {
-            name = deserializer_name.editText?.text?.toString() ?: name ?: getString(R.string.deserializer_default_name)
+            name = deserializer_name.editText?.text?.toString() ?: name
+                ?: getString(R.string.deserializer_default_name)
             filter = deserializer_filter.editText?.text?.toString() ?: filter ?: ""
             filterType = filterType
             sampleData = getSampleDataBytes()
+            fieldDeserializers.apply {
+                clear()
+                addAll(deserializerEditorAdapter.fieldDeserializers)
+            }
         }
     }
 
     private fun getSampleDataBytes(): ByteArray {
         return try {
             BaseEncoding.base16().decode(deserializer_sample_data?.editText?.text?.toString()
-                    ?.replace("0x", "")?.replace(" ", "") ?: "")
+                ?.replace("0x", "")?.replace(" ", "") ?: "")
         } catch (e: Exception) {
             byteArrayOf()
         }
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.deserializer_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id: Int? = item.itemId
+        when (id) {
+            R.id.action_save -> saveDeserializer()
+            android.R.id.home -> finish()
+            else -> return false
+        }
+
+        return true
+    }
+
 }

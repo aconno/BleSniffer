@@ -6,7 +6,7 @@ import java.nio.charset.Charset
 import kotlin.experimental.or
 
 enum class ValueConverter(var default: Any, var converter: Converter<*>) {
-    BOOLEAN(false, object : Converter<Boolean>(false) {
+    BOOLEAN(false, object : Converter<Boolean>(false, 1) {
         override fun fromString(string: String): Boolean {
             return if (string.equals("true", true) || string == "1") true
             else if (string.equals("false", true) || string == "0") false
@@ -25,7 +25,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
             }
         }
     }),
-    BYTE(0, object : Converter<Byte>(0) {
+    BYTE(0, object : Converter<Byte>(0, 1) {
         override fun fromString(string: String): Byte {
             return string.toByte()
         }
@@ -38,7 +38,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
             return data[0]
         }
     }),
-    MAC_ADDRESS(0, object : Converter<String>("00:11:22:33:44:55") {
+    MAC_ADDRESS(0, object : Converter<String>("00:11:22:33:44:55", 6) {
         override fun serialize(data: String, order: ByteOrder): ByteArray {
             return serializeInternal(fromString(data))
         }
@@ -54,7 +54,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         override fun fromString(string: String): String = string
 
         override fun serializeInternal(data: String): ByteArray =
-            data.split(':').map { it.toByte() }.toList().toByteArray()
+            data.split(':').map {it.hexPairToByte()  }.toList().toByteArray()
 
         override fun deserializeInternal(data: ByteArray): String =
             data.joinToString(":") { String.format("%02x", it) }
@@ -165,7 +165,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         }
     }),
     UTF8STRING("", object : Converter<String>("") {
-        private val ASCII = Charset.forName("ASCII")
+        private val ASCII = Charset.forName("UTF8")
 
         override fun fromString(string: String): String {
             return string

@@ -146,7 +146,7 @@ class AppModule(private val bleSnifferApplication: BleSnifferApplication) {
     }
 
     @Provides
-    fun provdeSharedPreferences(): SharedPreferences {
+    fun provideSharedPreferences(): SharedPreferences {
         return PreferenceManager.getDefaultSharedPreferences(bleSnifferApplication.applicationContext)
     }
 
