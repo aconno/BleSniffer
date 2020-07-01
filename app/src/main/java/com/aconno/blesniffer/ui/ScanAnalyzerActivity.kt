@@ -27,6 +27,7 @@ import com.aconno.blesniffer.domain.interactor.deserializing.GetAllDeserializers
 import com.aconno.blesniffer.domain.model.ScanEvent
 import com.aconno.blesniffer.domain.model.ScanResult
 import com.aconno.blesniffer.domain.scanning.BluetoothState
+import com.aconno.blesniffer.ui.base.SettingsActivity
 import com.aconno.blesniffer.viewmodel.BluetoothScanningViewModel
 import com.aconno.blesniffer.viewmodel.BluetoothViewModel
 import com.aconno.blesniffer.viewmodel.PermissionViewModel
@@ -353,6 +354,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 scanAnalyzerAdapter.clear()
             }
             R.id.search -> (mainMenu?.findItem(R.id.search)?.actionView as SearchView).performClick()
+            R.id.action_start_settings_activity -> startActivity(Intent(this,SettingsActivity::class.java))
         }
 
         return super.onOptionsItemSelected(item)
