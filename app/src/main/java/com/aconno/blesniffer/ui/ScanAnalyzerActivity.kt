@@ -28,6 +28,7 @@ import com.aconno.blesniffer.adapter.ScanRecordListener
 import com.aconno.blesniffer.dagger.scananalyzeractivity.DaggerScanAnalyzerActivityComponent
 import com.aconno.blesniffer.dagger.scananalyzeractivity.ScanAnalyzerActivityComponent
 import com.aconno.blesniffer.dagger.scananalyzeractivity.ScanAnalyzerActivityModule
+import com.aconno.blesniffer.domain.byteformatter.ByteArrayFormatter
 import com.aconno.blesniffer.domain.interactor.deserializing.GetAllDeserializersUseCase
 import com.aconno.blesniffer.domain.model.ScanEvent
 import com.aconno.blesniffer.domain.model.ScanResult
@@ -78,7 +79,8 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private var filter: String? = null
 
     private val scanAnalyzerAdapter: ScanAnalyzerAdapter by lazy {
-        ScanAnalyzerAdapter(this, this)
+        val byteArrayFormatter = ByteArrayFormatter.getFormatter(preferences.getAdvertisementBytesDisplayMode())
+        ScanAnalyzerAdapter(this, this, byteArrayFormatter)
     }
 
     @Inject
@@ -125,6 +127,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         getSyncDeserializersLiveData().observe(this, Observer {
             onWorkStateChanged(it)
         })
+
+        scanAnalyzerAdapter.advertisementDataFormatter =
+            ByteArrayFormatter.getFormatter(preferences.getAdvertisementBytesDisplayMode())
     }
 
 

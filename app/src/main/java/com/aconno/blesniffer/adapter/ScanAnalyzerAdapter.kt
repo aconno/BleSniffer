@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.aconno.blesniffer.R
+import com.aconno.blesniffer.domain.byteformatter.ByteArrayFormatter
 import com.aconno.blesniffer.domain.deserializing.Deserializer
 import com.aconno.blesniffer.domain.deserializing.FieldDeserializer
 import com.aconno.blesniffer.domain.model.Device
@@ -32,10 +33,18 @@ fun ByteArray.inversedCopyOfRangeInclusive(start: Int, end: Int) =
 
 class ScanAnalyzerAdapter(
         private val scanRecordListener: ScanRecordListener,
-        private val longItemClickListener: LongItemClickListener<ScanResult>
+        private val longItemClickListener: LongItemClickListener<ScanResult>,
+        advertisementDataFormatter : ByteArrayFormatter
+
 ) : RecyclerView.Adapter<ScanAnalyzerAdapter.ViewHolder>() {
     val scanLog: MutableList<Item> = mutableListOf()
     private val hashes: MutableMap<Int, Int> = mutableMapOf()
+
+    var advertisementDataFormatter : ByteArrayFormatter = advertisementDataFormatter
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
     data class Item(
         val scanResult: ScanResult,
@@ -132,7 +141,7 @@ class ScanAnalyzerAdapter(
         fun bind(scanLog: Item) {
             val device = scanLog.scanResult.device
             val advertisementData = scanLog.scanResult.advertisement.rawData
-            val dataHex = advertisementData.toHex()
+            val dataHex = advertisementDataFormatter.formatBytes(advertisementData)
             val scanResult = scanLog.scanResult
 
             view.time.text = formatTimestamp(
