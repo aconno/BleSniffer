@@ -7,6 +7,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.view.Menu
 import android.view.MenuItem
+import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
@@ -31,6 +32,7 @@ import com.aconno.blesniffer.domain.interactor.deserializing.GetAllDeserializers
 import com.aconno.blesniffer.domain.model.ScanEvent
 import com.aconno.blesniffer.domain.model.ScanResult
 import com.aconno.blesniffer.domain.scanning.BluetoothState
+import com.aconno.blesniffer.preferences.BleSnifferPreferences
 import com.aconno.blesniffer.viewmodel.BluetoothScanningViewModel
 import com.aconno.blesniffer.viewmodel.BluetoothViewModel
 import com.aconno.blesniffer.viewmodel.PermissionViewModel
@@ -78,6 +80,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private val scanAnalyzerAdapter: ScanAnalyzerAdapter by lazy {
         ScanAnalyzerAdapter(this, this)
     }
+
+    @Inject
+    lateinit var preferences: BleSnifferPreferences
 
     private val scanAnalyzerActivityComponent: ScanAnalyzerActivityComponent by lazy {
         val bleSnifferApplication: BleSnifferApplication? = application as? BleSnifferApplication
@@ -279,6 +284,12 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
     private fun onScanStart() {
         startScan()
+
+        if(preferences.isKeepScreenOn()) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
     }
 
     private fun startScan() {
@@ -306,6 +317,8 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         }
         Timber.e("Observer Removed")
         scanResultViewModel.getScanResultsLiveData().removeObservers(this)
+
+        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
