@@ -1,7 +1,10 @@
 package com.aconno.blesniffer.ui
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ImageView
@@ -18,6 +21,7 @@ import com.aconno.blesniffer.BleSnifferApplication
 import com.aconno.blesniffer.BluetoothScanningService
 import com.aconno.blesniffer.R
 import com.aconno.blesniffer.adapter.LongItemClickListener
+import com.aconno.blesniffer.adapter.MutablePair
 import com.aconno.blesniffer.adapter.ScanAnalyzerAdapter
 import com.aconno.blesniffer.adapter.ScanRecordListener
 import com.aconno.blesniffer.dagger.scananalyzeractivity.DaggerScanAnalyzerActivityComponent
@@ -38,6 +42,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_scan_analyzer.*
 import timber.log.Timber
+import java.lang.IllegalStateException
 import javax.inject.Inject
 
 
@@ -97,7 +102,10 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
         initViews()
 
-        getAllDeserializers()
+        getAllDeserializers {
+            loadLogs(savedInstanceState)
+            scan_list.scrollToPosition(scanAnalyzerAdapter.itemCount - 1)
+        }
     }
 
     override fun onResume() {
@@ -194,6 +202,13 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         (scan_list.itemAnimator as SimpleItemAnimator).supportsChangeAnimations =
             false
         scan_list.itemAnimator = null
+
+        search_view?.let {
+            setSearchQueryTextListener(it)
+        }
+
+        scanAnalyzerAdapter.hideMissingSerializer = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+
     }
 
 
@@ -298,8 +313,26 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         mainMenu?.clear()
         menuInflater.inflate(R.menu.scanner_menu, menu)
 
-        val searchView = mainMenu?.findItem(R.id.search)?.actionView as SearchView
+        val searchMenuItem = mainMenu?.findItem(R.id.search)
+        searchMenuItem?.isVisible = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
+        val searchView = searchMenuItem?.actionView as SearchView
+
+        setSearchQueryTextListener(searchView)
+
+        mainMenu?.findItem(R.id.action_toggle_scan)?.let {
+            setScanMenuLabel(it)
+            val state = bluetoothViewModel.bluetoothState.value
+            when (state?.state) {
+                BluetoothState.BLUETOOTH_ON -> it.setVisible(true)
+                else -> it.setVisible(false)
+            }
+        }
+
+        return true
+    }
+
+    private fun setSearchQueryTextListener(searchView: SearchView) {
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 filter = null
@@ -331,17 +364,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 return false
             }
         })
-
-        mainMenu?.findItem(R.id.action_toggle_scan)?.let {
-            setScanMenuLabel(it)
-            val state = bluetoothViewModel.bluetoothState.value
-            when (state?.state) {
-                BluetoothState.BLUETOOTH_ON -> it.setVisible(true)
-                else -> it.setVisible(false)
-            }
-        }
-
-        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -383,14 +405,65 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         }
     }
 
-    private fun getAllDeserializers() {
+    private fun getAllDeserializers(onDeserializersLoaded : (() -> Unit)? = null) {
         disposable = getAllDeserializersUseCase.execute()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { deserializers ->
                 scanAnalyzerAdapter.updateDeserializers(deserializers.toMutableList())
+                if (onDeserializersLoaded != null) {
+                    onDeserializersLoaded()
+                }
             }
     }
+
+    private fun loadLogs(savedInstanceState: Bundle?) {
+        savedInstanceState?.let {
+            val scanLogParcelableArray = it.getParcelableArray(SCAN_LOG_KEY)
+            scanLogParcelableArray?.let { array ->
+                val scanLog = array.map { MutablePair((it as ScanLogElement).scanResult, (it as ScanLogElement).repeatingNumber) }
+                scanAnalyzerAdapter.loadScanLog(scanLog)
+            }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        val scanLog = scanAnalyzerAdapter.scanLog
+        val scanLogParcelableArray = scanLog.map { pair -> ScanLogElement(pair.scanResult,pair.occurrences) }.toTypedArray()
+        outState.putParcelableArray(SCAN_LOG_KEY,scanLogParcelableArray)
+    }
+
+    class ScanLogElement(
+        var scanResult : ScanResult,
+        var repeatingNumber : Int
+    ) : Parcelable {
+
+        constructor(parcel: Parcel) : this(
+            parcel.readParcelable(ScanResult::class.java.classLoader) ?: throw IllegalStateException(),
+            parcel.readInt()
+        )
+
+        override fun describeContents() = 0
+
+        override fun writeToParcel(dest: Parcel?, flags: Int) {
+            dest?.writeParcelable(scanResult, 0)
+            dest?.writeInt(repeatingNumber)
+        }
+
+        companion object CREATOR : Parcelable.Creator<ScanLogElement> {
+            override fun createFromParcel(parcel: Parcel): ScanLogElement {
+                return ScanLogElement(parcel)
+            }
+
+            override fun newArray(size: Int): Array<ScanLogElement?> {
+                return arrayOfNulls(size)
+            }
+        }
+
+    }
+
 
     override fun permissionAccepted(actionCode: Int) {
         bluetoothScanningViewModel.startScanning()
@@ -408,5 +481,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     companion object {
         const val EXTRA_FILTER_MAC: String = "com.acconno.blesniffer.FILTER_MAC"
         const val EXTRA_SAMPLE_DATA: String = "com.acconno.blesniffer.SAMPLE_DATA"
+        const val SCAN_LOG_KEY = "SCAN_LOG_KEY"
     }
 }

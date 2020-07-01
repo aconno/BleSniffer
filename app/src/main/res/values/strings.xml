@@ -80,4 +80,6 @@
     <string name="generate">Generate</string>
     <string name="time_between_advs"><![CDATA[<-> %1$dms]]></string>
     <string name="time_between_advs_not_available">&lt;-&gt; N/A</string>
+    <string name="deserializer">Deserializer:</string>
+    <string name="deserializer_fields">Deserializer Fields</string>
 </resources>
