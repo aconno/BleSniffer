@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="show_only_manufacturer_data"
+        android:title="Show only manufacturer data"
+        android:summary="Show only manufacturer data portion of advertisement"
+        app:iconSpaceReserved="false"
+        />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="keep_screen_on"
+        android:title="Keep screen on"
+        android:summary="Keep screen on while scanning"
+        app:iconSpaceReserved="false"
+        />
+
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/adv_bytes_display_mode"
+        android:entryValues="@array/adv_bytes_display_mode_values"
+        android:key="adv_bytes_display_mode"
+        android:title="Advertisement bytes display mode"
+        app:iconSpaceReserved="false"/>
+
+    <SwitchPreference
+        android:defaultValue="false"
+        app:isPreferenceVisible="false"
+        android:key="advanced_mode"
+        android:title="Advanced mode"
+        android:summary="Enable advanced deserialization options"
+        app:iconSpaceReserved="false"
+        />
+
+</PreferenceScreen>

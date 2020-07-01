@@ -21,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.base.SettingsActivity"></activity>
+        <activity android:name=".ui.SettingsActivity"></activity>
         <activity
             android:name=".ui.ScanAnalyzerActivity"
             android:configChanges="screenSize"
