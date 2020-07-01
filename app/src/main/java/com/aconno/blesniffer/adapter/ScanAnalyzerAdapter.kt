@@ -34,7 +34,7 @@ class ScanAnalyzerAdapter(
         private val scanRecordListener: ScanRecordListener,
         private val longItemClickListener: LongItemClickListener<ScanResult>
 ) : RecyclerView.Adapter<ScanAnalyzerAdapter.ViewHolder>() {
-    private val scanLog: MutableList<Item> = mutableListOf()
+    val scanLog: MutableList<Item> = mutableListOf()
     private val hashes: MutableMap<Int, Int> = mutableMapOf()
 
     data class Item(
@@ -44,6 +44,14 @@ class ScanAnalyzerAdapter(
 
 
     var deserializers: MutableList<Deserializer> = mutableListOf()
+
+    var hideMissingSerializer : Boolean = false
+        set(value) {
+            if(field != value) {
+                field = value
+                notifyDataSetChanged()
+            }
+        }
 
     init {
         setHasStableIds(true)
@@ -74,6 +82,20 @@ class ScanAnalyzerAdapter(
             scanRecordListener.onRecordAdded(size)
         }
     }
+
+    fun loadScanLog(scanLog : List<MutablePair<ScanResult,Int>>) {
+        this.scanLog.clear()
+        this.scanLog.addAll(scanLog.map { Item(it.first,it.second) })
+
+        hashes.clear()
+        scanLog.forEachIndexed { index, mutablePair ->
+            val scanResult = mutablePair.first
+            hashes[scanResult.hashCode()] = index
+        }
+
+        notifyDataSetChanged()
+    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
@@ -132,6 +154,8 @@ class ScanAnalyzerAdapter(
                 view.setOnLongClickListener { longItemClickListener.onLongItemClick(scanResult) }
 
                 findDeserializer(device, dataHex)?.let { deserializer ->
+                    view.deserializer?.visibility = View.VISIBLE
+                    view.deserializer_name.visibility = View.VISIBLE
                     view.deserializer_name.text = deserializer.name
 
                     view.deserialized_field_list.layoutManager = LinearLayoutManager(
@@ -144,6 +168,14 @@ class ScanAnalyzerAdapter(
                         it.setFields(deserializer.fieldDeserializers.mapNotNull { fieldDeserializer ->
                             getField(fieldDeserializer, advertisementData)
                         })
+                    }
+                } ?: run {
+                    if (hideMissingSerializer) {
+                        view.deserializer_name.visibility = View.GONE
+                        view.deserializer?.visibility = View.GONE
+                    } else {
+                        view.deserializer_name.visibility = View.VISIBLE
+                        view.deserializer?.visibility = View.VISIBLE
                     }
                 }
                 initialized = true

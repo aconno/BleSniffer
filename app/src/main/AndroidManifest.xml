@@ -10,7 +10,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
     <uses-feature android:name="android.hardware.bluetooth" />
 
     <application
@@ -25,24 +24,24 @@
         <activity android:name=".ui.base.SettingsActivity"></activity>
         <activity
             android:name=".ui.ScanAnalyzerActivity"
-            android:configChanges="orientation|screenSize"
+            android:configChanges="screenSize"
             android:icon="@mipmap/ic_launcher_sniffer"
-            android:label="@string/app_name"
-            android:screenOrientation="landscape"
-            android:usesCleartextTraffic="true">
+            android:usesCleartextTraffic="true"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".ui.DeserializerListActivity"
-            android:screenOrientation="landscape" />
+         />
         <activity
-            android:name=".ui.EditDeserializerActivity"
-            android:screenOrientation="landscape" />
+            android:name=".ui.EditDeserializerActivity" />
+
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -67,6 +66,7 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="${fabricAPIKey}" />
+
     </application>
 
 </manifest>
