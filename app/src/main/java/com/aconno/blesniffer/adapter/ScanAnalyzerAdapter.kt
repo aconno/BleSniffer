@@ -155,11 +155,11 @@ class ScanAnalyzerAdapter(
             view.repeating.text = view.context.getString(
                 R.string.repeating_amount, scanLog.occurrences
             )
+            view.data.text = dataHex
 
             if (!initialized) {
                 view.address.text = device.macAddress
                 view.name.text = device.name
-                view.data.text = dataHex
                 view.setOnLongClickListener { longItemClickListener.onLongItemClick(scanResult) }
 
                 findDeserializer(device, dataHex)?.let { deserializer ->
