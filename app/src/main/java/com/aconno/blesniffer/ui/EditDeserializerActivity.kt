@@ -16,7 +16,6 @@ import com.aconno.blesniffer.R
 import com.aconno.blesniffer.adapter.DeserializedFieldsAdapter
 import com.aconno.blesniffer.adapter.DeserializerEditorAdapter
 import com.aconno.blesniffer.adapter.inversedCopyOfRangeInclusive
-import com.aconno.blesniffer.adapter.toHex
 import com.aconno.blesniffer.dagger.editdeserializeractivity.DaggerEditDeserializerActivityComponent
 import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerActivityComponent
 import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerActivityModule

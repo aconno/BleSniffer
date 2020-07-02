@@ -9,6 +9,7 @@ interface ByteArrayFormatter {
                 ByteArrayFormatMode.SINGLE_BYTE_WITH_PREFIX -> SingleByteWithPrefixByteArrayFormatter()
                 ByteArrayFormatMode.SINGLE_BYTE -> SingleByteByteArrayFormatter()
                 ByteArrayFormatMode.BYTE_PAIRS -> BytePairsByteArrayFormatter()
+                ByteArrayFormatMode.PLAIN -> PlainFormatByteArrayFormatter()
             }
         }
     }
