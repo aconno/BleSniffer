@@ -25,6 +25,10 @@ class BleSnifferPreferences(val context : Context) {
         }
     }
 
+    fun isShowOnlyManufacturerData() : Boolean {
+        return sharedPreferences.getBoolean(SHOW_ONLY_MANUFACTURER_DATA,false)
+    }
+
     companion object {
         const val KEEP_SCREEN_ON = "keep_screen_on"
         const val SHOW_ONLY_MANUFACTURER_DATA = "show_only_manufacturer_data"
