@@ -16,14 +16,15 @@ import com.aconno.blesniffer.R
 import com.aconno.blesniffer.adapter.DeserializedFieldsAdapter
 import com.aconno.blesniffer.adapter.DeserializerEditorAdapter
 import com.aconno.blesniffer.adapter.inversedCopyOfRangeInclusive
-import com.aconno.blesniffer.adapter.toHex
 import com.aconno.blesniffer.dagger.editdeserializeractivity.DaggerEditDeserializerActivityComponent
 import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerActivityComponent
 import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerActivityModule
 import com.aconno.blesniffer.data.deserializing.ParcelableDeserializer
+import com.aconno.blesniffer.domain.byteformatter.ByteArrayFormatter
 import com.aconno.blesniffer.domain.deserializing.Deserializer
 import com.aconno.blesniffer.domain.deserializing.GeneralDeserializer
 import com.aconno.blesniffer.domain.interactor.deserializing.*
+import com.aconno.blesniffer.preferences.BleSnifferPreferences
 import com.aconno.blesniffer.ui.base.BaseActivity
 import com.google.common.io.BaseEncoding
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -55,6 +56,9 @@ class EditDeserializerActivity : BaseActivity() {
     @Inject
     lateinit var generateSampleDataUseCase: GenerateSampleDataUseCase
 
+    @Inject
+    lateinit var preferences: BleSnifferPreferences
+
     var deserializer: Deserializer = GeneralDeserializer()
         set(value) {
             field = value.apply {
@@ -64,7 +68,8 @@ class EditDeserializerActivity : BaseActivity() {
                 ))
                 deserializer_filter.editText?.setText(this.filter)
                 deserializer_name.editText?.setText(this.name)
-                deserializer_sample_data.editText?.setText(if (this.sampleData.isNotEmpty()) this.sampleData.toHex() else "")
+
+                deserializer_sample_data.editText?.setText(bytesToString(sampleData))
             }
         }
 
@@ -83,6 +88,9 @@ class EditDeserializerActivity : BaseActivity() {
     }
 
     private var existing: Boolean = false
+
+    fun bytesToString(byteArray : ByteArray) =
+        ByteArrayFormatter.getFormatter(preferences.getAdvertisementBytesDisplayMode()).formatBytes(byteArray)
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -218,7 +226,7 @@ class EditDeserializerActivity : BaseActivity() {
         generate_sample_data.setOnClickListener {
             generateSampleDataUseCase.execute(updateDeserializerFromInputData())
                 .subscribe { sampleData ->
-                    deserializer_sample_data.editText?.setText(sampleData.toHex())
+                    deserializer_sample_data.editText?.setText(bytesToString(sampleData))
                 }
 
         }

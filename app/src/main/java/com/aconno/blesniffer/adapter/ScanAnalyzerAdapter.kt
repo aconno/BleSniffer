@@ -8,7 +8,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.aconno.blesniffer.R
+import com.aconno.blesniffer.domain.byteformatter.ByteArrayFormatter
 import com.aconno.blesniffer.domain.deserializing.Deserializer
+import com.aconno.blesniffer.domain.deserializing.DeserializerFinder
 import com.aconno.blesniffer.domain.deserializing.FieldDeserializer
 import com.aconno.blesniffer.domain.model.Device
 import com.aconno.blesniffer.domain.model.ScanResult
@@ -19,23 +21,25 @@ import java.lang.IndexOutOfBoundsException
 import java.text.SimpleDateFormat
 import java.util.*
 
-//TODO (This needs a refactor, this adapter is doing all the business logic)
-fun ByteArray.toHex() = this.joinToString(separator = "") {
-    "0x" + it.toInt().and(0xff).toString(16).padStart(
-            2,
-            '0'
-    ).toUpperCase() + " "
-}
 
 fun ByteArray.inversedCopyOfRangeInclusive(start: Int, end: Int) =
         this.reversedArray().copyOfRange((size - 1) - start, (size - 1) - end + 1)
 
 class ScanAnalyzerAdapter(
         private val scanRecordListener: ScanRecordListener,
-        private val longItemClickListener: LongItemClickListener<ScanResult>
+        private val longItemClickListener: LongItemClickListener<ScanResult>,
+        advertisementDataFormatter : ByteArrayFormatter,
+        private val deserializerFinder : DeserializerFinder
+
 ) : RecyclerView.Adapter<ScanAnalyzerAdapter.ViewHolder>() {
     val scanLog: MutableList<Item> = mutableListOf()
     private val hashes: MutableMap<Int, Int> = mutableMapOf()
+
+    var advertisementDataFormatter : ByteArrayFormatter = advertisementDataFormatter
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
     data class Item(
         val scanResult: ScanResult,
@@ -132,7 +136,7 @@ class ScanAnalyzerAdapter(
         fun bind(scanLog: Item) {
             val device = scanLog.scanResult.device
             val advertisementData = scanLog.scanResult.advertisement.rawData
-            val dataHex = advertisementData.toHex()
+            val dataHex = advertisementDataFormatter.formatBytes(advertisementData)
             val scanResult = scanLog.scanResult
 
             view.time.text = formatTimestamp(
@@ -146,14 +150,14 @@ class ScanAnalyzerAdapter(
             view.repeating.text = view.context.getString(
                 R.string.repeating_amount, scanLog.occurrences
             )
+            view.data.text = dataHex
 
             if (!initialized) {
                 view.address.text = device.macAddress
                 view.name.text = device.name
-                view.data.text = dataHex
                 view.setOnLongClickListener { longItemClickListener.onLongItemClick(scanResult) }
 
-                findDeserializer(device, dataHex)?.let { deserializer ->
+                deserializerFinder.findDeserializerForDevice(deserializers,device,advertisementData)?.let { deserializer ->
                     view.deserializer?.visibility = View.VISIBLE
                     view.deserializer_name.visibility = View.VISIBLE
                     view.deserializer_name.text = deserializer.name
@@ -179,16 +183,6 @@ class ScanAnalyzerAdapter(
                     }
                 }
                 initialized = true
-            }
-        }
-
-        private fun findDeserializer(device: Device, dataHex: String): Deserializer? {
-            return deserializers.find {
-                when (it.filterType) {
-                    Deserializer.Type.MAC -> device.macAddress.matches(it.pattern)
-                    Deserializer.Type.DATA -> dataHex.matches(it.pattern) or dataHex.contains(it.pattern)
-                    else -> false
-                }
             }
         }
 
