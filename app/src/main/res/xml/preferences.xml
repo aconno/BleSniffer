@@ -7,7 +7,7 @@
         android:title="Show only manufacturer data"
         android:summary="Show only manufacturer data portion of advertisement"
         app:iconSpaceReserved="false"
-        app:isPreferenceVisible="false"
+        app:isPreferenceVisible="true"
         />
 
     <SwitchPreference

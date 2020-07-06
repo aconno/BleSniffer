@@ -8,11 +8,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.aconno.blesniffer.R
+import com.aconno.blesniffer.domain.advertisementfilter.AdvertisementDataFilter
 import com.aconno.blesniffer.domain.byteformatter.ByteArrayFormatter
 import com.aconno.blesniffer.domain.deserializing.Deserializer
 import com.aconno.blesniffer.domain.deserializing.DeserializerFinder
 import com.aconno.blesniffer.domain.deserializing.FieldDeserializer
-import com.aconno.blesniffer.domain.model.Device
 import com.aconno.blesniffer.domain.model.ScanResult
 import com.aconno.blesniffer.domain.util.ByteOperations
 import kotlinx.android.synthetic.main.item_scan_record.view.*
@@ -26,16 +26,23 @@ fun ByteArray.inversedCopyOfRangeInclusive(start: Int, end: Int) =
         this.reversedArray().copyOfRange((size - 1) - start, (size - 1) - end + 1)
 
 class ScanAnalyzerAdapter(
-        private val scanRecordListener: ScanRecordListener,
-        private val longItemClickListener: LongItemClickListener<ScanResult>,
-        advertisementDataFormatter : ByteArrayFormatter,
-        private val deserializerFinder : DeserializerFinder
+    private val scanRecordListener: ScanRecordListener,
+    private val longItemClickListener: LongItemClickListener<ScanResult>,
+    advertisementDataFormatter : ByteArrayFormatter,
+    advertisementDataFilter : AdvertisementDataFilter?,
+    private val deserializerFinder : DeserializerFinder
 
 ) : RecyclerView.Adapter<ScanAnalyzerAdapter.ViewHolder>() {
     val scanLog: MutableList<Item> = mutableListOf()
     private val hashes: MutableMap<Int, Int> = mutableMapOf()
 
     var advertisementDataFormatter : ByteArrayFormatter = advertisementDataFormatter
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
+    var advertisementDataFilter : AdvertisementDataFilter? = advertisementDataFilter
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -136,7 +143,8 @@ class ScanAnalyzerAdapter(
         fun bind(scanLog: Item) {
             val device = scanLog.scanResult.device
             val advertisementData = scanLog.scanResult.advertisement.rawData
-            val dataHex = advertisementDataFormatter.formatBytes(advertisementData)
+            val filteredAdvertisementData = advertisementDataFilter?.filterAdvertisementData(advertisementData) ?: advertisementData
+            val dataHex = advertisementDataFormatter.formatBytes(filteredAdvertisementData)
             val scanResult = scanLog.scanResult
 
             view.time.text = formatTimestamp(

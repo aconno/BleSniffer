@@ -28,6 +28,7 @@ import com.aconno.blesniffer.adapter.ScanRecordListener
 import com.aconno.blesniffer.dagger.scananalyzeractivity.DaggerScanAnalyzerActivityComponent
 import com.aconno.blesniffer.dagger.scananalyzeractivity.ScanAnalyzerActivityComponent
 import com.aconno.blesniffer.dagger.scananalyzeractivity.ScanAnalyzerActivityModule
+import com.aconno.blesniffer.domain.advertisementfilter.ManufacturerDataAdvertisementFilter
 import com.aconno.blesniffer.domain.byteformatter.ByteArrayFormatter
 import com.aconno.blesniffer.domain.deserializing.DeserializerFinder
 import com.aconno.blesniffer.domain.interactor.deserializing.GetAllDeserializersUseCase
@@ -84,7 +85,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
     private val scanAnalyzerAdapter: ScanAnalyzerAdapter by lazy {
         val byteArrayFormatter = ByteArrayFormatter.getFormatter(preferences.getAdvertisementBytesDisplayMode())
-        ScanAnalyzerAdapter(this, this, byteArrayFormatter, deserializerFinder)
+        ScanAnalyzerAdapter(this, this, byteArrayFormatter, getAdvertisementDataFilter(), deserializerFinder)
     }
 
     @Inject
@@ -134,8 +135,13 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
         scanAnalyzerAdapter.advertisementDataFormatter =
             ByteArrayFormatter.getFormatter(preferences.getAdvertisementBytesDisplayMode())
+        scanAnalyzerAdapter.advertisementDataFilter = getAdvertisementDataFilter()
     }
 
+    private fun getAdvertisementDataFilter() = when {
+        preferences.isShowOnlyManufacturerData() -> ManufacturerDataAdvertisementFilter()
+        else -> null
+    }
 
     override fun onPause() {
         super.onPause()
