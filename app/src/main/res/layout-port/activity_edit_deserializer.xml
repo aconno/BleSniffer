@@ -69,48 +69,47 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/deserializer_filter" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/sample_data_fragment"
-                android:layout_width="match_parent"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/deserializer_sample_data"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/deserializer_filter">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/sample_data_hint" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/preview"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/preview"
+                app:layout_constraintTop_toBottomOf="@id/deserializer_sample_data"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <Button
+                android:id="@+id/generate_sample_data"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/generate"
+                app:layout_constraintTop_toBottomOf="@id/deserializer_sample_data"
+                app:layout_constraintStart_toEndOf="@id/preview" />
+
+            <TextView
+                android:id="@+id/deserializer_fields"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/deserializer_filter">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/deserializer_sample_data"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/preview"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minLines="3"
-                        android:gravity="top"
-                        android:hint="@string/sample_data_hint" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <Button
-                    android:id="@+id/preview"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/preview"
-                    app:layout_constraintTop_toTopOf="@+id/deserializer_sample_data"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    />
-
-                <Button
-                    android:id="@+id/generate_sample_data"
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/generate"
-                    android:layout_marginEnd="40dp"
-                    app:layout_constraintTop_toBottomOf="@id/preview"
-                    app:layout_constraintStart_toStartOf="@id/preview" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                app:layout_constraintTop_toBottomOf="@id/preview"
+                android:text="@string/deserializer_fields"
+                android:textSize="25sp"
+                android:layout_marginTop="15dp"
+                android:layout_marginStart="4dp"
+                />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/deserializer_list"
@@ -119,7 +118,7 @@
                 android:scrollbars="vertical"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/sample_data_fragment"
+                app:layout_constraintTop_toBottomOf="@+id/deserializer_fields"
                 tools:itemCount="25" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -131,9 +130,9 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/deserializer_list"
+                android:layout_marginTop="10dp"
                 app:fabSize="normal" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

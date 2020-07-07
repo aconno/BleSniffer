@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.aconno.blesniffer.BleSnifferApplication
@@ -15,13 +16,15 @@ import com.aconno.blesniffer.R
 import com.aconno.blesniffer.adapter.DeserializedFieldsAdapter
 import com.aconno.blesniffer.adapter.DeserializerEditorAdapter
 import com.aconno.blesniffer.adapter.inversedCopyOfRangeInclusive
-import com.aconno.blesniffer.adapter.toHex
 import com.aconno.blesniffer.dagger.editdeserializeractivity.DaggerEditDeserializerActivityComponent
 import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerActivityComponent
 import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerActivityModule
+import com.aconno.blesniffer.data.deserializing.ParcelableDeserializer
+import com.aconno.blesniffer.domain.byteformatter.ByteArrayFormatter
 import com.aconno.blesniffer.domain.deserializing.Deserializer
 import com.aconno.blesniffer.domain.deserializing.GeneralDeserializer
 import com.aconno.blesniffer.domain.interactor.deserializing.*
+import com.aconno.blesniffer.preferences.BleSnifferPreferences
 import com.aconno.blesniffer.ui.base.BaseActivity
 import com.google.common.io.BaseEncoding
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -53,6 +56,9 @@ class EditDeserializerActivity : BaseActivity() {
     @Inject
     lateinit var generateSampleDataUseCase: GenerateSampleDataUseCase
 
+    @Inject
+    lateinit var preferences: BleSnifferPreferences
+
     var deserializer: Deserializer = GeneralDeserializer()
         set(value) {
             field = value.apply {
@@ -62,7 +68,8 @@ class EditDeserializerActivity : BaseActivity() {
                 ))
                 deserializer_filter.editText?.setText(this.filter)
                 deserializer_name.editText?.setText(this.name)
-                deserializer_sample_data.editText?.setText(if (this.sampleData.isNotEmpty()) this.sampleData.toHex() else "")
+
+                deserializer_sample_data.editText?.setText(bytesToString(sampleData))
             }
         }
 
@@ -82,6 +89,9 @@ class EditDeserializerActivity : BaseActivity() {
 
     private var existing: Boolean = false
 
+    fun bytesToString(byteArray : ByteArray) =
+        ByteArrayFormatter.getFormatter(preferences.getAdvertisementBytesDisplayMode()).formatBytes(byteArray)
+
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,43 +105,58 @@ class EditDeserializerActivity : BaseActivity() {
         deserializer_list.adapter = deserializerEditorAdapter
         deserializer_list.isNestedScrollingEnabled = false
         deserializer_list.layoutManager = LinearLayoutManager(this)
-        intent.extras?.let { extras ->
-            if (extras.getLong("id", -2L) != -2L) {
-                getDeserializerByIdUseCase.execute(extras.getLong("id"))
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                        {
-                            deserializer = it
-                            existing = true
-                        },
-                        {
-                            deserializer = GeneralDeserializer()
-                        }
-                    )
-            } else {
-                val filterContent: String = extras.getString("filter", "")
-                val type: String = extras.getString("type", "")
-                val sampleData = extras.getByteArray("sampleData") ?: byteArrayOf()
-                getDeserializerByFilterUseCase.execute(filterContent, type)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                        {
-                            deserializer = it
-                            existing = true
-                        },
-                        {
-                            deserializer = GeneralDeserializer(
-                                filter = filterContent,
-                                sampleData = sampleData
-                            )
-                        }
-                    )
+
+        if(savedInstanceState != null) {
+            val parcelableDeserializer = savedInstanceState.get(DESERIALIZER_KEY) as ParcelableDeserializer
+            deserializer = GeneralDeserializer(
+                parcelableDeserializer.id,
+                parcelableDeserializer.name,
+                parcelableDeserializer.filter,
+                parcelableDeserializer.filterType,
+                parcelableDeserializer.fieldDeserializers,
+                parcelableDeserializer.sampleData
+            )
+            existing = savedInstanceState.getBoolean(EXISTING_KEY)
+        } else {
+            intent.extras?.let { extras ->
+                if (extras.getLong("id", -2L) != -2L) {
+                    getDeserializerByIdUseCase.execute(extras.getLong("id"))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                            {
+                                deserializer = it
+                                existing = true
+                            },
+                            {
+                                deserializer = GeneralDeserializer()
+                            }
+                        )
+                } else {
+                    val filterContent: String = extras.getString("filter", "")
+                    val type: String = extras.getString("type", "")
+                    val sampleData = extras.getByteArray("sampleData") ?: byteArrayOf()
+                    getDeserializerByFilterUseCase.execute(filterContent, type)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                            {
+                                deserializer = it
+                                existing = true
+                            },
+                            {
+                                deserializer = GeneralDeserializer(
+                                    filter = filterContent,
+                                    sampleData = sampleData
+                                )
+                            }
+                        )
+                }
+            } ?: run {
+                deserializer = GeneralDeserializer()
             }
-        } ?: run {
-            deserializer = GeneralDeserializer()
         }
+
 
         deserializer_filter_type.adapter = ArrayAdapter(
             this,
@@ -201,10 +226,13 @@ class EditDeserializerActivity : BaseActivity() {
         generate_sample_data.setOnClickListener {
             generateSampleDataUseCase.execute(updateDeserializerFromInputData())
                 .subscribe { sampleData ->
-                    deserializer_sample_data.editText?.setText(sampleData.toHex())
+                    deserializer_sample_data.editText?.setText(bytesToString(sampleData))
                 }
 
         }
+
+        deserializer_list.addItemDecoration(DividerItemDecoration(this,
+            DividerItemDecoration.VERTICAL))
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
@@ -272,6 +300,18 @@ class EditDeserializerActivity : BaseActivity() {
         }
 
         return true
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        val deserializer = updateDeserializerFromInputData()
+        outState.putParcelable(DESERIALIZER_KEY,ParcelableDeserializer(deserializer))
+        outState.putBoolean(EXISTING_KEY,existing)
+    }
+
+    companion object {
+        const val DESERIALIZER_KEY = "DESERIALIZER_KEY"
+        const val EXISTING_KEY = "EXISTING_KEY"
     }
 
 }

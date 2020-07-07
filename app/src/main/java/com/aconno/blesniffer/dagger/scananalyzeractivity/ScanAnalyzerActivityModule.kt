@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModelProviders
 import com.aconno.blesniffer.BleSnifferApplication
 import com.aconno.blesniffer.BluetoothStateReceiver
 import com.aconno.blesniffer.device.permissons.PermissionActionFactory
+import com.aconno.blesniffer.domain.deserializing.DeserializerFinder
+import com.aconno.blesniffer.domain.deserializing.DeserializerFinderImpl
 import com.aconno.blesniffer.domain.deserializing.DeserializerRepository
 import com.aconno.blesniffer.domain.interactor.deserializing.GetAllDeserializersUseCase
 import com.aconno.blesniffer.domain.model.ScanResult
@@ -86,5 +88,11 @@ class ScanAnalyzerActivityModule(private val scanAnalyzerActivity: ScanAnalyzerA
     @ScanAnalyzerActivityScope
     fun provideGetAllDeserializersUseCase(deserializerRepository: DeserializerRepository): GetAllDeserializersUseCase {
         return GetAllDeserializersUseCase(deserializerRepository)
+    }
+
+    @Provides
+    @ScanAnalyzerActivityScope
+    fun provideDeserializerFinder(): DeserializerFinder {
+        return DeserializerFinderImpl()
     }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="adv_bytes_display_mode">
+        <item>0x02 0x46 0x8A 0xCE</item>
+        <item>01 23 45 67 89 AB CD</item>
+        <item>0123 4567 89AB CDEF</item>
+    </string-array>
+    <string-array name="adv_bytes_display_mode_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+</resources>

@@ -26,6 +26,7 @@ import com.aconno.blesniffer.domain.interactor.sync.SyncDeserializersUseCase
 import com.aconno.blesniffer.domain.model.ScanResult
 import com.aconno.blesniffer.domain.scanning.Bluetooth
 import com.aconno.blesniffer.domain.sync.SyncRepository
+import com.aconno.blesniffer.preferences.BleSnifferPreferences
 import dagger.Module
 import dagger.Provides
 import io.reactivex.Flowable
@@ -74,6 +75,10 @@ class AppModule(private val bleSnifferApplication: BleSnifferApplication) {
     @Provides
     @Singleton
     fun provideBleSnifferApplication(): BleSnifferApplication = bleSnifferApplication
+
+    @Provides
+    @Singleton
+    fun provideBleSnifferPreferences(): BleSnifferPreferences = BleSnifferPreferences(bleSnifferApplication)
 
     @Provides
     @Singleton
