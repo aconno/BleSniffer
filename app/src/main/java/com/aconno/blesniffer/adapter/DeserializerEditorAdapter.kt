@@ -74,6 +74,9 @@ class DeserializerEditorAdapter(
                         }
 
                         override fun onColorSelected(dialogId: Int, color: Int) {
+                            if(adapterPosition == RecyclerView.NO_POSITION) {
+                                return
+                            }
                             fieldDeserializers[adapterPosition].color = color
                             this@ViewHolder.view.color_button?.setBackgroundColor(color)
                         }
