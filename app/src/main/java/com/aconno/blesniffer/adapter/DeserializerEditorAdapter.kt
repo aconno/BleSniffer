@@ -106,11 +106,10 @@ class DeserializerEditorAdapter(
                             view.end.isEnabled = false
 
 
-                            val value = Integer.parseInt(
-                                view.start.editText?.text?.toString()?.takeIf {
+                            val value = view.start.editText?.text?.toString()?.takeIf {
                                     it.isNotEmpty()
-                                } ?: "0"
-                            )
+                                }?.toIntOrNull() ?: 0
+
 
                             (value + valueConverter.converter.length).let { endIndexExclusive ->
                                 view.end.editText?.setText(endIndexExclusive.toString())
@@ -143,15 +142,15 @@ class DeserializerEditorAdapter(
             })
             view.start.editText?.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
-                    view.start.error = if (s.toString().isBlank()) {
+                    val value = s.toString().takeIf { it.isNotEmpty() }?.toIntOrNull()
+                    view.start.error = if (value == null) {
                         "Defaulting to 0"
                     } else null
 
-                    val value = Integer.parseInt(s.toString().takeIf { it.isNotEmpty() } ?: "0")
-                    fieldDeserializers[adapterPosition].startIndexInclusive = value
+                    fieldDeserializers[adapterPosition].startIndexInclusive = value ?: 0
 
                     if (!view.end.isEnabled) {
-                        val endValue = (value + fieldDeserializers[adapterPosition].type.converter.length)
+                        val endValue = (value ?: 0 + fieldDeserializers[adapterPosition].type.converter.length)
                         view.end.editText?.setText(endValue.toString())
                         fieldDeserializers[adapterPosition].endIndexExclusive = endValue
                     }
@@ -164,12 +163,12 @@ class DeserializerEditorAdapter(
             view.end.editText?.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
                     if (!view.end.isEnabled) return
-                    view.end.error = if (s.toString().isBlank()) {
+
+                    val value = s.toString().takeIf { it.isNotEmpty() }?.toIntOrNull()
+                    view.end.error = if (value == null) {
                         "Defaulting to 0"
                     } else null
-
-                    val value = Integer.parseInt(s.toString().takeIf { it.isNotEmpty() } ?: "0")
-                    fieldDeserializers[adapterPosition].endIndexExclusive = value
+                    fieldDeserializers[adapterPosition].endIndexExclusive = value ?: 0
                 }
 
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
