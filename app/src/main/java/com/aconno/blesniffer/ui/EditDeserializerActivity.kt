@@ -186,19 +186,17 @@ class EditDeserializerActivity : BaseActivity() {
                 val end = d.endIndexExclusive
                 val size = rawData.size
                 Triple(
-                        d.name,
-                        if (start > size || end > size) getString(R.string.bad_indexes)
-                        else try {
-                            d.type.converter.deserialize(
-                                    if (start <= end) rawData.copyOfRange(start, end)
-                                    else rawData.inversedCopyOfRangeInclusive(start, end)
-                            ).toString()
-                        } catch (e: IllegalArgumentException) {
-                            getString(R.string.invalid_byte_data)
-                        } catch (e: IndexOutOfBoundsException) {
-                            getString(R.string.invalid_byte_data)
-                        },
-                        d.color
+                    d.name,
+                    if (start > size || end > size) getString(R.string.bad_indexes)
+                    else try {
+                        d.type.converter.deserialize(
+                            if (start <= end) rawData.copyOfRange(start, end)
+                            else rawData.inversedCopyOfRangeInclusive(start, end)
+                        ).toString()
+                    } catch (e: IllegalArgumentException) {
+                        getString(R.string.invalid_byte_data)
+                    },
+                    d.color
                 )
             }.let {
                 val view = layoutInflater.inflate(R.layout.popup_field_list_preview, findViewById(android.R.id.content), false)
