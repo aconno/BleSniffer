@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'io.fabric'
+apply from: '../version.gradle'
 
 android {
     compileSdkVersion 29
@@ -11,8 +12,8 @@ android {
         applicationId "com.aconno.blesniffer"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode rootProject.ext.bleScannerVersionCode
-        versionName rootProject.ext.bleScannerVersionName
+        versionCode generateVersionCode()
+        versionName generateVersionName()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [fabricAPIKey: sensorics_fabricKey]
     }

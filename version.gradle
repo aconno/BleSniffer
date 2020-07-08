@@ -1,0 +1,28 @@
+// Version information
+def versionMajor = 3
+def versionMinor = 4
+def versionPatch = 0
+
+ext.generateVersionCode = {
+    return 1000000 * versionMajor + 1000 * versionMinor + versionPatch
+}
+
+ext.generateVersionName = {
+    if (project.hasProperty('RELEASE_FLAG') && RELEASE_FLAG == "true") {
+        return "$versionMajor.$versionMinor.$versionPatch"
+    } else {
+        return "$versionMajor.$versionMinor.$versionPatch-SNAPSHOT"
+    }
+}
+
+task printVersionName {
+    doLast {
+        println generateVersionName()
+    }
+}
+
+task printVersionCode {
+    doLast {
+        println generateVersionCode()
+    }
+}
