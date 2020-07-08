@@ -54,7 +54,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         override fun fromString(string: String): String = string
 
         override fun serializeInternal(data: String): ByteArray =
-            data.split(':').map { it.toByte() }.toList().toByteArray()
+            data.split(':').map {it.hexPairToByte()  }.toList().toByteArray()
 
         override fun deserializeInternal(data: ByteArray): String =
             data.joinToString(":") { String.format("%02x", it) }
@@ -165,7 +165,7 @@ enum class ValueConverter(var default: Any, var converter: Converter<*>) {
         }
     }),
     UTF8STRING("", object : Converter<String>("") {
-        private val ASCII = Charset.forName("ASCII")
+        private val ASCII = Charset.forName("UTF8")
 
         override fun fromString(string: String): String {
             return string

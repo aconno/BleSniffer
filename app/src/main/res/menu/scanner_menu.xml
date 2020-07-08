@@ -18,9 +18,13 @@
         android:id="@+id/action_clear"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"
         android:title="Clear"
-        app:showAsAction="always" />
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_start_deserializer_list_activity"
         android:title="Deserializers"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_start_settings_activity"
+        android:title="@string/settings"
         app:showAsAction="never" />
 </menu>

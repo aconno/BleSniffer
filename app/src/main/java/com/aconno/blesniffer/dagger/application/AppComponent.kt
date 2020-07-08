@@ -8,6 +8,7 @@ import com.aconno.blesniffer.domain.deserializing.DeserializerRepository
 import com.aconno.blesniffer.domain.model.ScanResult
 import com.aconno.blesniffer.domain.scanning.Bluetooth
 import com.aconno.blesniffer.domain.sync.SyncRepository
+import com.aconno.blesniffer.preferences.BleSnifferPreferences
 import com.aconno.blesniffer.work.factory.BleSnifferWorkerFactory
 import dagger.Component
 import io.reactivex.Flowable
@@ -20,6 +21,8 @@ interface AppComponent {
     fun bleSnifferWorkerFactory(): BleSnifferWorkerFactory
 
     fun bleSnifferApplication(): BleSnifferApplication
+
+    fun bleSnifferPreferences(): BleSnifferPreferences
 
     fun bluetooth(): Bluetooth
 

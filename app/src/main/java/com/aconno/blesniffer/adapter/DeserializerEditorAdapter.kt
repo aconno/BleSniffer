@@ -59,38 +59,7 @@ class DeserializerEditorAdapter(
         holder.bind(fieldDeserializers[position])
     }
 
-    inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view), TextWatcher {
-        override fun afterTextChanged(s: Editable) {
-            val fieldDeserializer = fieldDeserializers[adapterPosition]
-
-            when (s) {
-                view.til_name.editText?.editableText -> fieldDeserializer.name = s.toString()
-                view.til_start.editText?.editableText -> {
-                    view.til_start.error = if (s.toString().isBlank()) {
-                        "Defaulting to 0"
-                    } else null
-
-                    val value = Integer.parseInt(s.toString().takeIf { it.isNotEmpty() } ?: "0")
-                    fieldDeserializer.startIndexInclusive = value
-
-                    if (!view.til_end.isEnabled) {
-                        val endValue = (value + fieldDeserializer.type.converter.length)
-                        view.til_end.editText?.setText(endValue.toString())
-                        fieldDeserializer.endIndexExclusive = endValue
-                    }
-                }
-                view.til_end.editText?.editableText -> {
-                    if (!view.til_end.isEnabled) return
-                    view.til_end.error = if (s.toString().isBlank()) {
-                        "Defaulting to 0"
-                    } else null
-
-                    val value = Integer.parseInt(s.toString().takeIf { it.isNotEmpty() } ?: "0")
-                    fieldDeserializer.endIndexExclusive = value
-                }
-            }
-        }
-
+    inner class ViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         private fun showColorPickerDialog() {
             ColorPickerDialog
                 .newBuilder()
@@ -101,7 +70,7 @@ class DeserializerEditorAdapter(
                 .create().apply {
                     setColorPickerDialogListener(object : ColorPickerDialogListener {
                         override fun onDialogDismissed(dialogId: Int) {
-                            TODO("Not yet implemented")
+
                         }
 
                         override fun onColorSelected(dialogId: Int, color: Int) {
@@ -123,31 +92,31 @@ class DeserializerEditorAdapter(
         }
 
         init {
-            view.til_name.editText?.addTextChangedListener(this)
-            view.til_start.editText?.addTextChangedListener(this)
-            view.til_end.editText?.addTextChangedListener(this)
+            registerTextWatchers()
 
             view.spinner_converter_type.adapter = converterTypeAdapter
             view.spinner_converter_type.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>, v: View, position: Int, id: Long) {
-                    val valueConverter = ValueConverter.values()[position]
-                    fieldDeserializers[adapterPosition].type = valueConverter
+                    ValueConverter.values()[position].let { valueConverter ->
+                        fieldDeserializers[adapterPosition].type = valueConverter
 
-                    if (valueConverter.converter.length == -1) {
-                        view.til_end.isEnabled = true
-                    } else {
-                        view.til_end.isEnabled = false
+                        if (valueConverter.converter.length == -1) {
+                            view.end.isEnabled = true
+                        } else {
+                            view.end.isEnabled = false
 
 
-                        val value = Integer.parseInt(
-                            view.til_start.editText?.text?.toString()?.takeIf {
-                                it.isNotEmpty()
-                            } ?: "0"
-                        )
+                            val value = Integer.parseInt(
+                                view.start.editText?.text?.toString()?.takeIf {
+                                    it.isNotEmpty()
+                                } ?: "0"
+                            )
 
-                        view.til_end.editText?.setText(
-                            (value + fieldDeserializers[adapterPosition].type.converter.length).toString()
-                        )
+                            (value + valueConverter.converter.length).let { endIndexExclusive ->
+                                view.end.editText?.setText(endIndexExclusive.toString())
+                                fieldDeserializers[adapterPosition].endIndexExclusive = endIndexExclusive
+                            }
+                        }
                     }
                 }
 
@@ -162,17 +131,61 @@ class DeserializerEditorAdapter(
             }
         }
 
-        fun bind(fieldDeserializer: FieldDeserializer) {
-            view.til_name.editText?.setText(fieldDeserializer.name)
-            view.color_button.setBackgroundColor(fieldDeserializer.color)
-            view.spinner_converter_type.setSelection(converterTypeAdapter.getPosition(fieldDeserializer.type.name))
-            view.til_start.editText?.setText(fieldDeserializer.startIndexInclusive.toString())
-            view.til_end.isEnabled = fieldDeserializer.type.converter.length == -1
-            view.til_end.editText?.setText(fieldDeserializer.endIndexExclusive.toString())
+        private fun registerTextWatchers() {
+            view.name.editText?.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    fieldDeserializers[adapterPosition].name = s.toString()
+                }
+
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            })
+            view.start.editText?.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    view.start.error = if (s.toString().isBlank()) {
+                        "Defaulting to 0"
+                    } else null
+
+                    val value = Integer.parseInt(s.toString().takeIf { it.isNotEmpty() } ?: "0")
+                    fieldDeserializers[adapterPosition].startIndexInclusive = value
+
+                    if (!view.end.isEnabled) {
+                        val endValue = (value + fieldDeserializers[adapterPosition].type.converter.length)
+                        view.end.editText?.setText(endValue.toString())
+                        fieldDeserializers[adapterPosition].endIndexExclusive = endValue
+                    }
+                }
+
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            })
+            view.end.editText?.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    if (!view.end.isEnabled) return
+                    view.end.error = if (s.toString().isBlank()) {
+                        "Defaulting to 0"
+                    } else null
+
+                    val value = Integer.parseInt(s.toString().takeIf { it.isNotEmpty() } ?: "0")
+                    fieldDeserializers[adapterPosition].endIndexExclusive = value
+                }
+
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            })
         }
 
-        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
-        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+        fun bind(fieldDeserializer: FieldDeserializer) {
+            view.name.editText?.setText(fieldDeserializer.name)
+            view.color_button.setBackgroundColor(fieldDeserializer.color)
+            view.spinner_converter_type.setSelection(converterTypeAdapter.getPosition(fieldDeserializer.type.name))
+            view.start.editText?.setText(fieldDeserializer.startIndexInclusive.toString())
+            view.end.isEnabled = fieldDeserializer.type.converter.length == -1
+            view.end.editText?.setText(fieldDeserializer.endIndexExclusive.toString())
+        }
     }
 
     fun createItemTouchHelper(): ItemTouchHelper.SimpleCallback =

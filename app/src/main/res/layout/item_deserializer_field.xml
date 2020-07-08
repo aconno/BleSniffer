@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="4dp">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/til_name"
+        android:id="@+id/name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toStartOf="@+id/spinner_converter_type"
+        app:layout_constraintEnd_toStartOf="@+id/color_button"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -20,16 +21,6 @@
             android:hint="@string/name" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Spinner
-        android:id="@+id/spinner_converter_type"
-        android:layout_width="144dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="2dp"
-        app:layout_constraintBottom_toBottomOf="@+id/til_name"
-        app:layout_constraintEnd_toStartOf="@+id/color_button"
-        app:layout_constraintStart_toEndOf="@+id/til_name"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <Button
         android:id="@+id/color_button"
         android:layout_width="48dp"
@@ -37,16 +28,26 @@
         android:layout_marginStart="2dp"
         android:background="@android:color/holo_red_dark"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/spinner_converter_type"
+        app:layout_constraintStart_toEndOf="@+id/name"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/spinner_converter_type"
+        android:layout_width="144dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="2dp"
+        app:layout_constraintBottom_toBottomOf="@+id/name"
+        app:layout_constraintEnd_toStartOf="@+id/start"
+        app:layout_constraintStart_toEndOf="@+id/color_button"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/til_start"
-        android:layout_width="wrap_content"
+        android:id="@+id/start"
+        android:layout_width="90dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="2dp"
-        app:layout_constraintEnd_toStartOf="@+id/til_end"
-        app:layout_constraintStart_toEndOf="@+id/color_button"
+        app:layout_constraintEnd_toStartOf="@+id/end"
+        app:layout_constraintStart_toEndOf="@+id/spinner_converter_type"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -58,12 +59,12 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/til_end"
-        android:layout_width="wrap_content"
+        android:id="@+id/end"
+        android:layout_width="90dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="2dp"
         app:layout_constraintEnd_toEndOf="@+id/btn_remove"
-        app:layout_constraintStart_toEndOf="@+id/til_start"
+        app:layout_constraintStart_toEndOf="@+id/start"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -74,14 +75,16 @@
             android:inputType="number" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
+    <ImageButton
         android:id="@+id/btn_remove"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginStart="2dp"
+        android:src="@android:drawable/ic_menu_delete"
         android:text="@string/remove"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/til_end"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/end"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@android:drawable/ic_menu_delete" />
 </androidx.constraintlayout.widget.ConstraintLayout>
