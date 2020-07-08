@@ -109,9 +109,7 @@ class DeserializerEditorAdapter(
                             view.end.isEnabled = false
 
 
-                            val value = view.start.editText?.text?.toString()?.takeIf {
-                                    it.isNotEmpty()
-                                }?.toIntOrNull() ?: 0
+                            val value = view.start.editText?.text?.toString()?.toIntOrNull() ?: 0
 
 
                             (value + valueConverter.converter.length).let { endIndexExclusive ->
@@ -145,7 +143,7 @@ class DeserializerEditorAdapter(
             })
             view.start.editText?.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
-                    val value = s.toString().takeIf { it.isNotEmpty() }?.toIntOrNull()
+                    val value = s.toString().toIntOrNull()
                     view.start.error = if (value == null) {
                         "Defaulting to 0"
                     } else null
@@ -167,7 +165,7 @@ class DeserializerEditorAdapter(
                 override fun afterTextChanged(s: Editable?) {
                     if (!view.end.isEnabled) return
 
-                    val value = s.toString().takeIf { it.isNotEmpty() }?.toIntOrNull()
+                    val value = s.toString().toIntOrNull()
                     view.end.error = if (value == null) {
                         "Defaulting to 0"
                     } else null
