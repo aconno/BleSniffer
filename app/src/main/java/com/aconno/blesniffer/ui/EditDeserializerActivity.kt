@@ -89,6 +89,8 @@ class EditDeserializerActivity : BaseActivity() {
 
     private var existing: Boolean = false
 
+    private var previewDisplayOn : Boolean = false
+
     fun bytesToString(byteArray : ByteArray) =
         ByteArrayFormatter.getFormatter(preferences.getAdvertisementBytesDisplayMode()).formatBytes(byteArray)
 
@@ -117,6 +119,11 @@ class EditDeserializerActivity : BaseActivity() {
                 parcelableDeserializer.sampleData
             )
             existing = savedInstanceState.getBoolean(EXISTING_KEY)
+
+            if(savedInstanceState.getBoolean(PREVIEW_DISPLAY_ON_KEY)) {
+                displayDeserializerPreview()
+            }
+
         } else {
             intent.extras?.let { extras ->
                 if (extras.getLong("id", -2L) != -2L) {
@@ -180,42 +187,7 @@ class EditDeserializerActivity : BaseActivity() {
         }
 
         preview.setOnClickListener {
-            val rawData = getSampleDataBytes()
-            updateDeserializerFromInputData().fieldDeserializers.map { d ->
-                val start = d.startIndexInclusive
-                val end = d.endIndexExclusive
-                val size = rawData.size
-                Triple(
-                        d.name,
-                        if (start > size || end > size) getString(R.string.bad_indexes)
-                        else try {
-                            d.type.converter.deserialize(
-                                    if (start <= end) rawData.copyOfRange(start, end)
-                                    else rawData.inversedCopyOfRangeInclusive(start, end)
-                            ).toString()
-                        } catch (e: IllegalArgumentException) {
-                            getString(R.string.invalid_byte_data)
-                        } catch (e: IndexOutOfBoundsException) {
-                            getString(R.string.invalid_byte_data)
-                        },
-                        d.color
-                )
-            }.let {
-                val view = layoutInflater.inflate(R.layout.popup_field_list_preview, findViewById(android.R.id.content), false)
-
-                val deserializedFieldsAdapter = DeserializedFieldsAdapter()
-                view.deserialized_field_list_preview.adapter = deserializedFieldsAdapter
-                view.deserialized_field_list_preview.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-                deserializedFieldsAdapter.setFields(it)
-                AlertDialog.Builder(this)
-                    .setView(view)
-                    .setOnDismissListener {
-                        deserializedFieldsAdapter.setFields(mutableListOf())
-                        it.dismiss()
-                    }
-                    .create()
-                    .show()
-            }
+            displayDeserializerPreview()
         }
 
         generate_sample_data.setOnClickListener {
@@ -230,6 +202,48 @@ class EditDeserializerActivity : BaseActivity() {
             DividerItemDecoration.VERTICAL))
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+    }
+
+    private fun displayDeserializerPreview() {
+        val rawData = getSampleDataBytes()
+        updateDeserializerFromInputData().fieldDeserializers.map { d ->
+            val start = d.startIndexInclusive
+            val end = d.endIndexExclusive
+            val size = rawData.size
+            Triple(
+                d.name,
+                if (start > size || end > size) getString(R.string.bad_indexes)
+                else try {
+                    d.type.converter.deserialize(
+                        if (start <= end) rawData.copyOfRange(start, end)
+                        else rawData.inversedCopyOfRangeInclusive(start, end)
+                    ).toString()
+                } catch (e: IllegalArgumentException) {
+                    getString(R.string.invalid_byte_data)
+                } catch (e: IndexOutOfBoundsException) {
+                    getString(R.string.invalid_byte_data)
+                },
+                d.color
+            )
+        }.let {
+            val view = layoutInflater.inflate(R.layout.popup_field_list_preview, findViewById(android.R.id.content), false)
+
+            val deserializedFieldsAdapter = DeserializedFieldsAdapter()
+            view.deserialized_field_list_preview.adapter = deserializedFieldsAdapter
+            view.deserialized_field_list_preview.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+            deserializedFieldsAdapter.setFields(it)
+
+            previewDisplayOn = true
+            AlertDialog.Builder(this)
+                .setView(view)
+                .setOnDismissListener {
+                    deserializedFieldsAdapter.setFields(mutableListOf())
+                    it.dismiss()
+                    previewDisplayOn = false
+                }
+                .show()
+        }
     }
 
     private fun saveDeserializer() {
@@ -302,11 +316,13 @@ class EditDeserializerActivity : BaseActivity() {
         val deserializer = updateDeserializerFromInputData()
         outState.putParcelable(DESERIALIZER_KEY,ParcelableDeserializer(deserializer))
         outState.putBoolean(EXISTING_KEY,existing)
+        outState.putBoolean(PREVIEW_DISPLAY_ON_KEY,previewDisplayOn)
     }
 
     companion object {
         const val DESERIALIZER_KEY = "DESERIALIZER_KEY"
         const val EXISTING_KEY = "EXISTING_KEY"
+        const val PREVIEW_DISPLAY_ON_KEY = "PREVIEW_DISPLAY_ON_KEY"
     }
 
 }
