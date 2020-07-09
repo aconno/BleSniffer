@@ -74,6 +74,9 @@ class DeserializerEditorAdapter(
                         }
 
                         override fun onColorSelected(dialogId: Int, color: Int) {
+                            if(adapterPosition == RecyclerView.NO_POSITION) {
+                                return
+                            }
                             fieldDeserializers[adapterPosition].color = color
                             this@ViewHolder.view.color_button?.setBackgroundColor(color)
                         }
@@ -106,11 +109,8 @@ class DeserializerEditorAdapter(
                             view.end.isEnabled = false
 
 
-                            val value = Integer.parseInt(
-                                view.start.editText?.text?.toString()?.takeIf {
-                                    it.isNotEmpty()
-                                } ?: "0"
-                            )
+                            val value = view.start.editText?.text?.toString()?.toIntOrNull() ?: 0
+
 
                             (value + valueConverter.converter.length).let { endIndexExclusive ->
                                 view.end.editText?.setText(endIndexExclusive.toString())
@@ -143,15 +143,15 @@ class DeserializerEditorAdapter(
             })
             view.start.editText?.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
-                    view.start.error = if (s.toString().isBlank()) {
+                    val value = s.toString().toIntOrNull()
+                    view.start.error = if (value == null) {
                         "Defaulting to 0"
                     } else null
 
-                    val value = Integer.parseInt(s.toString().takeIf { it.isNotEmpty() } ?: "0")
-                    fieldDeserializers[adapterPosition].startIndexInclusive = value
+                    fieldDeserializers[adapterPosition].startIndexInclusive = value ?: 0
 
                     if (!view.end.isEnabled) {
-                        val endValue = (value + fieldDeserializers[adapterPosition].type.converter.length)
+                        val endValue = (value ?: 0 + fieldDeserializers[adapterPosition].type.converter.length)
                         view.end.editText?.setText(endValue.toString())
                         fieldDeserializers[adapterPosition].endIndexExclusive = endValue
                     }
@@ -164,12 +164,12 @@ class DeserializerEditorAdapter(
             view.end.editText?.addTextChangedListener(object : TextWatcher {
                 override fun afterTextChanged(s: Editable?) {
                     if (!view.end.isEnabled) return
-                    view.end.error = if (s.toString().isBlank()) {
+
+                    val value = s.toString().toIntOrNull()
+                    view.end.error = if (value == null) {
                         "Defaulting to 0"
                     } else null
-
-                    val value = Integer.parseInt(s.toString().takeIf { it.isNotEmpty() } ?: "0")
-                    fieldDeserializers[adapterPosition].endIndexExclusive = value
+                    fieldDeserializers[adapterPosition].endIndexExclusive = value ?: 0
                 }
 
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
