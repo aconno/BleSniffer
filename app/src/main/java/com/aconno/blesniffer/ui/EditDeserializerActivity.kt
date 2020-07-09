@@ -213,12 +213,7 @@ class EditDeserializerActivity : BaseActivity() {
                         deserializedFieldsAdapter.setFields(mutableListOf())
                         it.dismiss()
                     }
-                    .create().also { dialog ->
-                        view.setOnTouchListener { _, _ ->
-                            dialog.dismiss()
-                            true
-                        }
-                    }
+                    .create()
                     .show()
             }
         }
