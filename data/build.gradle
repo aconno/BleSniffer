@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply from: '../version.gradle'
 
 android {
     compileSdkVersion 29
@@ -8,8 +9,8 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode rootProject.ext.bleScannerVersionCode
-        versionName rootProject.ext.bleScannerVersionName
+        versionCode generateVersionCode()
+        versionName generateVersionName()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
     }
