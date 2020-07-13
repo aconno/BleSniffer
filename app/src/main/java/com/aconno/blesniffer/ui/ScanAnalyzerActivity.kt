@@ -16,6 +16,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
@@ -99,6 +100,8 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             .scanAnalyzerActivityModule(ScanAnalyzerActivityModule(this))
             .build()
     }
+
+    private var attachScrollToTop = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -230,11 +233,24 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
         scanAnalyzerAdapter.hideMissingSerializer = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
+        scan_list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                if(!recyclerView.canScrollVertically(-1)) {
+                    attachScrollToTop = true
+                }
+
+                if(newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    attachScrollToTop = false
+                }
+            }
+
+        })
     }
 
-
     override fun onRecordAdded(size: Int) {
-        scan_list.scrollToPosition(size)
+       if(attachScrollToTop) {
+           scan_list.scrollToPosition(size)
+       }
     }
 
     private fun getSyncDeserializersLiveData(): LiveData<WorkInfo> {
