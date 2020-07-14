@@ -447,6 +447,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private fun loadLogs(savedInstanceState: Bundle?) {
         savedInstanceState?.let {
             scanAnalyzerAdapter.loadScanLog(scanLogSavedState ?: mutableListOf())
+            scanLogSavedState = null
         }
     }
 
