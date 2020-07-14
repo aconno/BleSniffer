@@ -59,11 +59,11 @@ class BluetoothImpl(
     }
 
     override fun stopScanning() {
-        val bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        val bluetoothLeScanner : BluetoothLeScanner? = bluetoothAdapter.bluetoothLeScanner
         scanEvents.onNext(
                 ScanEvent(ScanEvent.SCAN_STOP, "Scan stop at ${System.currentTimeMillis()}")
         )
-        bluetoothLeScanner.stopScan(scanCallback)
+        bluetoothLeScanner?.stopScan(scanCallback)
     }
 
     override fun getScanResults(): Flowable<ScanResult> {
