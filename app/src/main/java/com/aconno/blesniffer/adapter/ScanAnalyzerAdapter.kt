@@ -17,13 +17,12 @@ import com.aconno.blesniffer.domain.model.ScanResult
 import com.aconno.blesniffer.domain.util.ByteOperations
 import kotlinx.android.synthetic.main.item_scan_record.view.*
 import timber.log.Timber
-import java.lang.IndexOutOfBoundsException
 import java.text.SimpleDateFormat
 import java.util.*
 
 
 fun ByteArray.inversedCopyOfRangeInclusive(start: Int, end: Int) =
-        this.reversedArray().copyOfRange((size - 1) - start, (size - 1) - end + 1)
+    this.reversedArray().copyOfRange((size - 1) - start, (size - 1) - end + 1)
 
 class ScanAnalyzerAdapter(
     private val scanRecordListener: ScanRecordListener,
@@ -79,6 +78,7 @@ class ScanAnalyzerAdapter(
                 (data.timestamp) - (it.scanResult.timestamp) < 2500
             }?.let { item ->
                 item.occurrences++
+                item.scanResult.timeFromLastTimestamp = data.timestamp - item.scanResult.timestamp
                 item.scanResult.timestamp = data.timestamp
                 item.scanResult.rssi = data.rssi
                 notifyItemChanged(entryIndex, null)
@@ -110,7 +110,7 @@ class ScanAnalyzerAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
-                LayoutInflater.from(parent.context).inflate(R.layout.item_scan_record, parent, false)
+            LayoutInflater.from(parent.context).inflate(R.layout.item_scan_record, parent, false)
         )
     }
 
@@ -151,6 +151,13 @@ class ScanAnalyzerAdapter(
                 scanLog.scanResult.timestamp,
                 longItemClickListener as Context
             )
+            scanLog.scanResult.timeFromLastTimestamp.let { deltaTime ->
+                view.time_between_advs.text = if (deltaTime == -1L) {
+                    view.context.getString(R.string.time_between_advs_not_available)
+                } else {
+                    view.context.getString(R.string.time_between_advs, deltaTime)
+                }
+            }
             view.rssi.text = view.context.getString(
                 R.string.rssi_strength,
                 scanLog.scanResult.rssi
@@ -195,25 +202,25 @@ class ScanAnalyzerAdapter(
         }
 
         private fun getField(
-                fieldDeserializer: FieldDeserializer,
-                advertisementData: ByteArray
+            fieldDeserializer: FieldDeserializer,
+            advertisementData: ByteArray
         ): Triple<String, String, Int>? {
 
             val deserializedData =
-                    deserializeAdvertisementData(fieldDeserializer, advertisementData)
+                deserializeAdvertisementData(fieldDeserializer, advertisementData)
 
             return if (deserializedData != null)
                 Triple(
-                        fieldDeserializer.name,
-                        deserializedData,
-                        fieldDeserializer.color
+                    fieldDeserializer.name,
+                    deserializedData,
+                    fieldDeserializer.color
                 )
             else null
         }
 
         private fun deserializeAdvertisementData(
-                fieldDeserializer: FieldDeserializer,
-                advertisementData: ByteArray
+            fieldDeserializer: FieldDeserializer,
+            advertisementData: ByteArray
         ): String? {
             val validData = ByteOperations.isolateMsd(advertisementData)
             val start = fieldDeserializer.startIndexInclusive
@@ -248,16 +255,16 @@ var sdf: SimpleDateFormat? = null
 
 @Suppress("DEPRECATION")
 fun getCurrentLocale(context: Context): Locale =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) context.resources.configuration.locales.get(
-                0
-        )
-        else context.resources.configuration.locale
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) context.resources.configuration.locales.get(
+        0
+    )
+    else context.resources.configuration.locale
 
 fun formatTimestamp(timestamp: Long, context: Context): String =
-        (sdf ?: run {
-            sdf = SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa", getCurrentLocale(context))
-            sdf
-        })?.format(Date(timestamp)) ?: context.getString(R.string.invalid_timestamp)
+    (sdf ?: run {
+        sdf = SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa", getCurrentLocale(context))
+        sdf
+    })?.format(Date(timestamp)) ?: context.getString(R.string.invalid_timestamp)
 
 
 class MutablePair<A, B>(
