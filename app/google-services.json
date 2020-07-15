@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "696390456431",
+    "firebase_url": "https://aconno-blesniffer.firebaseio.com",
+    "project_id": "aconno-blesniffer",
+    "storage_bucket": "aconno-blesniffer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:696390456431:android:2d59d2b7bce279b6b6e99a",
+        "android_client_info": {
+          "package_name": "com.aconno.blesniffer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "696390456431-ab1jijgd0q10nkekjii01qm89l6s40m6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAnnGigWhZRsGDhtm2GqY9v3g52Yvvx43Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "696390456431-ab1jijgd0q10nkekjii01qm89l6s40m6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
