@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'io.fabric'
 apply from: '../version.gradle'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 29
@@ -85,6 +86,7 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:2.0.1"
     implementation "androidx.work:work-rxjava2:2.0.1"
 
+    implementation 'com.google.firebase:firebase-analytics-ktx:17.4.4'
 }
 
 repositories {
