@@ -94,13 +94,13 @@ class ScanAnalyzerAdapter(
         }
     }
 
-    fun loadScanLog(scanLog : List<MutablePair<ScanResult,Int>>) {
+    fun loadScanLog(scanLog : MutableList<Item>) {
         this.scanLog.clear()
-        this.scanLog.addAll(scanLog.map { Item(it.first,it.second) })
+        this.scanLog.addAll(scanLog)
 
         hashes.clear()
         scanLog.forEachIndexed { index, mutablePair ->
-            val scanResult = mutablePair.first
+            val scanResult = mutablePair.scanResult
             hashes[scanResult.hashCode()] = index
         }
 
