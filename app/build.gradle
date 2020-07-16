@@ -19,10 +19,23 @@ android {
         manifestPlaceholders = [fabricAPIKey: sensorics_fabricKey]
     }
 
+    signingConfigs {
+        release {
+            storeFile file(ACONNO_RELEASE_KEYSTORE_PATH)
+            storePassword ACONNO_RELEASE_KEYSTORE_PASSWORD
+            keyAlias SENSORICS_RELEASE_KEY_ALIAS
+            keyPassword SENSORICS_RELEASE_KEY_PASSWORD
+
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 
