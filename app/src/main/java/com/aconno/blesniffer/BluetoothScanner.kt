@@ -29,11 +29,6 @@ class BluetoothScanner(private var context: Context, private var bluetooth : Blu
         startScanningTimer()
         bluetooth.startScanning()
         running = true
-
-        with(NotificationManagerCompat.from(context)) {
-            // notificationId is a unique int for each notification that you must define
-            notify(SCANNING_NOTIFICATION_ID, notification)
-        }
     }
 
     fun stopScanning() {
@@ -41,11 +36,6 @@ class BluetoothScanner(private var context: Context, private var bluetooth : Blu
 
         bluetooth.stopScanning()
         running = false
-
-        with(NotificationManagerCompat.from(context)) {
-            // notificationId is a unique int for each notification that you must define
-            cancel(SCANNING_NOTIFICATION_ID)
-        }
     }
 
     private fun restartScanning() {

@@ -99,6 +99,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
     private var attachScrollToTop = true
 
+    //this flag indicates that user requested scan start and has not yet requested scan stop
+    private var shouldBeScanning = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scan_analyzer)
@@ -117,6 +120,10 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         getAllDeserializers {
             loadLogs(savedInstanceState)
             scan_list.scrollToPosition(scanAnalyzerAdapter.itemCount - 1)
+        }
+
+        savedInstanceState?.let {
+            shouldBeScanning = it.getBoolean(SHOULD_BE_SCANNING_KEY)
         }
     }
 
@@ -431,8 +438,10 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private fun toggleScan(item: MenuItem?) {
         item?.let {
             if (item.isChecked) {
+                shouldBeScanning = false
                 bluetoothScanningViewModel.stopScanning()
             } else {
+                shouldBeScanning = true
                 permissionViewModel.requestAccessFineLocation()
             }
         }
@@ -470,6 +479,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         scanLogSavedState = scanAnalyzerAdapter.scanLog
+        outState.putBoolean(SHOULD_BE_SCANNING_KEY,shouldBeScanning)
     }
 
     override fun permissionAccepted(actionCode: Int) {
@@ -485,9 +495,22 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         //TODO: Show rationale
     }
 
+    override fun onStop() {
+        super.onStop()
+        bluetoothScanningViewModel.stopScanning()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if(shouldBeScanning) {
+            bluetoothScanningViewModel.startScanning()
+        }
+    }
+
     companion object {
         const val EXTRA_FILTER_MAC: String = "com.acconno.blesniffer.FILTER_MAC"
         const val EXTRA_SAMPLE_DATA: String = "com.acconno.blesniffer.SAMPLE_DATA"
+        const val SHOULD_BE_SCANNING_KEY : String = "SHOULD_BE_SCANNING_KEY"
 
         var scanLogSavedState : MutableList<ScanAnalyzerAdapter.Item>? = null
     }
