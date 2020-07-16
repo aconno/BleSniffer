@@ -1,8 +1,10 @@
 package com.aconno.blesniffer.dagger.scananalyzeractivity
 
+import android.app.Notification
 import androidx.lifecycle.ViewModelProviders
-import com.aconno.blesniffer.BleSnifferApplication
-import com.aconno.blesniffer.BluetoothStateReceiver
+import com.aconno.blesniffer.*
+import com.aconno.blesniffer.device.notification.IntentProvider
+import com.aconno.blesniffer.device.notification.NotificationFactory
 import com.aconno.blesniffer.device.permissons.PermissionActionFactory
 import com.aconno.blesniffer.domain.deserializing.DeserializerFinder
 import com.aconno.blesniffer.domain.deserializing.DeserializerFinderImpl
@@ -51,10 +53,12 @@ class ScanAnalyzerActivityModule(private val scanAnalyzerActivity: ScanAnalyzerA
     @ScanAnalyzerActivityScope
     fun provideBluetoothScanningViewModelFactory(
             bluetooth: Bluetooth,
-            bleSnifferApplication: BleSnifferApplication
+            bleSnifferApplication: BleSnifferApplication,
+            bluetoothScanner : BluetoothScanner
     ) = BluetoothScanningViewModelFactory(
             bluetooth,
-            bleSnifferApplication
+            bleSnifferApplication,
+            bluetoothScanner
     )
 
     @Provides
@@ -94,5 +98,32 @@ class ScanAnalyzerActivityModule(private val scanAnalyzerActivity: ScanAnalyzerA
     @ScanAnalyzerActivityScope
     fun provideDeserializerFinder(): DeserializerFinder {
         return DeserializerFinderImpl()
+    }
+
+    @Provides
+    @ScanAnalyzerActivityScope
+    fun provideBluetoothScanner(bleSnifferApplication: BleSnifferApplication, bluetooth: Bluetooth, notification: Notification) = BluetoothScanner(bleSnifferApplication, bluetooth,notification)
+
+    @Provides
+    @ScanAnalyzerActivityScope
+    fun provideScanningNotification(
+        bleSnifferApplication: BleSnifferApplication,
+        intentProvider: IntentProvider
+    ): Notification {
+        val notificationFactory = NotificationFactory()
+        val title = bleSnifferApplication.getString(R.string.service_notification_title)
+        val content = bleSnifferApplication.getString(R.string.service_notification_content)
+        return notificationFactory.makeForegroundServiceNotification(
+            bleSnifferApplication,
+            intentProvider.getBleSnifferContentIntent(bleSnifferApplication),
+            title,
+            content
+        )
+    }
+
+    @Provides
+    @ScanAnalyzerActivityScope
+    fun provideIntentProvider(): IntentProvider {
+        return IntentProviderImpl()
     }
 }

@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.aconno.blesniffer.BleSnifferApplication
-import com.aconno.blesniffer.BluetoothScanningService
+import com.aconno.blesniffer.BluetoothScanner
 import com.aconno.blesniffer.R
 import com.aconno.blesniffer.adapter.LongItemClickListener
 import com.aconno.blesniffer.adapter.ScanAnalyzerAdapter
@@ -122,7 +122,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
     override fun onResume() {
         super.onResume()
-        if (BluetoothScanningService.isRunning()) onScanStart()
+        if (BluetoothScanner.isRunning()) onScanStart()
         else onScanStop()
         bluetoothScanningViewModel.getResult().observe(this, Observer { handleScanEvent(it) })
         bluetoothViewModel.observeBluetoothState()
@@ -201,7 +201,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     }
 
     private fun setScanStatus() {
-        if (BluetoothScanningService.isRunning()) onScanStart()
+        if (BluetoothScanner.isRunning()) onScanStart()
         else onScanStop()
     }
 
@@ -439,7 +439,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     }
 
     private fun setScanMenuLabel(menuItem: MenuItem) {
-        if (BluetoothScanningService.isRunning()) {
+        if (BluetoothScanner.isRunning()) {
             menuItem.title = getString(R.string.stop_scan)
             menuItem.isChecked = true
         } else {
