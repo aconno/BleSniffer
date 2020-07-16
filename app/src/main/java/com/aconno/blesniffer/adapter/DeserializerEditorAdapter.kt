@@ -151,7 +151,7 @@ class DeserializerEditorAdapter(
                     fieldDeserializers[adapterPosition].startIndexInclusive = value ?: 0
 
                     if (!view.end.isEnabled) {
-                        val endValue = (value ?: 0 + fieldDeserializers[adapterPosition].type.converter.length)
+                        val endValue = ((value ?: 0) + fieldDeserializers[adapterPosition].type.converter.length)
                         view.end.editText?.setText(endValue.toString())
                         fieldDeserializers[adapterPosition].endIndexExclusive = endValue
                     }
