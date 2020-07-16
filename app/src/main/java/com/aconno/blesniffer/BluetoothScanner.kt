@@ -11,7 +11,7 @@ import timber.log.Timber
  * @author aconno
  */
 class BluetoothScanner(private var context: Context, private var bluetooth : Bluetooth, private var notification: Notification) {
-    private lateinit var scanTimerDisposable: Job
+    private var scanTimerDisposable: Job? = null
 
     /**
      * Restart scanning before Android BLE Scanning Timeout
@@ -32,7 +32,7 @@ class BluetoothScanner(private var context: Context, private var bluetooth : Blu
     }
 
     fun stopScanning() {
-        scanTimerDisposable.cancel()
+        scanTimerDisposable?.cancel()
 
         bluetooth.stopScanning()
         running = false
@@ -45,7 +45,6 @@ class BluetoothScanner(private var context: Context, private var bluetooth : Blu
 
     companion object {
         private const val ANDROID_N_MAX_SCAN_DURATION =  30 * 60 * 1000L // 30 minutes
-        private const val SCANNING_NOTIFICATION_ID = 100
 
         private var running = false
 
