@@ -53,10 +53,6 @@
                 android:resource="@xml/filepaths" />
         </provider>
 
-        <service
-            android:name=".BluetoothScanningService"
-            android:exported="false" />
-
         <provider
             android:name="androidx.work.impl.WorkManagerInitializer"
             android:authorities="${applicationId}.workmanager-init"
