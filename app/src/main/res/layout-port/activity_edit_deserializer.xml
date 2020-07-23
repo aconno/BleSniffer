@@ -56,6 +56,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/deserializer_name">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/deserializer_filter_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/filter" />
@@ -78,6 +79,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/deserializer_filter">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/deserializer_sample_data_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/sample_data_hint" />
@@ -134,5 +136,14 @@
                 app:fabSize="normal" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <view class="com.aconno.blesniffer.ui.HexKeyboardView"
+        android:id="@+id/hex_keyboard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
