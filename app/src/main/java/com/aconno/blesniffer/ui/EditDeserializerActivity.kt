@@ -1,16 +1,12 @@
 package com.aconno.blesniffer.ui
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -62,6 +58,8 @@ class EditDeserializerActivity : BaseActivity() {
 
     @Inject
     lateinit var preferences: BleSnifferPreferences
+
+    private lateinit var keyboardManager : KeyboardManager
 
     var deserializer: Deserializer = GeneralDeserializer()
         set(value) {
@@ -207,31 +205,8 @@ class EditDeserializerActivity : BaseActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        connectInputsToHexKeyboard(deserializer_filter_input,deserializer_sample_data_input)
-    }
-
-    private fun connectInputsToHexKeyboard(vararg editText : EditText) {
-        editText.forEach { input ->
-            input.showSoftInputOnFocus = false
-            input.setOnFocusChangeListener { v, hasFocus ->
-                if(hasFocus) {
-                    (getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(v.windowToken,0)
-
-                    hex_keyboard.visibility = View.VISIBLE
-                } else {
-                    hex_keyboard.visibility = View.GONE
-                }
-            }
-
-            hex_keyboard.addListener(object : HexKeyboardView.KeyboardListener {
-                override fun onKeyDown(keyCode: Int,keyEvent: KeyEvent) {
-                    if(input.hasFocus()) {
-                        input.onKeyDown(keyCode,keyEvent)
-                    }
-                }
-            })
-
-        }
+        keyboardManager = KeyboardManager()
+        keyboardManager.manageKeyboardForActivity(this,edit_deserializer_root,hex_keyboard)
     }
 
     private fun displayDeserializerPreview() {
