@@ -4,6 +4,7 @@ import android.app.Activity
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 
@@ -23,19 +24,27 @@ class KeyboardManager {
                 (activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(v.windowToken,0)
 
                 showKeyboard(hexKeyboardView,activity)
-
             } else {
                 hideKeyboard(hexKeyboardView)
             }
         }
 
         hexKeyboardView.addListener(object : HexKeyboardView.KeyboardListener {
-            override fun onKeyDown(keyCode: Int,keyEvent: KeyEvent) {
+            private val inputConnection = input.onCreateInputConnection(EditorInfo())
+
+            override fun onSpecialKeyDown(keyCode: Int,keyEvent: KeyEvent) {
                 if(input.hasFocus()) {
                     input.onKeyDown(keyCode,keyEvent)
                 }
             }
+
+            override fun onCharTyped(character: Char) {
+                if(input.hasFocus()) {
+                    inputConnection.commitText(character.toString(),1)
+                }
+            }
         })
+
     }
 
     private fun getAllEditTextViews(root : View) : List<EditText> {
