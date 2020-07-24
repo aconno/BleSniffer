@@ -17,6 +17,14 @@ class KeyboardManager {
         }
     }
 
+    fun onBackPressed(hexKeyboardView: HexKeyboardView) : Boolean {
+        if(hexKeyboardView.visibility == View.VISIBLE) {
+            hideKeyboard(hexKeyboardView)
+            return true
+        }
+        return false
+    }
+
     private fun setupHexInputEditText(input: EditText, activity: Activity, hexKeyboardView: HexKeyboardView) {
         input.showSoftInputOnFocus = false
         input.setOnFocusChangeListener { v, hasFocus ->
@@ -27,6 +35,9 @@ class KeyboardManager {
             } else {
                 hideKeyboard(hexKeyboardView)
             }
+        }
+        input.setOnClickListener {
+            showKeyboard(hexKeyboardView,activity)
         }
 
         hexKeyboardView.addListener(object : HexKeyboardView.KeyboardListener {

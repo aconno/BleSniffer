@@ -209,6 +209,13 @@ class EditDeserializerActivity : BaseActivity() {
         keyboardManager.manageKeyboardForActivity(this,edit_deserializer_root,hex_keyboard)
     }
 
+    override fun onBackPressed() {
+        val backPressHandled = keyboardManager.onBackPressed(hex_keyboard)
+        if(!backPressHandled) {
+            super.onBackPressed()
+        }
+    }
+
     private fun displayDeserializerPreview() {
         val rawData = getSampleDataBytes()
         updateDeserializerFromInputData().fieldDeserializers.map { d ->
