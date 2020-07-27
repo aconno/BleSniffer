@@ -1,4 +1,4 @@
-package com.aconno.blesniffer.ui
+package com.aconno.hexinputlib
 
 import android.content.Context
 import android.util.AttributeSet

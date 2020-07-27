@@ -26,6 +26,7 @@ import com.aconno.blesniffer.domain.deserializing.GeneralDeserializer
 import com.aconno.blesniffer.domain.interactor.deserializing.*
 import com.aconno.blesniffer.preferences.BleSnifferPreferences
 import com.aconno.blesniffer.ui.base.BaseActivity
+import com.aconno.hexinputlib.KeyboardManager
 import com.google.common.io.BaseEncoding
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers

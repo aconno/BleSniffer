@@ -1,1 +1,3 @@
+include ':hexinputlib'
+include ':hexinput'
 include ':app', ':domain', ':data', ':device'
