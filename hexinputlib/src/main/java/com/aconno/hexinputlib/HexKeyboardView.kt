@@ -5,7 +5,6 @@ import android.util.AttributeSet
 import android.view.KeyEvent
 import android.widget.Button
 import android.widget.FrameLayout
-import com.aconno.blesniffer.R
 
 class HexKeyboardView(context : Context, attributeSet: AttributeSet) : FrameLayout(context,attributeSet) {
     private var listeners = mutableListOf<KeyboardListener>()
