@@ -1,6 +1,7 @@
 package com.aconno.hexinputlib
 
 import android.app.Activity
+import android.os.Handler
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,8 @@ class KeyboardManager {
     private var keyboardHideEventTime : Long = 0L
 
     fun manageKeyboardForActivity(activity : Activity, activityContentView : View, hexKeyboardView: HexKeyboardView) {
+        hideKeyboard(hexKeyboardView)
+
         getAllEditTextViews(activityContentView).filter { it.tag == HEX_INPUT_TAG }.forEach {
             setupHexInputEditText(it,activity,hexKeyboardView)
         }
@@ -31,13 +34,13 @@ class KeyboardManager {
             if(hasFocus) {
                 (activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(v.windowToken,0)
 
-                showKeyboard(hexKeyboardView,activity)
+                showKeyboard(hexKeyboardView)
             } else {
                 hideKeyboard(hexKeyboardView)
             }
         }
         input.setOnClickListener {
-            showKeyboard(hexKeyboardView,activity)
+            showKeyboard(hexKeyboardView)
         }
 
         hexKeyboardView.addListener(object : HexKeyboardView.KeyboardListener {
@@ -76,20 +79,22 @@ class KeyboardManager {
         keyboardHideEventTime = System.currentTimeMillis()
     }
 
-    private fun showKeyboard(hexKeyboardView: HexKeyboardView, activity: Activity) {
+    private fun showKeyboard(hexKeyboardView: HexKeyboardView) {
         if(hexKeyboardView.visibility != View.VISIBLE) {
-            hexKeyboardView.visibility = View.VISIBLE
-
-            if(System.currentTimeMillis() - keyboardHideEventTime > ANIMATED_KEYBOARD_SHOW_UP_TIME_THRESHOLD) {
-                hexKeyboardView.y = activity.resources.displayMetrics.heightPixels.toFloat()
-                hexKeyboardView.animate().setStartDelay(SHOW_KEYBOARD_DELAY_MILLIS).translationY(0f)
+            if(System.currentTimeMillis() - keyboardHideEventTime > KEYBOARD_REAPPEARANCE_TIME_THRESHOLD) {
+                Handler().postDelayed({
+                    hexKeyboardView.visibility = View.VISIBLE
+                    }, SHOW_KEYBOARD_DELAY_MILLIS)
+            } else {
+                hexKeyboardView.visibility = View.VISIBLE
             }
+
         }
     }
 
     companion object {
         const val HEX_INPUT_TAG = "hexInput"
-        const val SHOW_KEYBOARD_DELAY_MILLIS = 300L
-        const val ANIMATED_KEYBOARD_SHOW_UP_TIME_THRESHOLD = 100
+        const val SHOW_KEYBOARD_DELAY_MILLIS = 500L
+        const val KEYBOARD_REAPPEARANCE_TIME_THRESHOLD = 100
     }
 }
