@@ -1,32 +1,29 @@
 package com.aconno.hexinputlib.model
 
-import com.aconno.hexinputlib.model.HexContentListener
-
 open class HexContentObservable {
-    private val values = mutableListOf<Char>()
     private val listeners = mutableListOf<HexContentListener>()
 
     fun addListener(hexContentListener: HexContentListener) {
-        TODO()
+        listeners.add(hexContentListener)
     }
 
     fun removeListener(hexContentListener: HexContentListener) {
-        TODO()
+        listeners.remove(hexContentListener)
     }
 
-    protected fun notifyValueInserted(previousState : List<Char>, insertionIndex : Int, insertedValue : Int) {
-        TODO()
+    protected fun notifyValueInserted(previousState: List<Char>, insertionIndex: Int, insertedValue: Char) {
+        listeners.forEach { it.valueInserted(previousState,insertionIndex,insertedValue) }
     }
 
     protected fun notifyValuesInserted(previousState: List<Char>, insertionIndex: Int, insertedValues : List<Char>) {
-        TODO()
+        listeners.forEach { it.valuesInserted(previousState,insertionIndex,insertedValues) }
     }
 
     protected fun notifyValueRemoved(previousState: List<Char>, removalIndex : Int) {
-        TODO()
+        listeners.forEach { it.valueRemoved(previousState,removalIndex) }
     }
 
     protected fun notifyValuesRemoved(previousState: List<Char>, removalStartIndex : Int, removalEndIndex : Int) {
-        TODO()
+        listeners.forEach { it.valuesRemoved(previousState,removalStartIndex,removalEndIndex) }
     }
 }

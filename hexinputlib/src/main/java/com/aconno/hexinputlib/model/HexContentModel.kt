@@ -1,30 +1,45 @@
 package com.aconno.hexinputlib.model
 
 class HexContentModel : HexContentObservable() {
-    private val values = mutableListOf<Char>()
+    private val values : MutableList<Char> = mutableListOf()
 
     fun insertValue(index : Int, value : Char) {
-        TODO()
+        val previousState = getValues()
+
+        values.add(index,value)
+
+        notifyValueInserted(previousState,index,value)
     }
 
     fun insertValues(index : Int, values : List<Char>) {
-        TODO()
-    }
+        val previousState = getValues()
 
-    fun getValuesAsBytes() : ByteArray {
-        TODO()
+        this.values.addAll(index,values)
+
+        notifyValuesInserted(previousState,index,values)
     }
 
     fun getValues() : List<Char> {
-        TODO()
+        return values.toList()
     }
 
     fun removeValue(index : Int) {
-        TODO()
+        val previousState = getValues()
+
+        values.removeAt(index)
+
+        notifyValueRemoved(previousState,index)
     }
 
     fun removeRange(startIndex : Int, endIndex : Int) {
-        TODO()
+        val previousState = getValues()
+
+        values.subList(startIndex,endIndex).clear()
+
+        notifyValuesRemoved(previousState,startIndex,endIndex)
     }
 
+    fun getValuesAsBytes() : ByteArray {
+        return HexConverter.hexToBytes(values)
+    }
 }
