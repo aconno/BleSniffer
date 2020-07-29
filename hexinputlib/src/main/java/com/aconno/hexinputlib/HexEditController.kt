@@ -15,7 +15,11 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
         TODO()
     }
 
-    override fun valueInserted(previousState: List<Char>, insertionIndex: Int, insertedValue: Int) {
+    fun loadValuesFromText(textValues : String) {
+        TODO()
+    }
+
+    override fun valueInserted(previousState: List<Char>, insertionIndex: Int, insertedValue: Char) {
         TODO("Not yet implemented")
     }
 

@@ -6,7 +6,7 @@ import com.aconno.hexinputlib.ui.keyboard.BaseHexKeyboardView
 object KeyboardManager {
     private var keyboardHideEventTime : Long = 0
 
-    private fun findHexKeyboardView(viewHierarchyMember : View) {
+    fun findHexKeyboardView(viewHierarchyMember : View) : BaseHexKeyboardView {
         TODO()
     }
 
