@@ -8,26 +8,26 @@ abstract class BaseHexKeyboardView(context : Context, attributeSet: AttributeSet
     private var listeners = mutableListOf<KeyboardListener>()
 
     fun addListener(keyboardListener: KeyboardListener) {
-        TODO()
+        listeners.add(keyboardListener)
     }
 
     fun removeListener(keyboardListener: KeyboardListener) {
-        TODO()
+        listeners.remove(keyboardListener)
     }
 
     protected fun notifyValueTyped(value : Char) {
-        TODO()
+        listeners.forEach { it.onValueTyped(value) }
     }
 
     protected fun notifyRemoveKeyDown() {
-        TODO()
+        listeners.forEach { it.onRemoveKeyDown() }
     }
 
     protected fun notifyRemoveKeyLongPress() {
-        TODO()
+        listeners.forEach { it.onRemoveKeyLongPress() }
     }
 
     protected fun notifyRemoveKeyUp() {
-        TODO()
+        listeners.forEach { it.onRemoveKeyUp() }
     }
 }
