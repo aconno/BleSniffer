@@ -26,7 +26,6 @@ import com.aconno.blesniffer.domain.deserializing.GeneralDeserializer
 import com.aconno.blesniffer.domain.interactor.deserializing.*
 import com.aconno.blesniffer.preferences.BleSnifferPreferences
 import com.aconno.blesniffer.ui.base.BaseActivity
-import com.aconno.hexinputlib.KeyboardManager
 import com.google.common.io.BaseEncoding
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -59,8 +58,6 @@ class EditDeserializerActivity : BaseActivity() {
 
     @Inject
     lateinit var preferences: BleSnifferPreferences
-
-    private lateinit var keyboardManager : KeyboardManager
 
     var deserializer: Deserializer = GeneralDeserializer()
         set(value) {
@@ -205,16 +202,6 @@ class EditDeserializerActivity : BaseActivity() {
             DividerItemDecoration.VERTICAL))
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-
-        keyboardManager = KeyboardManager()
-        keyboardManager.manageKeyboardForActivity(this,edit_deserializer_root,hex_keyboard)
-    }
-
-    override fun onBackPressed() {
-        val backPressHandled = keyboardManager.onBackPressed(hex_keyboard)
-        if(!backPressHandled) {
-            super.onBackPressed()
-        }
     }
 
     private fun displayDeserializerPreview() {

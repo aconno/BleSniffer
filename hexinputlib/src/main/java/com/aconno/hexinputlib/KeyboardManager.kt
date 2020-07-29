@@ -1,100 +1,29 @@
 package com.aconno.hexinputlib
 
-import android.app.Activity
-import android.os.Handler
-import android.view.KeyEvent
 import android.view.View
-import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
+import com.aconno.hexinputlib.ui.keyboard.BaseHexKeyboardView
 
-class KeyboardManager {
-    private var keyboardHideEventTime : Long = 0L
+object KeyboardManager {
+    private var keyboardHideEventTime : Long = 0
 
-    fun manageKeyboardForActivity(activity : Activity, activityContentView : View, hexKeyboardView: HexKeyboardView) {
-        hideKeyboard(hexKeyboardView)
-
-        getAllEditTextViews(activityContentView).filter { it.tag == HEX_INPUT_TAG }.forEach {
-            setupHexInputEditText(it,activity,hexKeyboardView)
-        }
+    private fun findHexKeyboardView(viewHierarchyMember : View) {
+        TODO()
     }
 
-    fun onBackPressed(hexKeyboardView: HexKeyboardView) : Boolean {
-        if(hexKeyboardView.visibility == View.VISIBLE) {
-            hideKeyboard(hexKeyboardView)
-            return true
-        }
-        return false
+    fun showHexKeyboard(hexKeyboardView: BaseHexKeyboardView) {
+        TODO()
     }
 
-    private fun setupHexInputEditText(input: EditText, activity: Activity, hexKeyboardView: HexKeyboardView) {
-        input.showSoftInputOnFocus = false
-        input.setOnFocusChangeListener { v, hasFocus ->
-            if(hasFocus) {
-                (activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(v.windowToken,0)
-
-                showKeyboard(hexKeyboardView)
-            } else {
-                hideKeyboard(hexKeyboardView)
-            }
-        }
-        input.setOnClickListener {
-            showKeyboard(hexKeyboardView)
-        }
-
-        hexKeyboardView.addListener(object : HexKeyboardView.KeyboardListener {
-            private val inputConnection = input.onCreateInputConnection(EditorInfo())
-
-            override fun onSpecialKeyDown(keyCode: Int,keyEvent: KeyEvent) {
-                if(input.hasFocus()) {
-                    input.onKeyDown(keyCode,keyEvent)
-                }
-            }
-
-            override fun onCharTyped(character: Char) {
-                if(input.hasFocus()) {
-                    inputConnection.commitText(character.toString(),1)
-                }
-            }
-        })
-
+    fun showHexKeyboard(viewRequestingKeyboard : View) {
+        TODO()
     }
 
-    private fun getAllEditTextViews(root : View) : List<EditText> {
-        if(root is EditText) {
-            return listOf(root)
-        } else if(root is ViewGroup) {
-            val editTextViews = mutableListOf<EditText>()
-            for(i in 0 until root.childCount) {
-                editTextViews.addAll(getAllEditTextViews(root.getChildAt(i)))
-            }
-            return editTextViews
-        }
-        return listOf()
+    fun hideHexKeyboard(hexKeyboardView: BaseHexKeyboardView) {
+        TODO()
     }
 
-    private fun hideKeyboard(hexKeyboardView: HexKeyboardView) {
-        hexKeyboardView.visibility = View.GONE
-        keyboardHideEventTime = System.currentTimeMillis()
+    fun hideHexKeyboard(viewToHideFrom: View) {
+        TODO()
     }
 
-    private fun showKeyboard(hexKeyboardView: HexKeyboardView) {
-        if(hexKeyboardView.visibility != View.VISIBLE) {
-            if(System.currentTimeMillis() - keyboardHideEventTime > KEYBOARD_REAPPEARANCE_TIME_THRESHOLD) {
-                Handler().postDelayed({
-                    hexKeyboardView.visibility = View.VISIBLE
-                    }, SHOW_KEYBOARD_DELAY_MILLIS)
-            } else {
-                hexKeyboardView.visibility = View.VISIBLE
-            }
-
-        }
-    }
-
-    companion object {
-        const val HEX_INPUT_TAG = "hexInput"
-        const val SHOW_KEYBOARD_DELAY_MILLIS = 500L
-        const val KEYBOARD_REAPPEARANCE_TIME_THRESHOLD = 100
-    }
 }

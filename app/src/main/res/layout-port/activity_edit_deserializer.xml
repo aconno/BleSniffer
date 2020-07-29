@@ -139,7 +139,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <view class="com.aconno.hexinputlib.HexKeyboardView"
+    <view class="com.aconno.hexinputlib.ui.keyboard.HexKeyboardView"
         android:id="@+id/hex_keyboard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
