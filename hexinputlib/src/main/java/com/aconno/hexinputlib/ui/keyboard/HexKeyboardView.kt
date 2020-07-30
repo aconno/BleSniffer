@@ -46,10 +46,8 @@ class HexKeyboardView(context : Context, attributeSet: AttributeSet) : BaseHexKe
         backspaceButton.setOnTouchListener { _, event ->
             if(event.action == MotionEvent.ACTION_DOWN) {
                 notifyRemoveKeyDown()
-                return@setOnTouchListener true
             } else if(event.action == MotionEvent.ACTION_UP) {
                 notifyRemoveKeyUp()
-                return@setOnTouchListener true
             }
             false
         }
