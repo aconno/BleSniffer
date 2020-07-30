@@ -66,16 +66,6 @@
             android:backgroundTint="@color/keyboardButton"
             />
 
-        <Button
-            android:id="@+id/button_c"
-            android:text="@string/keyboard_key_c"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="@dimen/hex_keyboard_text_size"
-            android:backgroundTint="@color/keyboardButton"
-            />
-
     </LinearLayout>
 
     <LinearLayout
@@ -114,28 +104,18 @@
             />
 
         <Button
+            android:id="@+id/button_c"
+            android:text="@string/keyboard_key_c"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="@dimen/hex_keyboard_text_size"
+            android:backgroundTint="@color/keyboardButton"
+            />
+
+        <Button
             android:id="@+id/button_d"
             android:text="@string/keyboard_key_d"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="@dimen/hex_keyboard_text_size"
-            android:backgroundTint="@color/keyboardButton"
-            />
-
-        <Button
-            android:id="@+id/button_e"
-            android:text="@string/keyboard_key_e"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="@dimen/hex_keyboard_text_size"
-            android:backgroundTint="@color/keyboardButton"
-            />
-
-        <Button
-            android:id="@+id/button_f"
-            android:text="@string/keyboard_key_f"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -150,7 +130,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-
 
         <Button
             android:id="@+id/button_7"
@@ -183,6 +162,42 @@
             />
 
         <Button
+            android:id="@+id/button_e"
+            android:text="@string/keyboard_key_e"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="@dimen/hex_keyboard_text_size"
+            android:backgroundTint="@color/keyboardButton"
+            />
+
+        <Button
+            android:id="@+id/button_f"
+            android:text="@string/keyboard_key_f"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="@dimen/hex_keyboard_text_size"
+            android:backgroundTint="@color/keyboardButton"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="@dimen/hex_keyboard_text_size"
+            android:backgroundTint="@color/keyboardButtonDisabled"
+            android:enabled="false"
+            />
+
+        <Button
             android:id="@+id/button_0"
             android:text="@string/keyboard_key_0"
             android:layout_width="0dp"
@@ -190,6 +205,15 @@
             android:layout_weight="1"
             android:textSize="@dimen/hex_keyboard_text_size"
             android:backgroundTint="@color/keyboardButton"
+            />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="@dimen/hex_keyboard_text_size"
+            android:backgroundTint="@color/keyboardButtonDisabled"
+            android:enabled="false"
             />
 
         <Button
@@ -203,5 +227,6 @@
             />
 
     </LinearLayout>
+
 
 </LinearLayout>
