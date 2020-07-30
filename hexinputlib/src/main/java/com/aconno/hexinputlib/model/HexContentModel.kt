@@ -23,6 +23,15 @@ class HexContentModel : HexContentObservable() {
         return values.toList()
     }
 
+    fun setValues(values : List<Char>) {
+        val previousState = getValues()
+
+        this.values.clear()
+        this.values.addAll(values)
+
+        notifyValuesReplaced(previousState)
+    }
+
     fun removeValue(index : Int) {
         val previousState = getValues()
 

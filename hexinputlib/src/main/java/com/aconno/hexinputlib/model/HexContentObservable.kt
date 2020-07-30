@@ -26,4 +26,8 @@ open class HexContentObservable {
     protected fun notifyValuesRemoved(previousState: List<Char>, removalStartIndex : Int, removalEndIndex : Int) {
         listeners.forEach { it.valuesRemoved(previousState,removalStartIndex,removalEndIndex) }
     }
+
+    protected fun notifyValuesReplaced(previousState: List<Char>) {
+        listeners.forEach { it.valuesReplaced(previousState) }
+    }
 }

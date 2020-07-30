@@ -1,30 +1,41 @@
 package com.aconno.hexinputlib
 
-import com.aconno.hexinputlib.formatter.HexFormatter
+import com.aconno.hexinputlib.formatter.HexFormatters
 import com.aconno.hexinputlib.model.HexContentListener
 import com.aconno.hexinputlib.model.HexContentModel
 import com.aconno.hexinputlib.ui.editor.IHexEditView
 import com.aconno.hexinputlib.ui.keyboard.KeyboardListener
+import java.text.ParseException
 
 class HexEditController(private val view : IHexEditView) : HexContentListener,
     KeyboardListener {
-    lateinit var model : HexContentModel
-    lateinit var formatter : HexFormatter
+    var model : HexContentModel = HexContentModel()
+    var formatter = HexFormatters.getDefaultFormatter()
+        set(value) {
+            field = value
+            loadValuesFromText(view.getContent()) //reloading text that is currently in view so that it gets reformatted using new formatter
+        }
 
     init {
-        TODO()
+        model.addListener(this)
     }
 
     fun loadValuesFromText(textValues : String) {
-        TODO()
+        val values = try {
+             HexFormatters.parse(textValues)
+        } catch (parseException : ParseException) {
+            return
+        }
+
+        model.setValues(values)
     }
 
     override fun valueInserted(previousState: List<Char>, insertionIndex: Int, insertedValue: Char) {
-        TODO("Not yet implemented")
+        valuesInserted(previousState,insertionIndex, listOf(insertedValue))
     }
 
     override fun valueRemoved(previousState: List<Char>, removalIndex: Int) {
-        TODO("Not yet implemented")
+        valuesRemoved(previousState,removalIndex,removalIndex + 1)
     }
 
     override fun valuesInserted(
@@ -32,7 +43,11 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
         insertionIndex: Int,
         insertedValues: List<Char>
     ) {
-        TODO("Not yet implemented")
+        val values = model.getValues()
+        val newCursorIndex = formatter.locateFormattedValue(values,insertionIndex + insertedValues.size)
+
+        view.updateContent(formatter.format(values))
+        view.setSelection(newCursorIndex,newCursorIndex)
     }
 
     override fun valuesRemoved(
@@ -40,22 +55,43 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
         removalStartIndex: Int,
         removalEndIndex: Int
     ) {
-        TODO("Not yet implemented")
+        val values = model.getValues()
+        val newCursorIndex = formatter.locateFormattedValue(values,removalStartIndex)
+
+        view.updateContent(formatter.format(values))
+        view.setSelection(newCursorIndex,newCursorIndex)
+    }
+
+    override fun valuesReplaced(previousState: List<Char>) {
+        val newContent = formatter.format(model.getValues())
+        view.updateContent(newContent)
+        view.setSelection(newContent.length, newContent.length)
     }
 
     override fun onRemoveKeyDown() {
-        TODO("Not yet implemented")
-    }
-
-    override fun onRemoveKeyLongPress() {
-        TODO("Not yet implemented")
-    }
-
-    override fun onRemoveKeyUp() {
-        TODO("Not yet implemented")
+        if(view.getSelectionStart() != view.getSelectionEnd()) {
+            removeSelectedText()
+        } else {
+            model.removeValue(view.getSelectionStart() - 1)
+        }
     }
 
     override fun onValueTyped(value: Char) {
-        TODO("Not yet implemented")
+        val insertionIndex = formatter.locateSourceValue(model.getValues(),view.getSelectionStart())
+
+        removeSelectedText()
+
+        model.insertValue(insertionIndex,value)
+    }
+
+    private fun removeSelectedText() {
+        val values = model.getValues()
+
+        val selectionStartSourceIndex = formatter.locateSourceValue(values,view.getSelectionStart())
+        val selectionEndSourceIndex =
+            if(view.getSelectionEnd() == view.getSelectionStart()) selectionStartSourceIndex
+            else formatter.locateSourceValue(values,view.getSelectionEnd())
+
+        model.removeRange(selectionStartSourceIndex,selectionEndSourceIndex)
     }
 }
