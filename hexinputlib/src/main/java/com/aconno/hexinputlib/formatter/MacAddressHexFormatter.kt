@@ -1,7 +1,7 @@
 package com.aconno.hexinputlib.formatter
 
 class MacAddressHexFormatter : HexFormatter {
-    override fun format(values: List<Char>) {
+    override fun format(values: List<Char>)  : String {
         TODO("Not yet implemented")
     }
 

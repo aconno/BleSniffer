@@ -1,8 +1,8 @@
-package com.aconno.hexinputlib.model
+package com.aconno.hexinputlib
 
 import kotlin.math.ceil
 
-object HexConverter {
+object HexUtils {
     const val HEX_CHARS = "0123456789ABCDEF"
 
     fun hexToBytes(hexValues : List<Char>) : ByteArray {

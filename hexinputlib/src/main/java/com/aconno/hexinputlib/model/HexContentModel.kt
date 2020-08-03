@@ -1,5 +1,7 @@
 package com.aconno.hexinputlib.model
 
+import com.aconno.hexinputlib.HexUtils
+
 class HexContentModel : HexContentObservable() {
     private val values : MutableList<Char> = mutableListOf()
 
@@ -49,6 +51,6 @@ class HexContentModel : HexContentObservable() {
     }
 
     fun getValuesAsBytes() : ByteArray {
-        return HexConverter.hexToBytes(values)
+        return HexUtils.hexToBytes(values)
     }
 }

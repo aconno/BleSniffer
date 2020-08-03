@@ -1,6 +1,7 @@
 package com.aconno.hexinputlib
 
 import com.aconno.hexinputlib.formatter.HexFormatters
+import com.aconno.hexinputlib.formatter.IncompatibleFormatException
 import com.aconno.hexinputlib.model.HexContentListener
 import com.aconno.hexinputlib.model.HexContentModel
 import com.aconno.hexinputlib.ui.editor.IHexEditView
@@ -23,7 +24,7 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
     fun loadValuesFromText(textValues : String) {
         val values = try {
              HexFormatters.parse(textValues)
-        } catch (parseException : ParseException) {
+        } catch (ex : IncompatibleFormatException) {
             return
         }
 

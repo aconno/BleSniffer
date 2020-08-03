@@ -1,12 +1,12 @@
 package com.aconno.hexinputlib.formatter
 
 class BytePairsHexFormatter : HexFormatter {
-    override fun format(values: List<Char>) {
+    override fun format(values: List<Char>) : String {
         TODO("Not yet implemented")
     }
 
     override fun parse(text: String): List<Char> {
-        TODO("Not yet implemented")
+        return FormatParseUtils.parseGroupedHexBytes(text,2)
     }
 
     override fun locateSourceValue(values: List<Char>, formattedValueIndex: Int): Int {
