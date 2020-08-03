@@ -43,18 +43,6 @@ class HexKeyboardView(context : Context, attributeSet: AttributeSet) : BaseHexKe
 
         val backspaceButton = findViewById<Button>(backspaceButtonId)
         backspaceButton.setOnClickListener { notifyRemoveKeyDown() }
-        backspaceButton.setOnTouchListener { _, event ->
-            if(event.action == MotionEvent.ACTION_DOWN) {
-                notifyRemoveKeyDown()
-            } else if(event.action == MotionEvent.ACTION_UP) {
-                notifyRemoveKeyUp()
-            }
-            false
-        }
-        backspaceButton.setOnLongClickListener {
-            notifyRemoveKeyLongPress()
-            true
-        }
     }
 
 }
