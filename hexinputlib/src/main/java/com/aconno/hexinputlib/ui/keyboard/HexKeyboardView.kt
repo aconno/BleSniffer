@@ -33,8 +33,6 @@ class HexKeyboardView(context : Context, attributeSet: AttributeSet) : BaseHexKe
         setupKeyboard()
     }
 
-    //TODO: fix this warning
-    @SuppressLint("ClickableViewAccessibility")
     private fun setupKeyboard() {
         charButtonsMap.forEach {
             val button = findViewById<Button>(it.key)
