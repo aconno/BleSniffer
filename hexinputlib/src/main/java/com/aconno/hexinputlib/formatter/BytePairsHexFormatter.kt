@@ -1,19 +1,38 @@
 package com.aconno.hexinputlib.formatter
 
+import java.lang.StringBuilder
+import kotlin.math.min
+
 class BytePairsHexFormatter : HexFormatter {
     override fun format(values: List<Char>) : String {
-        TODO("Not yet implemented")
+        val valuePairs = HexFormattersUtils.hexValuesToValuePairs(values)
+
+        val builder = StringBuilder()
+        for(i in valuePairs.indices step 2) {
+            val bytePair = valuePairs.subList(i,min(i+2,valuePairs.size)).joinToString("")
+            builder.append(bytePair)
+            builder.append(" ")
+        }
+
+        return builder.trim().toString()
     }
 
     override fun parse(text: String): List<Char> {
-        return FormatParseUtils.parseGroupedHexBytes(text,2)
+        return HexFormattersUtils.parseGroupedHexBytes(text,2)
     }
 
     override fun locateSourceValue(values: List<Char>, formattedValueIndex: Int): Int {
-        TODO("Not yet implemented")
+        return HexFormattersUtils.locateSourceValueInGroupedHexBytesString(values,formattedValueIndex,2)
     }
 
     override fun locateFormattedValue(values: List<Char>, sourceIndex: Int): Int {
-        TODO("Not yet implemented")
+        var index = sourceIndex + sourceIndex/4
+        if(values.size % 2 == 1 && sourceIndex >= values.lastIndex) {
+            index++
+        } else if(values.size % 4 == 0 && sourceIndex == values.size) {
+            index--
+        }
+
+        return index
     }
 }
