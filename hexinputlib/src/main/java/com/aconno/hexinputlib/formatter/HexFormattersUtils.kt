@@ -44,4 +44,15 @@ object HexFormattersUtils {
         return index
     }
 
+    fun locateFormattedValueInGroupedHexBytesString(values: List<Char>, sourceIndex: Int, groupSizeInBytes : Int) : Int {
+        val groupSizeInChars = groupSizeInBytes * HEX_CHARS_PER_BYTE
+        var index = sourceIndex + sourceIndex/groupSizeInChars
+        if(values.size % 2 == 1 && sourceIndex >= values.lastIndex) {
+            index++
+        } else if(values.size % groupSizeInChars == 0 && sourceIndex == values.size) {
+            index--
+        }
+        return index
+    }
+
 }

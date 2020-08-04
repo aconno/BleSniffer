@@ -26,13 +26,6 @@ class BytePairsHexFormatter : HexFormatter {
     }
 
     override fun locateFormattedValue(values: List<Char>, sourceIndex: Int): Int {
-        var index = sourceIndex + sourceIndex/4
-        if(values.size % 2 == 1 && sourceIndex >= values.lastIndex) {
-            index++
-        } else if(values.size % 4 == 0 && sourceIndex == values.size) {
-            index--
-        }
-
-        return index
+        return HexFormattersUtils.locateFormattedValueInGroupedHexBytesString(values,sourceIndex,2)
     }
 }
