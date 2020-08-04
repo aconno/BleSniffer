@@ -2,10 +2,10 @@ package com.aconno.hexinputlib.formatter
 
 import com.aconno.hexinputlib.isHexChar
 
-class PlainHexFormatter : HexFormatter {
+class PlainByteHexFormatter : HexFormatter {
 
     override fun format(values: List<Char>): String {
-        return HexFormattersUtils.hexValuesToValuePairs(values).joinToString { "" }
+        return HexFormattersUtils.hexValuesToValuePairs(values).joinToString("")
     }
 
     override fun parse(text: String): List<Char> {
