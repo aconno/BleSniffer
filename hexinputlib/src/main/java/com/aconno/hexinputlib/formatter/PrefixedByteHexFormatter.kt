@@ -11,63 +11,28 @@ class PrefixedByteHexFormatter : HexFormatter {
     override fun parse(text: String): List<Char> {
         val values = mutableListOf<Char>()
         val textParts = text.split(" ").filter { it.isNotEmpty() && it.isNotBlank() }
-        for((index,part) in textParts.withIndex()) {
-            val partValues =
-                if(part.length == 4) {
-                    parseCompletePart(part)
-                } else {
-                    when (index) {
-                        0 -> {
-                            parsePartWithIncompleteStart(part) //if this is the first part of text, then it should be accepted if it has incomplete start, for example 'xFF','FF' and 'F' should be accepted as the first part of text
-                        }
-                        textParts.lastIndex -> {
-                            parsePartWithIncompleteEnd(part) //if this is the last part of text, then it should be accepted if it has incomplete end, for example '0xF','0x' and '0' should be accepted as the last part of text
-                        }
-                        else -> {
-                            throw IncompatibleFormatException()
-                        }
-                    }
-                }
 
-            values.addAll(partValues)
+        for((index,part) in textParts.withIndex()) {
+            values.addAll(parsePart(part,index==0,index==textParts.lastIndex))
         }
 
         return values
     }
 
-    private fun parsePartWithIncompleteStart(part : String) : List<Char> {
-        return if(part.length == 2 || part.length == 3 && part.startsWith("x")) {
-            parsePartWithoutPrefixChecks(part)
-        } else if(part.length == 1 && part[0].isHexChar()) {
-            listOf(part[0])
-        } else {
+    private fun parsePart(part : String, acceptIncompleteStart : Boolean, acceptIncompleteEnd : Boolean) : List<Char> {
+        if(!acceptIncompleteStart && (part.first() != '0' || part.length > 1 && part[1] != 'x') ) {
             throw IncompatibleFormatException()
         }
-
-    }
-
-    private fun parsePartWithIncompleteEnd(part : String) : List<Char> {
-        return if(part.length == 3 && part.startsWith("0x") && part[2].isHexChar()) {
-            listOf(part[2])
-        } else if(part.length == 2 && part == "0x" || part.length == 1 && part == "0") {
-            listOf()
-        } else {
+        if(!acceptIncompleteEnd && (!part.last().isHexChar() || part.length > 1 && !part[part.lastIndex - 1].isHexChar()) ) { //checking if end is complete: the last char has to be a hex char and second to last char (if included) also has to be a hex char
             throw IncompatibleFormatException()
         }
-
-    }
-
-    private fun parseCompletePart(part : String) : List<Char> {
-        return if(part.startsWith("0x")) {
-            parsePartWithoutPrefixChecks(part)
-        } else {
-            throw IncompatibleFormatException()
+        val prefixLength = when {
+            part.startsWith("0x") -> 2
+            part.startsWith("x") || part=="0" -> 1
+            else -> 0
         }
 
-    }
-
-    private fun parsePartWithoutPrefixChecks(part : String) : List<Char> {
-        val values = part.subSequence(part.length - 2, part.length)
+        val values = part.subSequence(prefixLength,part.length)
         if(values.any { !it.isHexChar() }) {
             throw IncompatibleFormatException()
         }
