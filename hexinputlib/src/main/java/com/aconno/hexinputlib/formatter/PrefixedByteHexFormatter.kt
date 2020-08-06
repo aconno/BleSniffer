@@ -28,7 +28,7 @@ class PrefixedByteHexFormatter : HexFormatter {
         }
         val prefixLength = when {
             part.startsWith("0x") -> 2
-            part.startsWith("x") || part=="0" -> 1
+            part.startsWith("x") || part=="0" && !acceptIncompleteStart -> 1
             else -> 0
         }
 
