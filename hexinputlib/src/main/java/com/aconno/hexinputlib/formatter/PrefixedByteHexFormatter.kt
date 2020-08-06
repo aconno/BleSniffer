@@ -11,19 +11,67 @@ class PrefixedByteHexFormatter : HexFormatter {
     override fun parse(text: String): List<Char> {
         val values = mutableListOf<Char>()
         val textParts = text.split(" ").filter { it.isNotEmpty() && it.isNotBlank() }
-        for(part in textParts) {
-            if(part.length != EXPECTED_FORMAT_PART_SIZE || !part.startsWith("0x") ||
-                !part[FORMAT_PART_FIRST_CHAR_INDEX].isHexChar() ||
-                !part[FORMAT_PART_SECOND_CHAR_INDEX].isHexChar()) {
+        for((index,part) in textParts.withIndex()) {
+            val partValues =
+                if(part.length == 4) {
+                    parseCompletePart(part)
+                } else {
+                    when (index) {
+                        0 -> {
+                            parsePartWithIncompleteStart(part) //if this is the first part of text, then it should be accepted if it has incomplete start, for example 'xFF','FF' and 'F' should be accepted as the first part of text
+                        }
+                        textParts.lastIndex -> {
+                            parsePartWithIncompleteEnd(part) //if this is the last part of text, then it should be accepted if it has incomplete end, for example '0xF','0x' and '0' should be accepted as the last part of text
+                        }
+                        else -> {
+                            throw IncompatibleFormatException()
+                        }
+                    }
+                }
 
-                throw IncompatibleFormatException()
-            }
-
-            values.add(part[FORMAT_PART_FIRST_CHAR_INDEX])
-            values.add(part[FORMAT_PART_SECOND_CHAR_INDEX])
+            values.addAll(partValues)
         }
 
         return values
+    }
+
+    private fun parsePartWithIncompleteStart(part : String) : List<Char> {
+        return if(part.length == 2 || part.length == 3 && part.startsWith("x")) {
+            parsePartWithoutPrefixChecks(part)
+        } else if(part.length == 1 && part[0].isHexChar()) {
+            listOf(part[0])
+        } else {
+            throw IncompatibleFormatException()
+        }
+
+    }
+
+    private fun parsePartWithIncompleteEnd(part : String) : List<Char> {
+        return if(part.length == 3 && part.startsWith("0x") && part[2].isHexChar()) {
+            listOf(part[2])
+        } else if(part.length == 2 && part == "0x" || part.length == 1 && part == "0") {
+            listOf()
+        } else {
+            throw IncompatibleFormatException()
+        }
+
+    }
+
+    private fun parseCompletePart(part : String) : List<Char> {
+        return if(part.startsWith("0x")) {
+            parsePartWithoutPrefixChecks(part)
+        } else {
+            throw IncompatibleFormatException()
+        }
+
+    }
+
+    private fun parsePartWithoutPrefixChecks(part : String) : List<Char> {
+        val values = part.subSequence(part.length - 2, part.length)
+        if(values.any { !it.isHexChar() }) {
+            throw IncompatibleFormatException()
+        }
+        return values.toList()
     }
 
     override fun locateSourceValue(values: List<Char>, formattedValueIndex: Int): Int {
@@ -63,9 +111,4 @@ class PrefixedByteHexFormatter : HexFormatter {
         return formattedIndex
     }
 
-    companion object {
-        const val EXPECTED_FORMAT_PART_SIZE = 4
-        const val FORMAT_PART_FIRST_CHAR_INDEX = 2
-        const val FORMAT_PART_SECOND_CHAR_INDEX = 3
-    }
 }

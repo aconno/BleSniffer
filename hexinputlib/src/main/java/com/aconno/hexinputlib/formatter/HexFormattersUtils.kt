@@ -10,8 +10,12 @@ object HexFormattersUtils {
         val values = mutableListOf<Char>()
 
         val textParts = text.split(" ").filter { it.isNotEmpty() && it.isNotBlank() }
-        for(part in textParts) {
-            if(part.length != expectedGroupSizeInChars || part.filter { it.isHexChar() }.length != expectedGroupSizeInChars) {
+        for((index,part) in textParts.withIndex()) {
+            if(part.length != expectedGroupSizeInChars && index > 0 && index < textParts.lastIndex || // accept incomplete group if it is the first or the last group (for example, text 'ABC 1234 567' should be accepted for expected group size of 4
+                part.length > expectedGroupSizeInChars ||
+                part.any { !it.isHexChar() }
+            ) {
+
                 throw IncompatibleFormatException()
             }
             part.forEach { values.add(it) }
