@@ -45,6 +45,8 @@ class HexContentModel : HexContentObservable() {
     }
 
     fun removeRange(startIndex : Int, endIndex : Int) {
+        if(startIndex == endIndex) return
+
         val previousState = getValues()
 
         values.subList(startIndex,endIndex).clear()
