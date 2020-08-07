@@ -17,10 +17,16 @@ class PlainByteHexFormatter : HexFormatter {
     }
 
     override fun locateSourceValue(values: List<Char>, formattedValueIndex: Int): Int {
+        if(values.size % 2 == 1 && formattedValueIndex > values.lastIndex) {
+            return formattedValueIndex - 1
+        }
         return formattedValueIndex
     }
 
     override fun locateFormattedValue(values: List<Char>, sourceIndex: Int): Int {
+        if(values.size % 2 == 1 && sourceIndex >= values.lastIndex) {
+            return sourceIndex + 1
+        }
         return sourceIndex
     }
 
