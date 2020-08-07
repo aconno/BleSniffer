@@ -1,7 +1,10 @@
 package com.aconno.hexinputlib.ui.editor
 
+import android.app.Activity
+import android.content.ClipboardManager
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View.OnFocusChangeListener
 import com.aconno.hexinputlib.HexEditController
 import com.aconno.hexinputlib.KeyboardManager
 import com.aconno.hexinputlib.formatter.HexFormatter
@@ -55,5 +58,23 @@ class HexEditText(context: Context, attributeSet: AttributeSet) : androidx.appco
         return controller.model.getValuesAsBytes()
     }
 
+    override fun onTextContextMenuItem(id: Int): Boolean {
+        when(id) {
+            android.R.id.cut -> controller.cutSelection() //TODO copy selection to clipboard
+            android.R.id.paste -> controller.paste(getClipboardText())
+            else -> return false
+        }
+        return true
+    }
+
+    private fun getClipboardText() : String {
+        val clipboardManager = context.getSystemService(Activity.CLIPBOARD_SERVICE) as ClipboardManager
+        val primaryClip = clipboardManager.primaryClip ?: return ""
+        if(primaryClip.itemCount > 0) {
+            val item = primaryClip.getItemAt(0)
+            return item.text.toString()
+        }
+        return ""
+    }
 
 }

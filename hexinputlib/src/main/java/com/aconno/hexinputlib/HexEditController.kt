@@ -100,4 +100,22 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
     fun loadValuesFromByteArray(bytes: ByteArray) {
         model.setValues(bytes)
     }
+
+    fun cutSelection() {
+        removeSelectedText()
+    }
+
+    fun paste(clipboardText: String) {
+        val insertionIndex = formatter.locateSourceValue(model.getValues(),view.getSelectionStart())
+
+        removeSelectedText()
+
+        val values = try {
+            HexFormatters.parse(clipboardText)
+        } catch (ex : IncompatibleFormatException) {
+            return
+        }
+
+        model.insertValues(insertionIndex,values)
+    }
 }
