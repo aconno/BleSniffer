@@ -55,4 +55,8 @@ class HexContentModel : HexContentObservable() {
     fun getValuesAsBytes() : ByteArray {
         return HexUtils.hexToBytes(values)
     }
+
+    fun setValues(values : ByteArray) {
+        setValues(HexUtils.bytesToHex(values))
+    }
 }

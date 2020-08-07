@@ -1,5 +1,6 @@
 package com.aconno.hexinputlib
 
+import java.util.*
 import kotlin.math.ceil
 
 object HexUtils {
@@ -25,5 +26,9 @@ object HexUtils {
 
     private fun hexCharToDecimal(hexChar : Char) : Int {
         return HEX_CHARS.indexOf(hexChar.toUpperCase())
+    }
+
+    fun bytesToHex(values: ByteArray) : List<Char> {
+        return values.flatMap { it.toString(16).toUpperCase(Locale.ROOT).toList() }
     }
 }

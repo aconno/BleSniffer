@@ -96,4 +96,8 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
 
         model.removeRange(selectionStartSourceIndex,selectionEndSourceIndex)
     }
+
+    fun loadValuesFromByteArray(bytes: ByteArray) {
+        model.setValues(bytes)
+    }
 }

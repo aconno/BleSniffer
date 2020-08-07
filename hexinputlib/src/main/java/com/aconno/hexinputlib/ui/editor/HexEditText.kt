@@ -39,6 +39,10 @@ class HexEditText(context: Context, attributeSet: AttributeSet) : androidx.appco
         controller.loadValuesFromText(content)
     }
 
+    fun setContent(bytes : ByteArray) {
+        controller.loadValuesFromByteArray(bytes)
+    }
+
     fun setFormatter(formatter :  HexFormatter) {
         controller.formatter = formatter
     }
