@@ -15,18 +15,16 @@ class HexEditText(context: Context, attributeSet: AttributeSet) : androidx.appco
         showSoftInputOnFocus = false
         onFocusChangeListener = OnFocusChangeListener { v, hasFocus ->
             if(hasFocus) {
-                KeyboardManager.showHexKeyboard(this@HexEditText)
+                val keyboardView = KeyboardManager.findHexKeyboardView(this)
+                KeyboardManager.showHexKeyboard(keyboardView)
+                keyboardView.addListener(controller)
             } else {
-                KeyboardManager.hideHexKeyboard(this@HexEditText)
+                val keyboardView = KeyboardManager.findHexKeyboardView(this)
+                KeyboardManager.hideHexKeyboard(keyboardView)
+                keyboardView.removeListener(controller)
             }
         }
         setOnClickListener { KeyboardManager.showHexKeyboard(this) }
-    }
-
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        val keyboardView = KeyboardManager.findHexKeyboardView(this)
-        keyboardView.addListener(controller)
     }
 
     override fun updateContent(text: String) {
