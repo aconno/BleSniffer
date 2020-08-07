@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import com.aconno.hexinputlib.HexEditController
 import com.aconno.hexinputlib.KeyboardManager
+import com.aconno.hexinputlib.formatter.HexFormatter
 import com.aconno.hexinputlib.model.HexContentModel
 
 class HexEditText(context: Context, attributeSet: AttributeSet) : androidx.appcompat.widget.AppCompatEditText(context,attributeSet),
@@ -36,8 +37,12 @@ class HexEditText(context: Context, attributeSet: AttributeSet) : androidx.appco
         return text.toString()
     }
 
-    override fun setText(text: CharSequence?, type: BufferType?) {
-        controller.loadValuesFromText(text.toString())
+    fun setContent(content : String) {
+        controller.loadValuesFromText(content)
+    }
+
+    fun setFormatter(formatter :  HexFormatter) {
+        controller.formatter = formatter
     }
 
     fun getContentModel() : HexContentModel {

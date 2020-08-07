@@ -35,6 +35,8 @@ class HexContentModel : HexContentObservable() {
     }
 
     fun removeValue(index : Int) {
+        if(index < 0 || index > values.lastIndex) return
+
         val previousState = getValues()
 
         values.removeAt(index)

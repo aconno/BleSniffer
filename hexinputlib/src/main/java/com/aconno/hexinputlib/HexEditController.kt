@@ -73,7 +73,8 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
         if(view.getSelectionStart() != view.getSelectionEnd()) {
             removeSelectedText()
         } else {
-            model.removeValue(view.getSelectionStart() - 1)
+            val removalIndex = formatter.locateSourceValue(model.getValues(),view.getSelectionStart()) - 1
+            model.removeValue(removalIndex)
         }
     }
 
