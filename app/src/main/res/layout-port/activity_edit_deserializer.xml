@@ -55,7 +55,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/deserializer_name">
 
-                <com.google.android.material.textfield.TextInputEditText
+                <view class="com.aconno.hexinputlib.ui.editor.HexEditText"
                     android:id="@+id/deserializer_filter_input"
                     android:tag="hexInput"
                     android:layout_width="match_parent"
@@ -79,9 +79,8 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/deserializer_filter">
 
-                <com.google.android.material.textfield.TextInputEditText
+                <view class="com.aconno.hexinputlib.ui.editor.HexEditText"
                     android:id="@+id/deserializer_sample_data_input"
-                    android:tag="hexInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/sample_data_hint" />
