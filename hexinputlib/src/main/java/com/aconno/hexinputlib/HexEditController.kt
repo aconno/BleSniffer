@@ -6,7 +6,7 @@ import com.aconno.hexinputlib.model.HexContentListener
 import com.aconno.hexinputlib.model.HexContentModel
 import com.aconno.hexinputlib.ui.editor.IHexEditView
 import com.aconno.hexinputlib.ui.keyboard.KeyboardListener
-import java.text.ParseException
+import java.util.*
 
 class HexEditController(private val view : IHexEditView) : HexContentListener,
     KeyboardListener {
@@ -111,7 +111,7 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
         removeSelectedText()
 
         val values = try {
-            HexFormatters.parse(clipboardText)
+            HexFormatters.parse(clipboardText.toUpperCase(Locale.ROOT))
         } catch (ex : IncompatibleFormatException) {
             return
         }
