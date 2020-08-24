@@ -17,6 +17,9 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
             loadValuesFromText(view.getContent()) //reloading text that is currently in view so that it gets reformatted using new formatter
         }
 
+    @Volatile
+    private var removeBeingLongPressed = false
+
     init {
         model.addListener(this)
     }
@@ -57,7 +60,9 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
         removalEndIndex: Int
     ) {
         val values = model.getValues()
-        val newCursorIndex = formatter.locateFormattedValue(values,removalStartIndex)
+        val newCursorIndex = if(values.isNotEmpty()) {
+            formatter.locateFormattedValue(values, removalStartIndex)
+        } else 0
 
         view.updateContent(formatter.format(values))
         view.setSelection(newCursorIndex,newCursorIndex)
@@ -73,9 +78,27 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
         if(view.getSelectionStart() != view.getSelectionEnd()) {
             removeSelectedText()
         } else {
-            val removalIndex = formatter.locateSourceValue(model.getValues(),view.getSelectionStart()) - 1
-            model.removeValue(removalIndex)
+            removeValueBeforeCursor()
         }
+    }
+
+    private fun removeValueBeforeCursor() {
+        val removalIndex = formatter.locateSourceValue(model.getValues(),view.getSelectionStart()) - 1
+        model.removeValue(removalIndex)
+    }
+
+    override fun onRemoveKeyLongPress() {
+        removeBeingLongPressed = true
+        Thread {
+            while(removeBeingLongPressed) {
+                removeValueBeforeCursor()
+                Thread.sleep(TIME_BETWEEN_AUTO_VALUE_REMOVAL)
+            }
+        }.start()
+    }
+
+    override fun onRemoveKeyUp() {
+        removeBeingLongPressed = false
     }
 
     override fun onValueTyped(value: Char) {
@@ -117,5 +140,9 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
         }
 
         model.insertValues(insertionIndex,values)
+    }
+
+    companion object {
+        const val TIME_BETWEEN_AUTO_VALUE_REMOVAL = 100L
     }
 }

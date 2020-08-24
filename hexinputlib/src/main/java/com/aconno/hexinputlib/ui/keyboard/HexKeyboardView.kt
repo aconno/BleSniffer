@@ -33,6 +33,7 @@ class HexKeyboardView(context : Context, attributeSet: AttributeSet) : BaseHexKe
         setupKeyboard()
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setupKeyboard() {
         charButtonsMap.forEach {
             val button = findViewById<Button>(it.key)
@@ -40,7 +41,19 @@ class HexKeyboardView(context : Context, attributeSet: AttributeSet) : BaseHexKe
         }
 
         val backspaceButton = findViewById<Button>(backspaceButtonId)
-        backspaceButton.setOnClickListener { notifyRemoveKeyDown() }
+        backspaceButton.setOnLongClickListener {
+            notifyRemoveKeyLongPress()
+            true
+        }
+        backspaceButton.setOnTouchListener { _, event ->
+            when(event.action) {
+                MotionEvent.ACTION_DOWN -> notifyRemoveKeyDown()
+                MotionEvent.ACTION_UP -> notifyRemoveKeyUp()
+            }
+            false
+        }
     }
+
+
 
 }

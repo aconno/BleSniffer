@@ -23,4 +23,11 @@ abstract class BaseHexKeyboardView(context : Context, attributeSet: AttributeSet
         listeners.forEach { it.onRemoveKeyDown() }
     }
 
+    protected fun notifyRemoveKeyLongPress() {
+        listeners.forEach { it.onRemoveKeyLongPress() }
+    }
+
+    protected fun notifyRemoveKeyUp() {
+        listeners.forEach { it.onRemoveKeyUp() }
+    }
 }
