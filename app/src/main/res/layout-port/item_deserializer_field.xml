@@ -71,7 +71,8 @@
             android:layout_height="wrap_content"
             android:ems="3"
             android:hint="@string/start_index_inclusive"
-            android:inputType="number" />
+            android:inputType="number"
+            android:maxLength="5"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -88,7 +89,8 @@
             android:layout_height="wrap_content"
             android:ems="3"
             android:hint="@string/end_index_inclusive"
-            android:inputType="number" />
+            android:inputType="number"
+            android:maxLength="5"/>
     </com.google.android.material.textfield.TextInputLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
