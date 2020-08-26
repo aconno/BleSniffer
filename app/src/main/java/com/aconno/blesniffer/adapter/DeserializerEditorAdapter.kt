@@ -123,8 +123,10 @@ class DeserializerEditorAdapter(
                 override fun onNothingSelected(p0: AdapterView<*>?) {}
             }
             view.btn_remove.setOnClickListener {
-                fieldDeserializers.removeAt(adapterPosition)
-                notifyItemRemoved(adapterPosition)
+                if(adapterPosition != RecyclerView.NO_POSITION) {
+                    fieldDeserializers.removeAt(adapterPosition)
+                    notifyItemRemoved(adapterPosition)
+                }
             }
             view.color_button.setOnClickListener {
                 showColorPickerDialog()
