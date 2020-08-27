@@ -27,6 +27,7 @@ import com.aconno.blesniffer.domain.interactor.deserializing.*
 import com.aconno.blesniffer.preferences.BleSnifferPreferences
 import com.aconno.blesniffer.ui.base.BaseActivity
 import com.aconno.hexinputlib.formatter.*
+import com.aconno.hexinputlib.setContentViewWithHexKeyboardAutoAdded
 import com.google.common.io.BaseEncoding
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -94,7 +95,7 @@ class EditDeserializerActivity : BaseActivity() {
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit_deserializer)
+        setContentViewWithHexKeyboardAutoAdded(R.layout.activity_edit_deserializer)
 
         editDeserializerActivityComponent.inject(this)
 
