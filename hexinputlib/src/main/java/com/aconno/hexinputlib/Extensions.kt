@@ -18,26 +18,32 @@ fun Activity.setContentViewWithHexKeyboardAutoAdded(layoutResourceId : Int, wrap
     } else {
         inflatedLayout
     }
-    activityMainContent.id = View.generateViewId()
-    activityMainContent.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0)
+    activityMainContent.apply {
+        id = View.generateViewId()
+        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0)
+    }
 
-    val hexKeyboardView = HexKeyboardView(this)
-    hexKeyboardView.id = View.generateViewId()
-    hexKeyboardView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT)
-    hexKeyboardView.visibility = View.GONE
+    val hexKeyboardView = HexKeyboardView(this).apply {
+        id = View.generateViewId()
+        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT)
+        visibility = View.GONE
+    }
 
-    val contentView = androidx.constraintlayout.widget.ConstraintLayout(this)
-    contentView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT)
-    contentView.addView(activityMainContent)
-    contentView.addView(hexKeyboardView)
+    val contentView = androidx.constraintlayout.widget.ConstraintLayout(this).apply {
+        layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT)
+        addView(activityMainContent)
+        addView(hexKeyboardView)
+    }
 
-    val constraintSet = ConstraintSet()
-    constraintSet.clone(contentView)
-    constraintSet.connect(activityMainContent.id,ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP)
-    constraintSet.connect(activityMainContent.id,ConstraintSet.BOTTOM,hexKeyboardView.id,ConstraintSet.TOP)
-    constraintSet.connect(hexKeyboardView.id,ConstraintSet.BOTTOM,ConstraintSet.PARENT_ID,ConstraintSet.BOTTOM)
+    ConstraintSet().apply {
+        clone(contentView)
+        connect(activityMainContent.id,ConstraintSet.TOP,ConstraintSet.PARENT_ID,ConstraintSet.TOP)
+        connect(activityMainContent.id,ConstraintSet.BOTTOM,hexKeyboardView.id,ConstraintSet.TOP)
+        connect(hexKeyboardView.id,ConstraintSet.BOTTOM,ConstraintSet.PARENT_ID,ConstraintSet.BOTTOM)
 
-    constraintSet.applyTo(contentView)
+        applyTo(contentView)
+    }
+
 
     setContentView(contentView)
 }
