@@ -24,6 +24,7 @@ fun Activity.setContentViewWithHexKeyboardAutoAdded(layoutResourceId : Int, wrap
     val hexKeyboardView = HexKeyboardView(this)
     hexKeyboardView.id = View.generateViewId()
     hexKeyboardView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT)
+    hexKeyboardView.visibility = View.GONE
 
     val contentView = androidx.constraintlayout.widget.ConstraintLayout(this)
     contentView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT)
