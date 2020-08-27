@@ -7,7 +7,7 @@ import android.view.MotionEvent
 import android.widget.Button
 import com.aconno.hexinputlib.R
 
-class HexKeyboardView(context : Context, attributeSet: AttributeSet) : BaseHexKeyboardView(context, attributeSet) {
+class HexKeyboardView(context : Context, attributeSet: AttributeSet?) : BaseHexKeyboardView(context, attributeSet) {
     private var charButtonsMap = mutableMapOf(
         R.id.button_0 to '0',
         R.id.button_1 to '1',
@@ -32,6 +32,8 @@ class HexKeyboardView(context : Context, attributeSet: AttributeSet) : BaseHexKe
         inflate(context,R.layout.hex_keyboard,this)
         setupKeyboard()
     }
+
+    constructor(context: Context) : this(context,null)
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupKeyboard() {

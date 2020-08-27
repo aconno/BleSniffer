@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
 
-abstract class BaseHexKeyboardView(context : Context, attributeSet: AttributeSet) : FrameLayout(context,attributeSet) {
+abstract class BaseHexKeyboardView(context : Context, attributeSet: AttributeSet?) : FrameLayout(context,attributeSet) {
     private var listeners = mutableListOf<KeyboardListener>()
 
     fun addListener(keyboardListener: KeyboardListener) {
