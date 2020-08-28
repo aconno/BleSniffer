@@ -59,14 +59,14 @@ class AppModule(private val bleSnifferApplication: BleSnifferApplication) {
     @Provides
     @Singleton
     fun provideBluetooth(
-        bluetoothAdapter: BluetoothAdapter,
+        bluetoothAdapter: BluetoothAdapter?,
         bluetoothPermission: BluetoothPermission,
         bluetoothStateListener: BluetoothStateListener
     ): Bluetooth = BluetoothImpl(bluetoothAdapter, bluetoothPermission, bluetoothStateListener)
 
     @Provides
     @Singleton
-    fun provideBluetoothAdapter(): BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+    fun provideBluetoothAdapter(): BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
 
     @Provides
     @Singleton
