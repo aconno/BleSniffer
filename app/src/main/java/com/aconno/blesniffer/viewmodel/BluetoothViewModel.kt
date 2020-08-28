@@ -26,6 +26,8 @@ class BluetoothViewModel(
         bluetoothAdapter?.enable()
     }
 
+    fun isBluetoothAvailable() = BluetoothAdapter.getDefaultAdapter() != null
+
     fun observeBluetoothState() {
         application.applicationContext.registerReceiver(
             bluetoothStateReceiver,

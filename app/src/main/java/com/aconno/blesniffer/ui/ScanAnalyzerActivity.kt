@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.SearchView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
@@ -125,6 +126,18 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         savedInstanceState?.let {
             shouldBeScanning = it.getBoolean(SHOULD_BE_SCANNING_KEY)
         }
+
+        if(!bluetoothViewModel.isBluetoothAvailable() && savedInstanceState == null) {
+            displayBluetoothNotAvailableDialog()
+        }
+    }
+
+    private fun displayBluetoothNotAvailableDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.bluetooth_not_available))
+            .setMessage(getString(R.string.bletooth_not_available_message))
+            .setPositiveButton(getString(R.string.ok)) { _, _ ->}
+            .show()
     }
 
     override fun onResume() {
