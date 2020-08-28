@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.util.AttributeSet
 import android.view.View.OnFocusChangeListener
+import androidx.core.widget.addTextChangedListener
 import com.aconno.hexinputlib.HexEditController
 import com.aconno.hexinputlib.KeyboardManager
 import com.aconno.hexinputlib.formatter.HexFormatter
@@ -29,6 +30,19 @@ class HexEditText(context: Context, attributeSet: AttributeSet) : androidx.appco
             }
         }
         setOnClickListener { KeyboardManager.showHexKeyboard(this) }
+
+        addTextChangedListener(
+            onTextChanged = { _,_,_,_ ->
+                onTextChanged()
+            }
+        )
+
+    }
+
+    private fun onTextChanged(
+    ) {
+        controller.onViewContentChanged()
+
     }
 
     override fun updateContent(text: String) {
