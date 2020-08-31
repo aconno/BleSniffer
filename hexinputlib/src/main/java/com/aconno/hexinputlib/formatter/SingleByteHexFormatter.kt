@@ -17,4 +17,8 @@ class SingleByteHexFormatter : HexFormatter {
     override fun locateFormattedValue(values: List<Char>, sourceIndex: Int): Int {
         return HexFormattersUtils.locateFormattedValueInGroupedHexBytesString(values,sourceIndex,1)
     }
+
+    override fun areValuesDerivableFrom(values: List<Char>, fromValues: List<Char>): Boolean {
+        return HexFormattersUtils.areByteValuesDerivableFrom(values,fromValues)
+    }
 }

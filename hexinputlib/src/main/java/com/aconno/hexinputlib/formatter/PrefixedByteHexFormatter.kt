@@ -76,4 +76,8 @@ class PrefixedByteHexFormatter : HexFormatter {
         return formattedIndex
     }
 
+    override fun areValuesDerivableFrom(values: List<Char>, fromValues: List<Char>): Boolean {
+        return HexFormattersUtils.areByteValuesDerivableFrom(values,fromValues)
+    }
+
 }

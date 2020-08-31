@@ -43,23 +43,9 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
             return
         }
 
-        if(!areValuesEqual(parsedValues,model.getValues())) {
+        if(!formatter.areValuesDerivableFrom(parsedValues,model.getValues())) {
             model.setValues(parsedValues)
         }
-    }
-
-    //TODO delegate this comparison to formatter
-    private fun areValuesEqual(parsedValues : List<Char>, currentValues : List<Char>) : Boolean {
-        if(currentValues == parsedValues) {
-            return true
-        }
-        if(parsedValues.size - currentValues.size == 1) {
-            val sizeWithoutLastByte = parsedValues.size - 2
-            if(parsedValues.last() == currentValues.last() && parsedValues[parsedValues.lastIndex - 1] == '0' && parsedValues.subList(0,sizeWithoutLastByte) == currentValues.subList(0,sizeWithoutLastByte)) {
-                return true
-            }
-        }
-        return false
     }
 
     override fun valueInserted(previousState: List<Char>, insertionIndex: Int, insertedValue: Char) {

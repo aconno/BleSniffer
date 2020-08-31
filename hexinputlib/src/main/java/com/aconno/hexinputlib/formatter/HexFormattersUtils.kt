@@ -59,4 +59,16 @@ object HexFormattersUtils {
         return index
     }
 
+    fun areByteValuesDerivableFrom(byteValues: List<Char>, fromValues : List<Char>) : Boolean {
+        if(fromValues == byteValues) {
+            return true
+        }
+        if(byteValues.size - fromValues.size == 1) {
+            val sizeWithoutLastByte = byteValues.size - 2
+            if(byteValues.last() == fromValues.last() && byteValues[byteValues.lastIndex - 1] == '0' && byteValues.subList(0,sizeWithoutLastByte) == fromValues.subList(0,sizeWithoutLastByte)) {
+                return true
+            }
+        }
+        return false
+    }
 }

@@ -30,5 +30,8 @@ class PlainByteHexFormatter : HexFormatter {
         return sourceIndex
     }
 
+    override fun areValuesDerivableFrom(values: List<Char>, fromValues: List<Char>): Boolean {
+        return HexFormattersUtils.areByteValuesDerivableFrom(values,fromValues)
+    }
 
 }
