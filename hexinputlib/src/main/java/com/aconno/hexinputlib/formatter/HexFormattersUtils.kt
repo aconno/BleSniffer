@@ -24,6 +24,14 @@ object HexFormattersUtils {
         return values
     }
 
+    fun parsePlainValues(text: String) : List<Char> {
+        val trimmedText = text.trim()
+        if(trimmedText.find { !it.isHexChar() } != null) {
+            throw IncompatibleFormatException()
+        }
+        return trimmedText.toCharArray().toList()
+    }
+
     fun hexValuesToValuePairs(values : List<Char>) : List<String> {
         val pairs = mutableListOf<String>()
         for(i in values.indices step 2) {

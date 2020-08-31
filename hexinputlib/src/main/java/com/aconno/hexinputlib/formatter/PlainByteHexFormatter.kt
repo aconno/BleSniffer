@@ -1,7 +1,5 @@
 package com.aconno.hexinputlib.formatter
 
-import com.aconno.hexinputlib.isHexChar
-
 class PlainByteHexFormatter : HexFormatter {
 
     override fun format(values: List<Char>): String {
@@ -9,11 +7,7 @@ class PlainByteHexFormatter : HexFormatter {
     }
 
     override fun parse(text: String): List<Char> {
-        val trimmedText = text.trim()
-        if(trimmedText.find { !it.isHexChar() } != null) {
-            throw IncompatibleFormatException()
-        }
-        return trimmedText.toCharArray().toList()
+        return HexFormattersUtils.parsePlainValues(text)
     }
 
     override fun locateSourceValue(values: List<Char>, formattedValueIndex: Int): Int {
