@@ -31,18 +31,7 @@ class HexEditText(context: Context, attributeSet: AttributeSet) : androidx.appco
         }
         setOnClickListener { KeyboardManager.showHexKeyboard(this) }
 
-        addTextChangedListener(
-            onTextChanged = { _,_,_,_ ->
-                onTextChanged()
-            }
-        )
-
-    }
-
-    private fun onTextChanged(
-    ) {
-        controller.onViewContentChanged()
-
+        addTextChangedListener(afterTextChanged = { controller.onViewContentChanged() })
     }
 
     override fun updateContent(text: String) {
