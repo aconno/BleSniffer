@@ -4,9 +4,10 @@ import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.View.OnFocusChangeListener
-import androidx.core.widget.addTextChangedListener
 import com.aconno.hexinputlib.HexEditController
 import com.aconno.hexinputlib.KeyboardManager
 import com.aconno.hexinputlib.formatter.HexFormatter
@@ -31,7 +32,7 @@ class HexEditText(context: Context, attributeSet: AttributeSet) : androidx.appco
         }
         setOnClickListener { KeyboardManager.showHexKeyboard(this) }
 
-        addTextChangedListener(afterTextChanged = { controller.onViewContentChanged() })
+        addTextChangedListener(HexTextWatcher())
     }
 
     override fun updateContent(text: String) {
@@ -96,4 +97,31 @@ class HexEditText(context: Context, attributeSet: AttributeSet) : androidx.appco
         return ""
     }
 
+
+    inner class HexTextWatcher : TextWatcher {
+        private lateinit var contentBeforeChange : String
+        private var changeStartIndex = 0
+        private var charsReplaced = 0
+        private var charsInserted = 0
+
+        override fun afterTextChanged(s: Editable?) {
+            if(isWholeContentReplaced()) {
+                controller.onViewContentChanged()
+            } else {
+                val insertedChars = editableText.toString().substring(changeStartIndex,changeStartIndex + charsInserted)
+                controller.onViewContentChanged(changeStartIndex,charsReplaced,insertedChars)
+            }
+        }
+
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            contentBeforeChange = s.toString()
+            changeStartIndex = start
+            charsReplaced = count
+            charsInserted = after
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+        private fun isWholeContentReplaced() = charsReplaced == contentBeforeChange.length && charsInserted == editableText.length
+    }
 }

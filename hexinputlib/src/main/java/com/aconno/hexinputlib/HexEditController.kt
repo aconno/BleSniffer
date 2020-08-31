@@ -48,6 +48,11 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
         }
     }
 
+    fun onViewContentChanged(changeStartIndex : Int, charsReplacedCount : Int, charsInserted : String) {
+        removeTextPart(changeStartIndex, changeStartIndex + charsReplacedCount)
+        insertValuesFromText(charsInserted,changeStartIndex)
+    }
+
     override fun valueInserted(previousState: List<Char>, insertionIndex: Int, insertedValue: Char) {
         valuesInserted(previousState,insertionIndex, listOf(insertedValue))
     }
@@ -124,14 +129,18 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
     }
 
     private fun removeSelectedText() {
+        return removeTextPart(view.getSelectionStart(),view.getSelectionEnd())
+    }
+
+    private fun removeTextPart(removalStartIndex : Int, removalEndIndex : Int) {
         val values = model.getValues()
 
-        val selectionStartSourceIndex = formatter.locateSourceValue(values,view.getSelectionStart())
-        val selectionEndSourceIndex =
-            if(view.getSelectionEnd() == view.getSelectionStart()) selectionStartSourceIndex
-            else formatter.locateSourceValue(values,view.getSelectionEnd())
+        val removalStartSourceIndex = formatter.locateSourceValue(values,removalStartIndex)
+        val removalEndSourceIndex =
+            if(removalEndIndex == removalStartIndex) removalStartSourceIndex
+            else formatter.locateSourceValue(values,removalEndIndex)
 
-        model.removeRange(selectionStartSourceIndex,selectionEndSourceIndex)
+        model.removeRange(removalStartSourceIndex,removalEndSourceIndex)
     }
 
     fun loadValuesFromByteArray(bytes: ByteArray) {
@@ -143,12 +152,16 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
     }
 
     fun paste(clipboardText: String) {
-        val insertionIndex = formatter.locateSourceValue(model.getValues(),view.getSelectionStart())
+        insertValuesFromText(clipboardText,view.getSelectionStart())
+    }
+
+    private fun insertValuesFromText(text: String, insertAtIndex : Int) {
+        val insertionIndex = formatter.locateSourceValue(model.getValues(),insertAtIndex)
 
         removeSelectedText()
 
         val values = try {
-            HexFormatters.parse(clipboardText.toUpperCase(Locale.ROOT))
+            HexFormatters.parse(text.toUpperCase(Locale.ROOT))
         } catch (ex : IncompatibleFormatException) {
             return
         }
