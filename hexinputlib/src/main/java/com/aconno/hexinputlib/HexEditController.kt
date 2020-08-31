@@ -35,7 +35,14 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
     }
 
     fun onViewContentChanged() {
-        val parsedValues = formatter.parse(view.getContent())
+        val content = view.getContent()
+        val parsedValues = try {
+            formatter.parse(view.getContent())
+        } catch (ex : IncompatibleFormatException) {
+            loadValuesFromText(content)
+            return
+        }
+
         if(!areValuesEqual(parsedValues,model.getValues())) {
             model.setValues(parsedValues)
         }
