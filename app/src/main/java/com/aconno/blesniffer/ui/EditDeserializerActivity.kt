@@ -212,7 +212,7 @@ class EditDeserializerActivity : BaseActivity() {
     private fun advertisementBytesDisplayModeToHexFormatterFormatType(displayMode : ByteArrayFormatMode) : HexFormatters.FormatterType {
         return when(displayMode) {
             ByteArrayFormatMode.SINGLE_BYTE_WITH_PREFIX -> HexFormatters.FormatterType.PREFIXED_BYTE_HEX_FORMATTER
-            ByteArrayFormatMode.PLAIN -> HexFormatters.FormatterType.PLAIN_HEX_FORMATTER
+            ByteArrayFormatMode.PLAIN -> HexFormatters.FormatterType.PLAIN_VALUES_HEX_FORMATTER
             ByteArrayFormatMode.BYTE_PAIRS -> HexFormatters.FormatterType.BYTE_PAIRS_HEX_FORMATTER
             ByteArrayFormatMode.SINGLE_BYTE -> HexFormatters.FormatterType.SINGLE_BYTE_HEX_FORMATTER
         }
