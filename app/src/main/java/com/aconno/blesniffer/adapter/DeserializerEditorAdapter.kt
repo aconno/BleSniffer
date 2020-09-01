@@ -44,11 +44,18 @@ class DeserializerEditorAdapter(
             fieldDeserializers.maxBy {
                 it.endIndexExclusive
             }?.let {
-                this.startIndexInclusive = it.endIndexExclusive
-                this.endIndexExclusive = this.startIndexInclusive + this.type.converter.length
+                setFieldDeserializerIndices(this, it.endIndexExclusive)
+                if(this.endIndexExclusive > MAX_DESERIALIZER_FIELD_END_INDEX) {
+                    setFieldDeserializerIndices(this,0)
+                }
             }
         })
         notifyItemInserted(fieldDeserializers.size - 1)
+    }
+
+    private fun setFieldDeserializerIndices(deserializerField : FieldDeserializer, startIndex : Int) {
+        deserializerField.startIndexInclusive = startIndex
+        deserializerField.endIndexExclusive = startIndex + deserializerField.type.converter.length
     }
 
     override fun getItemCount(): Int {
@@ -123,8 +130,10 @@ class DeserializerEditorAdapter(
                 override fun onNothingSelected(p0: AdapterView<*>?) {}
             }
             view.btn_remove.setOnClickListener {
-                fieldDeserializers.removeAt(adapterPosition)
-                notifyItemRemoved(adapterPosition)
+                if(adapterPosition != RecyclerView.NO_POSITION) {
+                    fieldDeserializers.removeAt(adapterPosition)
+                    notifyItemRemoved(adapterPosition)
+                }
             }
             view.color_button.setOnClickListener {
                 showColorPickerDialog()
@@ -207,4 +216,7 @@ class DeserializerEditorAdapter(
             }
         }
 
+    companion object {
+        const val MAX_DESERIALIZER_FIELD_END_INDEX = 99999
+    }
 }
