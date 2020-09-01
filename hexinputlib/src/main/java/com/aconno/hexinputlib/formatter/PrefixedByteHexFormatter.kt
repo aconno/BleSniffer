@@ -1,6 +1,7 @@
 package com.aconno.hexinputlib.formatter
 
 import com.aconno.hexinputlib.isHexChar
+import java.util.*
 
 class PrefixedByteHexFormatter : HexFormatter {
     override fun format(values: List<Char>)  : String {
@@ -10,7 +11,8 @@ class PrefixedByteHexFormatter : HexFormatter {
 
     override fun parse(text: String): List<Char> {
         val values = mutableListOf<Char>()
-        val textParts = text.split(" ").filter { it.isNotEmpty() && it.isNotBlank() }
+        val textParts =
+            text.toUpperCase(Locale.ROOT).split(" ").filter { it.isNotEmpty() && it.isNotBlank() }
 
         for((index,part) in textParts.withIndex()) {
             values.addAll(parsePart(part,index==0,index==textParts.lastIndex))
@@ -20,15 +22,15 @@ class PrefixedByteHexFormatter : HexFormatter {
     }
 
     private fun parsePart(part : String, acceptIncompleteStart : Boolean, acceptIncompleteEnd : Boolean) : List<Char> {
-        if(!acceptIncompleteStart && (part.first() != '0' || part.length > 1 && part[1] != 'x') ) {
+        if(!acceptIncompleteStart && (part.first() != '0' || part.length > 1 && part[1] != 'X') ) {
             throw IncompatibleFormatException()
         }
         if(!acceptIncompleteEnd && (!part.last().isHexChar() || part.length > 1 && !part[part.lastIndex - 1].isHexChar()) ) { //checking if end is complete: the last char has to be a hex char and second to last char (if included) also has to be a hex char
             throw IncompatibleFormatException()
         }
         val prefixLength = when {
-            part.startsWith("0x") -> 2
-            part.startsWith("x") || part=="0" && !acceptIncompleteStart -> 1
+            part.startsWith("0X") -> 2
+            part.startsWith("X") || part=="0" && !acceptIncompleteStart -> 1
             else -> 0
         }
 
