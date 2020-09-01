@@ -1,8 +1,5 @@
 package com.aconno.hexinputlib.ui.editor
 
-import android.app.Activity
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
@@ -62,41 +59,6 @@ class HexEditText(context: Context, attributeSet: AttributeSet) : androidx.appco
     fun getValuesAsBytes() : ByteArray {
         return controller.model.getValuesAsBytes()
     }
-
-    override fun onTextContextMenuItem(id: Int): Boolean {
-        when(id) {
-            android.R.id.cut -> {
-                addSelectedTextToClipboard()
-                controller.cutSelection()
-            }
-            android.R.id.paste -> controller.paste(getClipboardText())
-            else -> return super.onTextContextMenuItem(id)
-        }
-        return true
-    }
-
-    private fun addSelectedTextToClipboard() {
-        text?.subSequence(selectionStart,selectionEnd)?.let {
-            setClipboardText(it)
-        }
-    }
-
-    private fun setClipboardText(text : CharSequence) {
-        val clip = ClipData.newPlainText(text,text)
-        val clipboardManager = context.getSystemService(Activity.CLIPBOARD_SERVICE) as ClipboardManager
-        clipboardManager.setPrimaryClip(clip)
-    }
-
-    private fun getClipboardText() : String {
-        val clipboardManager = context.getSystemService(Activity.CLIPBOARD_SERVICE) as ClipboardManager
-        val primaryClip = clipboardManager.primaryClip ?: return ""
-        if(primaryClip.itemCount > 0) {
-            val item = primaryClip.getItemAt(0)
-            return item.text.toString()
-        }
-        return ""
-    }
-
 
     inner class HexTextWatcher : TextWatcher {
         private lateinit var contentBeforeChange : String
