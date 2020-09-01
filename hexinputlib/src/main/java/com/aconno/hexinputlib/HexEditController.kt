@@ -28,7 +28,7 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
         val values = try {
              HexFormatters.parse(textValues)
         } catch (ex : IncompatibleFormatException) {
-            return
+            listOf<Char>()
         }
 
         model.setValues(values)
@@ -50,7 +50,12 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
 
     fun onViewContentChanged(changeStartIndex : Int, charsReplacedCount : Int, charsInserted : String) {
         removeTextPart(changeStartIndex, changeStartIndex + charsReplacedCount)
-        insertValuesFromText(charsInserted,changeStartIndex)
+
+        val valuesInserted = insertValuesFromText(charsInserted,changeStartIndex)
+        if(!valuesInserted) {
+            view.updateContent(formatter.format(model.getValues()))
+            view.setSelection(changeStartIndex,changeStartIndex)
+        }
     }
 
     override fun valueInserted(previousState: List<Char>, insertionIndex: Int, insertedValue: Char) {
@@ -155,7 +160,7 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
         insertValuesFromText(clipboardText,view.getSelectionStart())
     }
 
-    private fun insertValuesFromText(text: String, insertAtIndex : Int) {
+    private fun insertValuesFromText(text: String, insertAtIndex : Int) : Boolean {
         val insertionIndex = formatter.locateSourceValue(model.getValues(),insertAtIndex)
 
         removeSelectedText()
@@ -163,10 +168,12 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
         val values = try {
             HexFormatters.parse(text.toUpperCase(Locale.ROOT))
         } catch (ex : IncompatibleFormatException) {
-            return
+            return false
         }
 
         model.insertValues(insertionIndex,values)
+
+        return true
     }
 
     companion object {
