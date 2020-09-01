@@ -44,8 +44,16 @@ fun Activity.setContentViewWithHexKeyboardAutoAdded(layoutResourceId : Int, wrap
         applyTo(contentView)
     }
 
-
     setContentView(contentView)
+}
+
+fun Activity.handleBackPressedWithHexKeyboardInContentView() {
+    val hexKeyboardView = KeyboardManager.findHexKeyboardView(findViewById(android.R.id.content))
+    if(hexKeyboardView.visibility == View.VISIBLE) {
+        KeyboardManager.hideHexKeyboard(hexKeyboardView)
+    } else {
+        finish()
+    }
 }
 
 internal fun Char.isHexChar() : Boolean {

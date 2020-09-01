@@ -27,6 +27,7 @@ import com.aconno.blesniffer.domain.interactor.deserializing.*
 import com.aconno.blesniffer.preferences.BleSnifferPreferences
 import com.aconno.blesniffer.ui.base.BaseActivity
 import com.aconno.hexinputlib.formatter.*
+import com.aconno.hexinputlib.handleBackPressedWithHexKeyboardInContentView
 import com.aconno.hexinputlib.setContentViewWithHexKeyboardAutoAdded
 import com.google.common.io.BaseEncoding
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -342,6 +343,10 @@ class EditDeserializerActivity : BaseActivity() {
         outState.putParcelable(DESERIALIZER_KEY,ParcelableDeserializer(deserializer))
         outState.putBoolean(EXISTING_KEY,existing)
         outState.putBoolean(PREVIEW_DISPLAY_ON_KEY,previewDisplayOn)
+    }
+
+    override fun onBackPressed() {
+        handleBackPressedWithHexKeyboardInContentView()
     }
 
     companion object {
