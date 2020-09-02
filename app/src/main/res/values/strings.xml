@@ -83,4 +83,7 @@
     <string name="settings">Settings</string>
     <string name="deserializer">Deserializer:</string>
     <string name="deserializer_fields">Deserializer Fields</string>
+    <string name="advertisement_filter_icon">Advertisement filter icon</string>
+    <string name="mac_address">Mac</string>
+    <string name="device_name">Name</string>
 </resources>
