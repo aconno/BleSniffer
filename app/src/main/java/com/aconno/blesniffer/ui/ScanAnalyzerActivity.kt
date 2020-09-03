@@ -2,6 +2,9 @@ package com.aconno.blesniffer.ui
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -369,6 +372,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
         val searchMenuItem = mainMenu?.findItem(R.id.search)
         searchMenuItem?.isVisible = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        searchMenuItem?.icon?.colorFilter = PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY)
 
         val searchView = searchMenuItem?.actionView as ViewGroup
         initSearchView(searchView)
