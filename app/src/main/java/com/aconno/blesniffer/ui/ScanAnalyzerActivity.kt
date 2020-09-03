@@ -439,40 +439,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         }
     }
 
-    private fun setSearchQueryTextListener(searchView: SearchView) {
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                filter = null
-                query?.let {
-                    filter = if (query.isNotEmpty()) query
-                    else null
-                }
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                // Clean this up somehow
-                val but = searchView.context.resources.getIdentifier(
-                    "android:id/search_close_btn",
-                    null,
-                    null
-                )
-                val closeButton = findViewById<ImageView>(but)
-                closeButton.setOnClickListener {
-                    searchView.clearFocus()
-                    searchView.setQuery("", false)
-                    filter = null
-                }
-                filter = null
-                newText?.let {
-                    filter = if (newText.isNotEmpty()) newText
-                    else null
-                }
-                return false
-            }
-        })
-    }
-
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         val id: Int? = item?.itemId
         when (id) {
@@ -481,7 +447,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             R.id.action_clear -> {
                 scanAnalyzerAdapter.clear()
             }
-//            R.id.search -> (mainMenu?.findItem(R.id.search)?.actionView as SearchView).performClick()
             R.id.action_start_settings_activity -> startActivity(Intent(this,
                 SettingsActivity::class.java))
         }
