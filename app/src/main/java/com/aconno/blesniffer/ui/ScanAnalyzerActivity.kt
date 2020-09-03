@@ -85,6 +85,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private var snackbar: Snackbar? = null
 
     private var filter: String? = null
+    private var filterType : AdvertisementFilterType = AdvertisementFilterType.MAC
 
     @Inject
     lateinit var deserializerFinder : DeserializerFinder
@@ -191,20 +192,29 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private fun initScanResultObserver() {
         scanResultObserver = Observer {
             it?.let { result ->
-                filter.let { filter ->
-                    if (filter == null || ((result.device.macAddress.contains(
-                            filter,
-                            ignoreCase = true
-                        ) || result.device.name.contains(
-                            filter,
-                            ignoreCase = true
-                        ) && result.timestamp >= lastObserverCreateTime))
-                    ) {
-                        scanAnalyzerAdapter.logScan(result)
-                    }
+                if (satisfiesFilterConditions(result)) {
+                    scanAnalyzerAdapter.logScan(result)
                 }
             }
         }
+    }
+
+    private fun satisfiesFilterConditions(scanResult : ScanResult) : Boolean {
+        return if(filter == null) {
+            true
+        } else {
+            when (filterType) {
+                AdvertisementFilterType.MAC -> scanResult.device.macAddress.contains(
+                    filter ?: "",
+                    ignoreCase = true
+                )
+                AdvertisementFilterType.DEVICE_NAME -> scanResult.device.name.contains(
+                    filter ?: "",
+                    ignoreCase = true
+                )
+            }
+        }
+
     }
 
     private fun createSnackbar() {
@@ -392,6 +402,17 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         return true
     }
 
+    private fun getOnAdvFilterChangedListener(filterType : AdvertisementFilterType) =
+        object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                filter = s?.toString()
+                this@ScanAnalyzerActivity.filterType = filterType
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        }
+
     private fun initSearchView(searchView: ViewGroup) {
         val advertisementFilterByMacLayout = searchView.findViewById<TextInputLayout>(R.id.advertisement_filter_by_mac_layout)
         val advertisementFilterByMac = advertisementFilterByMacLayout.editText as HexEditText
@@ -400,16 +421,8 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         val advertisementFilterByNameLayout = searchView.findViewById<TextInputLayout>(R.id.advertisement_filter_by_name_layout)
         val advertisementFilterByName = advertisementFilterByNameLayout.editText as EditText
 
-        val onFilterChanged = object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                filter = s?.toString()
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        }
-        advertisementFilterByMac.addTextChangedListener(onFilterChanged)
-        advertisementFilterByName.addTextChangedListener(onFilterChanged)
+        advertisementFilterByMac.addTextChangedListener(getOnAdvFilterChangedListener(AdvertisementFilterType.MAC))
+        advertisementFilterByName.addTextChangedListener(getOnAdvFilterChangedListener(AdvertisementFilterType.DEVICE_NAME))
 
         val advertisementFilterType = searchView.findViewById<Spinner>(R.id.advertisement_filter_type)
         advertisementFilterType.adapter = ArrayAdapter(
