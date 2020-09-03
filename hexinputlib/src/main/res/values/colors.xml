@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="keyboardBackground">#dedde2</color>
+    <color name="keyboardButton">#fafafa</color>
+    <color name="keyboardButtonDisabled">#ecebf0</color>
+</resources>

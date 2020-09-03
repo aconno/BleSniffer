@@ -40,7 +40,8 @@
             android:name=".ui.DeserializerListActivity"
          />
         <activity
-            android:name=".ui.EditDeserializerActivity" />
+            android:name=".ui.EditDeserializerActivity"
+            android:windowSoftInputMode="stateHidden"/>
 
 
         <provider
