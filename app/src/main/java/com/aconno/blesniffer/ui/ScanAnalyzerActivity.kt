@@ -1,6 +1,5 @@
 package com.aconno.blesniffer.ui
 
-import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -10,9 +9,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
-import android.view.inputmethod.InputMethodManager
 import android.widget.*
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
@@ -45,7 +42,6 @@ import com.aconno.blesniffer.viewmodel.BluetoothViewModel
 import com.aconno.blesniffer.viewmodel.PermissionViewModel
 import com.aconno.blesniffer.viewmodel.ScanResultViewModel
 import com.aconno.blesniffer.work.SyncDeserializersWorker
-import com.aconno.hexinputlib.KeyboardManager
 import com.aconno.hexinputlib.formatter.HexFormatters
 import com.aconno.hexinputlib.handleBackPressedWithHexKeyboardInContentView
 import com.aconno.hexinputlib.setContentViewWithHexKeyboardAutoAdded
@@ -247,10 +243,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             false
         scan_list.itemAnimator = null
 
-        search_view?.let {
-            setSearchQueryTextListener(it)
-        }
-
         scanAnalyzerAdapter.hideMissingSerializer = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
         scan_list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -265,6 +257,8 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             }
 
         })
+
+        advertisement_filter_layout?.let { initSearchView(it as ViewGroup) }
 
     }
 
