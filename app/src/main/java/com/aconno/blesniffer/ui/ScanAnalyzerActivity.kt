@@ -1,5 +1,6 @@
 package com.aconno.blesniffer.ui
 
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -9,7 +10,9 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
@@ -42,7 +45,9 @@ import com.aconno.blesniffer.viewmodel.BluetoothViewModel
 import com.aconno.blesniffer.viewmodel.PermissionViewModel
 import com.aconno.blesniffer.viewmodel.ScanResultViewModel
 import com.aconno.blesniffer.work.SyncDeserializersWorker
+import com.aconno.hexinputlib.KeyboardManager
 import com.aconno.hexinputlib.formatter.HexFormatters
+import com.aconno.hexinputlib.handleBackPressedWithHexKeyboardInContentView
 import com.aconno.hexinputlib.setContentViewWithHexKeyboardAutoAdded
 import com.aconno.hexinputlib.ui.editor.HexEditText
 import com.google.android.material.snackbar.Snackbar
@@ -133,6 +138,10 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             shouldBeScanning = it.getBoolean(SHOULD_BE_SCANNING_KEY)
         }
 
+    }
+
+    override fun onBackPressed() {
+        handleBackPressedWithHexKeyboardInContentView()
     }
 
     override fun onResume() {
