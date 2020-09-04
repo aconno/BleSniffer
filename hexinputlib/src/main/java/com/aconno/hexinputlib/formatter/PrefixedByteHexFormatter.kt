@@ -5,6 +5,10 @@ import java.util.*
 
 class PrefixedByteHexFormatter : HexFormatter {
     override fun format(values: List<Char>)  : String {
+        if(values.isEmpty()) {
+            return ""
+        }
+
         val valuePairs = HexFormattersUtils.hexValuesToValuePairs(values)
         return valuePairs.joinToString(" 0x","0x")
     }
