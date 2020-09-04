@@ -152,14 +152,6 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
         model.setValues(bytes)
     }
 
-    fun cutSelection() {
-        removeSelectedText()
-    }
-
-    fun paste(clipboardText: String) {
-        insertValuesFromText(clipboardText,view.getSelectionStart())
-    }
-
     private fun insertValuesFromText(text: String, insertAtIndex : Int) : Boolean {
         val insertionIndex = formatter.locateSourceValue(model.getValues(),insertAtIndex)
 
