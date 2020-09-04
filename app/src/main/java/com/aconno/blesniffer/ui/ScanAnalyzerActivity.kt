@@ -84,7 +84,8 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
     private var snackbar: Snackbar? = null
 
-    private var filter: String? = null
+    private var macFilter : String? = null
+    private var nameFilter : String? = null
     private var filterType : AdvertisementFilterType = AdvertisementFilterType.MAC
 
     @Inject
@@ -133,6 +134,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
         savedInstanceState?.let {
             shouldBeScanning = it.getBoolean(SHOULD_BE_SCANNING_KEY)
+            macFilter = it.getString(ADVERTISEMENT_MAC_FILTER_KEY)
+            nameFilter = it.getString(ADVERTISEMENT_NAME_FILTER_KEY)
+            filterType = it.getSerializable(ADVERTISEMENT_FILTER_TYPE_KEY) as AdvertisementFilterType
         }
 
     }
@@ -200,19 +204,11 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     }
 
     private fun satisfiesFilterConditions(scanResult : ScanResult) : Boolean {
-        return if(filter == null) {
-            true
-        } else {
-            when (filterType) {
-                AdvertisementFilterType.MAC -> scanResult.device.macAddress.contains(
-                    filter ?: "",
-                    ignoreCase = true
-                )
-                AdvertisementFilterType.DEVICE_NAME -> scanResult.device.name.contains(
-                    filter ?: "",
-                    ignoreCase = true
-                )
-            }
+        return when(filterType) {
+            AdvertisementFilterType.MAC ->
+                macFilter == null || scanResult.device.macAddress.contains(macFilter ?: "", ignoreCase = true)
+            AdvertisementFilterType.DEVICE_NAME ->
+                nameFilter == null || scanResult.device.name.contains(nameFilter ?: "", ignoreCase = true)
         }
 
     }
@@ -405,7 +401,11 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private fun getOnAdvFilterChangedListener(filterType : AdvertisementFilterType) =
         object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                filter = s?.toString()
+                when(filterType) {
+                    AdvertisementFilterType.MAC -> macFilter = s?.toString()
+                    AdvertisementFilterType.DEVICE_NAME -> nameFilter = s?.toString()
+                }
+
                 this@ScanAnalyzerActivity.filterType = filterType
             }
 
@@ -417,9 +417,11 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         val advertisementFilterByMacLayout = searchView.findViewById<TextInputLayout>(R.id.advertisement_filter_by_mac_layout)
         val advertisementFilterByMac = advertisementFilterByMacLayout.editText as HexEditText
         advertisementFilterByMac.setFormatter(HexFormatters.getFormatter(HexFormatters.FormatterType.MAC_ADDRESS_HEX_FORMATTER))
+        macFilter?.let { advertisementFilterByMac.setContent(it) }
 
         val advertisementFilterByNameLayout = searchView.findViewById<TextInputLayout>(R.id.advertisement_filter_by_name_layout)
         val advertisementFilterByName = advertisementFilterByNameLayout.editText as EditText
+        advertisementFilterByName.setText(nameFilter)
 
         advertisementFilterByMac.addTextChangedListener(getOnAdvFilterChangedListener(AdvertisementFilterType.MAC))
         advertisementFilterByName.addTextChangedListener(getOnAdvFilterChangedListener(AdvertisementFilterType.DEVICE_NAME))
@@ -430,23 +432,20 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             android.R.layout.simple_spinner_item,
             AdvertisementFilterType.values().map { resources.getString(it.stringResourceId) }
         )
+        advertisementFilterType.setSelection(AdvertisementFilterType.values().indexOf(filterType))
         advertisementFilterType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 advertisementFilterType.setSelection(0)
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val filterType = AdvertisementFilterType.values()[position]
+                filterType = AdvertisementFilterType.values()[position]
                 if(filterType == AdvertisementFilterType.MAC) {
                     advertisementFilterByMacLayout.visibility = View.VISIBLE
                     advertisementFilterByNameLayout.visibility = View.GONE
-
-                    filter = advertisementFilterByMac.text.toString()
                 } else {
                     advertisementFilterByMacLayout.visibility = View.GONE
                     advertisementFilterByNameLayout.visibility = View.VISIBLE
-
-                    filter = advertisementFilterByName.text.toString()
                 }
             }
         }
@@ -517,6 +516,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         super.onSaveInstanceState(outState)
         scanLogSavedState = scanAnalyzerAdapter.scanLog
         outState.putBoolean(SHOULD_BE_SCANNING_KEY,shouldBeScanning)
+        outState.putString(ADVERTISEMENT_MAC_FILTER_KEY,macFilter)
+        outState.putString(ADVERTISEMENT_NAME_FILTER_KEY,nameFilter)
+        outState.putSerializable(ADVERTISEMENT_FILTER_TYPE_KEY,filterType)
     }
 
     override fun permissionAccepted(actionCode: Int) {
@@ -548,6 +550,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         const val EXTRA_FILTER_MAC: String = "com.acconno.blesniffer.FILTER_MAC"
         const val EXTRA_SAMPLE_DATA: String = "com.acconno.blesniffer.SAMPLE_DATA"
         const val SHOULD_BE_SCANNING_KEY : String = "SHOULD_BE_SCANNING_KEY"
+        const val ADVERTISEMENT_MAC_FILTER_KEY : String = "ADVERTISEMENT_MAC_FILTER_KEY"
+        const val ADVERTISEMENT_NAME_FILTER_KEY : String = "ADVERTISEMENT_NAME_FILTER_KEY"
+        const val ADVERTISEMENT_FILTER_TYPE_KEY : String = "ADVERTISEMENT_FILTER_TYPE_KEY"
 
         var scanLogSavedState : MutableList<ScanAnalyzerAdapter.Item>? = null
     }
