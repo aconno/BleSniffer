@@ -42,6 +42,7 @@ import com.aconno.blesniffer.viewmodel.BluetoothViewModel
 import com.aconno.blesniffer.viewmodel.PermissionViewModel
 import com.aconno.blesniffer.viewmodel.ScanResultViewModel
 import com.aconno.blesniffer.work.SyncDeserializersWorker
+import com.aconno.hexinputlib.KeyboardManager
 import com.aconno.hexinputlib.formatter.HexFormatters
 import com.aconno.hexinputlib.handleBackPressedWithHexKeyboardInContentView
 import com.aconno.hexinputlib.setContentViewWithHexKeyboardAutoAdded
@@ -443,6 +444,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 if(filterType == AdvertisementFilterType.MAC) {
                     advertisementFilterByMacLayout.visibility = View.VISIBLE
                     advertisementFilterByNameLayout.visibility = View.GONE
+                    KeyboardManager.hideSystemKeyboard(advertisementFilterByMac)
                 } else {
                     advertisementFilterByMacLayout.visibility = View.GONE
                     advertisementFilterByNameLayout.visibility = View.VISIBLE
