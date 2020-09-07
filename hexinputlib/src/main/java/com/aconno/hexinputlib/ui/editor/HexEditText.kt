@@ -60,6 +60,10 @@ class HexEditText(context: Context, attributeSet: AttributeSet) : androidx.appco
         return controller.model.getValuesAsBytes()
     }
 
+    fun setHexValuesLimit(hexValuesLimit : Int) {
+        controller.model.setValuesLimit(hexValuesLimit)
+    }
+
     inner class HexTextWatcher : TextWatcher {
         private lateinit var contentBeforeChange : String
         private var changeStartIndex = 0

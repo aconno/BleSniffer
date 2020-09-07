@@ -1,11 +1,20 @@
 package com.aconno.hexinputlib.model
 
 import com.aconno.hexinputlib.HexUtils
+import kotlin.math.max
+import kotlin.math.min
 
 class HexContentModel : HexContentObservable() {
     private val values : MutableList<Char> = mutableListOf()
+    private var valuesLimit : Int = Int.MAX_VALUE
+
+    fun setValuesLimit(limit : Int) {
+        this.valuesLimit = limit
+    }
 
     fun insertValue(index : Int, value : Char) {
+        if(values.size == valuesLimit) return
+
         val previousState = getValues()
 
         values.add(index,value)
@@ -16,9 +25,11 @@ class HexContentModel : HexContentObservable() {
     fun insertValues(index : Int, values : List<Char>) {
         val previousState = getValues()
 
-        this.values.addAll(index,values)
+        val valuesExceedingLimit = max(0,this.values.size + values.size - valuesLimit) // making sure that the values limit doesn't get surpassed by excluding last N values that would cause the limit get surpassed
+        val valuesToInsert = values.subList(0,values.size - valuesExceedingLimit)
+        this.values.addAll(index,valuesToInsert)
 
-        notifyValuesInserted(previousState,index,values)
+        notifyValuesInserted(previousState,index,valuesToInsert)
     }
 
     fun getValues() : List<Char> {
@@ -29,7 +40,7 @@ class HexContentModel : HexContentObservable() {
         val previousState = getValues()
 
         this.values.clear()
-        this.values.addAll(values)
+        this.values.addAll(values.subList(0,min(valuesLimit,values.size)))
 
         notifyValuesReplaced(previousState)
     }
