@@ -5,6 +5,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.View.OnFocusChangeListener
+import androidx.core.widget.addTextChangedListener
 import com.aconno.hexinputlib.HexEditController
 import com.aconno.hexinputlib.KeyboardManager
 import com.aconno.hexinputlib.formatter.HexFormatter
@@ -62,6 +63,10 @@ class HexEditText(context: Context, attributeSet: AttributeSet) : androidx.appco
 
     fun setHexValuesLimit(hexValuesLimit : Int) {
         controller.model.setValuesLimit(hexValuesLimit)
+    }
+
+    fun doAfterTextChanges(afterTextChanges : ((String) -> Unit)) {
+        addTextChangedListener(afterTextChanged = {afterTextChanges(getContent())})
     }
 
     inner class HexTextWatcher : TextWatcher {
