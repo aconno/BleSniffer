@@ -42,7 +42,13 @@ class PrefixedByteHexFormatter : HexFormatter {
     }
 
     override fun locateSourceValue(values: List<Char>, formattedValueIndex: Int): Int {
-        if(formattedValueIndex <= 2) return 0
+        if(formattedValueIndex <= 2) {
+            return 0
+        }
+        if(values.size == 1) {
+            return if(formattedValueIndex <= 3) 0 else 1
+        }
+
         var sourceIndex = 1
         var index = 3
         while(index < formattedValueIndex) {
