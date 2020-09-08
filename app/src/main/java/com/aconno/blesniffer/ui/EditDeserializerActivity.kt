@@ -20,10 +20,10 @@ import com.aconno.blesniffer.dagger.editdeserializeractivity.DaggerEditDeseriali
 import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerActivityComponent
 import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerActivityModule
 import com.aconno.blesniffer.data.deserializing.ParcelableDeserializer
-import com.aconno.blesniffer.domain.byteformatter.ByteArrayFormatMode
 import com.aconno.blesniffer.domain.deserializing.Deserializer
 import com.aconno.blesniffer.domain.deserializing.GeneralDeserializer
 import com.aconno.blesniffer.domain.interactor.deserializing.*
+import com.aconno.blesniffer.getHexFormatterForAdvertisementBytesDisplayMode
 import com.aconno.blesniffer.preferences.BleSnifferPreferences
 import com.aconno.blesniffer.ui.base.BaseActivity
 import com.aconno.hexinputlib.formatter.*
@@ -205,29 +205,19 @@ class EditDeserializerActivity : BaseActivity() {
 
         updateDeserializerFilterFormatter()
 
-        deserializer_sample_data_input.setFormatter(HexFormatters.getFormatter(
-            advertisementBytesDisplayModeToHexFormatterFormatType(preferences.getAdvertisementBytesDisplayMode())
-        ))
-    }
-
-    private fun advertisementBytesDisplayModeToHexFormatterFormatType(displayMode : ByteArrayFormatMode) : HexFormatters.FormatterType {
-        return when(displayMode) {
-            ByteArrayFormatMode.SINGLE_BYTE_WITH_PREFIX -> HexFormatters.FormatterType.PREFIXED_BYTE_HEX_FORMATTER
-            ByteArrayFormatMode.PLAIN -> HexFormatters.FormatterType.PLAIN_VALUES_HEX_FORMATTER
-            ByteArrayFormatMode.BYTE_PAIRS -> HexFormatters.FormatterType.BYTE_PAIRS_HEX_FORMATTER
-            ByteArrayFormatMode.SINGLE_BYTE -> HexFormatters.FormatterType.SINGLE_BYTE_HEX_FORMATTER
-        }
+        deserializer_sample_data_input.setFormatter(
+            getHexFormatterForAdvertisementBytesDisplayMode(preferences.getAdvertisementBytesDisplayMode())
+        )
     }
 
     private fun updateDeserializerFilterFormatter() {
-      val formatterType = when(deserializer.filterType) {
-           Deserializer.Type.DATA -> {
-               advertisementBytesDisplayModeToHexFormatterFormatType(preferences.getAdvertisementBytesDisplayMode())
-           }
-           Deserializer.Type.MAC -> HexFormatters.FormatterType.MAC_ADDRESS_HEX_FORMATTER
-       }
+        val formatter = when (deserializer.filterType) {
+            Deserializer.Type.DATA -> {
+                getHexFormatterForAdvertisementBytesDisplayMode(preferences.getAdvertisementBytesDisplayMode())
+            }
+            Deserializer.Type.MAC -> MacAddressHexFormatter()
+        }
 
-        val formatter = HexFormatters.getFormatter(formatterType)
         deserializer_filter_input.setFormatter(formatter)
     }
 
