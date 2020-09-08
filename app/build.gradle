@@ -52,6 +52,7 @@ dependencies {
     implementation project(':domain')
     implementation project(':device')
     implementation project(':data')
+    implementation project(':hexinputlib')
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     // Support Library

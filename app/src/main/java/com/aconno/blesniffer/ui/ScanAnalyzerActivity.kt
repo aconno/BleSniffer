@@ -2,7 +2,14 @@ package com.aconno.blesniffer.ui
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.*
+import android.widget.*
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
@@ -41,11 +48,18 @@ import com.aconno.blesniffer.viewmodel.BluetoothViewModel
 import com.aconno.blesniffer.viewmodel.PermissionViewModel
 import com.aconno.blesniffer.viewmodel.ScanResultViewModel
 import com.aconno.blesniffer.work.SyncDeserializersWorker
+import com.aconno.hexinputlib.KeyboardManager
+import com.aconno.hexinputlib.formatter.HexFormatters
+import com.aconno.hexinputlib.handleBackPressedWithHexKeyboardInContentView
+import com.aconno.hexinputlib.setContentViewWithHexKeyboardAutoAdded
+import com.aconno.hexinputlib.ui.editor.HexEditText
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputLayout
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_scan_analyzer.*
+import kotlinx.android.synthetic.main.activity_scan_analyzer.custom_toolbar
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -77,7 +91,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
     private var snackbar: Snackbar? = null
 
-    private var filter: String? = null
+    private var macFilter : String? = null
+    private var nameFilter : String? = null
+    private var filterType : AdvertisementFilterType = AdvertisementFilterType.MAC
 
     @Inject
     lateinit var deserializerFinder : DeserializerFinder
@@ -105,7 +121,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_scan_analyzer)
+        setContentViewWithHexKeyboardAutoAdded(R.layout.activity_scan_analyzer)
         scanAnalyzerActivityComponent.inject(this)
 
         initScanResultObserver()
@@ -125,6 +141,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
         savedInstanceState?.let {
             shouldBeScanning = it.getBoolean(SHOULD_BE_SCANNING_KEY)
+            macFilter = it.getString(ADVERTISEMENT_MAC_FILTER_KEY)
+            nameFilter = it.getString(ADVERTISEMENT_NAME_FILTER_KEY)
+            filterType = it.getSerializable(ADVERTISEMENT_FILTER_TYPE_KEY) as AdvertisementFilterType
         }
 
         if(!bluetoothViewModel.isBluetoothAvailable() && savedInstanceState == null) {
@@ -138,6 +157,11 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             .setMessage(getString(R.string.bletooth_not_available_message))
             .setPositiveButton(getString(R.string.ok)) { _, _ ->}
             .show()
+
+    }
+
+    override fun onBackPressed() {
+        handleBackPressedWithHexKeyboardInContentView()
     }
 
     override fun onResume() {
@@ -191,20 +215,21 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private fun initScanResultObserver() {
         scanResultObserver = Observer {
             it?.let { result ->
-                filter.let { filter ->
-                    if (filter == null || ((result.device.macAddress.contains(
-                            filter,
-                            ignoreCase = true
-                        ) || result.device.name.contains(
-                            filter,
-                            ignoreCase = true
-                        ) && result.timestamp >= lastObserverCreateTime))
-                    ) {
-                        scanAnalyzerAdapter.logScan(result)
-                    }
+                if (satisfiesFilterConditions(result)) {
+                    scanAnalyzerAdapter.logScan(result)
                 }
             }
         }
+    }
+
+    private fun satisfiesFilterConditions(scanResult : ScanResult) : Boolean {
+        return when(filterType) {
+            AdvertisementFilterType.MAC ->
+                macFilter == null || scanResult.device.macAddress.contains(macFilter ?: "", ignoreCase = true)
+            AdvertisementFilterType.DEVICE_NAME ->
+                nameFilter == null || scanResult.device.name.contains(nameFilter ?: "", ignoreCase = true)
+        }
+
     }
 
     private fun createSnackbar() {
@@ -243,10 +268,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             false
         scan_list.itemAnimator = null
 
-        search_view?.let {
-            setSearchQueryTextListener(it)
-        }
-
         scanAnalyzerAdapter.hideMissingSerializer = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
         scan_list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -261,6 +282,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             }
 
         })
+
+        advertisement_filter_layout?.let { initSearchView(it as ViewGroup) }
+
     }
 
     override fun onRecordAdded(size: Int) {
@@ -376,10 +400,10 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
         val searchMenuItem = mainMenu?.findItem(R.id.search)
         searchMenuItem?.isVisible = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        searchMenuItem?.icon?.colorFilter = PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY)
 
-        val searchView = searchMenuItem?.actionView as SearchView
-
-        setSearchQueryTextListener(searchView)
+        val searchView = searchMenuItem?.actionView as ViewGroup
+        initSearchView(searchView)
 
         mainMenu?.findItem(R.id.action_toggle_scan)?.let {
             setScanMenuLabel(it)
@@ -393,38 +417,58 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         return true
     }
 
-    private fun setSearchQueryTextListener(searchView: SearchView) {
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                filter = null
-                query?.let {
-                    filter = if (query.isNotEmpty()) query
-                    else null
+    private fun getOnAdvFilterChangedListener(filterType : AdvertisementFilterType) =
+        object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                when(filterType) {
+                    AdvertisementFilterType.MAC -> macFilter = s?.toString()
+                    AdvertisementFilterType.DEVICE_NAME -> nameFilter = s?.toString()
                 }
-                return false
+
+                this@ScanAnalyzerActivity.filterType = filterType
             }
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                // Clean this up somehow
-                val but = searchView.context.resources.getIdentifier(
-                    "android:id/search_close_btn",
-                    null,
-                    null
-                )
-                val closeButton = findViewById<ImageView>(but)
-                closeButton.setOnClickListener {
-                    searchView.clearFocus()
-                    searchView.setQuery("", false)
-                    filter = null
-                }
-                filter = null
-                newText?.let {
-                    filter = if (newText.isNotEmpty()) newText
-                    else null
-                }
-                return false
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        }
+
+    private fun initSearchView(searchView: ViewGroup) {
+        val advertisementFilterByMacLayout = searchView.findViewById<TextInputLayout>(R.id.advertisement_filter_by_mac_layout)
+        val advertisementFilterByMac = advertisementFilterByMacLayout.editText as HexEditText
+        advertisementFilterByMac.setFormatter(HexFormatters.getFormatter(HexFormatters.FormatterType.MAC_ADDRESS_HEX_FORMATTER))
+        macFilter?.let { advertisementFilterByMac.setContent(it) }
+
+        val advertisementFilterByNameLayout = searchView.findViewById<TextInputLayout>(R.id.advertisement_filter_by_name_layout)
+        val advertisementFilterByName = advertisementFilterByNameLayout.editText as EditText
+        advertisementFilterByName.setText(nameFilter)
+
+        advertisementFilterByMac.addTextChangedListener(getOnAdvFilterChangedListener(AdvertisementFilterType.MAC))
+        advertisementFilterByName.addTextChangedListener(getOnAdvFilterChangedListener(AdvertisementFilterType.DEVICE_NAME))
+
+        val advertisementFilterType = searchView.findViewById<Spinner>(R.id.advertisement_filter_type)
+        advertisementFilterType.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            AdvertisementFilterType.values().map { resources.getString(it.stringResourceId) }
+        )
+        advertisementFilterType.setSelection(AdvertisementFilterType.values().indexOf(filterType))
+        advertisementFilterType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                advertisementFilterType.setSelection(0)
             }
-        })
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                filterType = AdvertisementFilterType.values()[position]
+                if(filterType == AdvertisementFilterType.MAC) {
+                    advertisementFilterByMacLayout.visibility = View.VISIBLE
+                    advertisementFilterByNameLayout.visibility = View.GONE
+                    KeyboardManager.hideSystemKeyboard(advertisementFilterByMac)
+                } else {
+                    advertisementFilterByMacLayout.visibility = View.GONE
+                    advertisementFilterByNameLayout.visibility = View.VISIBLE
+                }
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -435,7 +479,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             R.id.action_clear -> {
                 scanAnalyzerAdapter.clear()
             }
-            R.id.search -> (mainMenu?.findItem(R.id.search)?.actionView as SearchView).performClick()
             R.id.action_start_settings_activity -> startActivity(Intent(this,
                 SettingsActivity::class.java))
         }
@@ -493,6 +536,9 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         super.onSaveInstanceState(outState)
         scanLogSavedState = scanAnalyzerAdapter.scanLog
         outState.putBoolean(SHOULD_BE_SCANNING_KEY,shouldBeScanning)
+        outState.putString(ADVERTISEMENT_MAC_FILTER_KEY,macFilter)
+        outState.putString(ADVERTISEMENT_NAME_FILTER_KEY,nameFilter)
+        outState.putSerializable(ADVERTISEMENT_FILTER_TYPE_KEY,filterType)
     }
 
     override fun permissionAccepted(actionCode: Int) {
@@ -524,7 +570,14 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         const val EXTRA_FILTER_MAC: String = "com.acconno.blesniffer.FILTER_MAC"
         const val EXTRA_SAMPLE_DATA: String = "com.acconno.blesniffer.SAMPLE_DATA"
         const val SHOULD_BE_SCANNING_KEY : String = "SHOULD_BE_SCANNING_KEY"
+        const val ADVERTISEMENT_MAC_FILTER_KEY : String = "ADVERTISEMENT_MAC_FILTER_KEY"
+        const val ADVERTISEMENT_NAME_FILTER_KEY : String = "ADVERTISEMENT_NAME_FILTER_KEY"
+        const val ADVERTISEMENT_FILTER_TYPE_KEY : String = "ADVERTISEMENT_FILTER_TYPE_KEY"
 
         var scanLogSavedState : MutableList<ScanAnalyzerAdapter.Item>? = null
+    }
+
+    enum class AdvertisementFilterType(val stringResourceId : Int) {
+        MAC(R.string.mac_address), DEVICE_NAME(R.string.device_name)
     }
 }

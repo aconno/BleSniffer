@@ -20,12 +20,15 @@ import com.aconno.blesniffer.dagger.editdeserializeractivity.DaggerEditDeseriali
 import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerActivityComponent
 import com.aconno.blesniffer.dagger.editdeserializeractivity.EditDeserializerActivityModule
 import com.aconno.blesniffer.data.deserializing.ParcelableDeserializer
-import com.aconno.blesniffer.domain.byteformatter.ByteArrayFormatter
+import com.aconno.blesniffer.domain.byteformatter.ByteArrayFormatMode
 import com.aconno.blesniffer.domain.deserializing.Deserializer
 import com.aconno.blesniffer.domain.deserializing.GeneralDeserializer
 import com.aconno.blesniffer.domain.interactor.deserializing.*
 import com.aconno.blesniffer.preferences.BleSnifferPreferences
 import com.aconno.blesniffer.ui.base.BaseActivity
+import com.aconno.hexinputlib.formatter.*
+import com.aconno.hexinputlib.handleBackPressedWithHexKeyboardInContentView
+import com.aconno.hexinputlib.setContentViewWithHexKeyboardAutoAdded
 import com.google.common.io.BaseEncoding
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -66,10 +69,9 @@ class EditDeserializerActivity : BaseActivity() {
                 deserializer_filter_type.setSelection(Deserializer.Type.values().indexOf(
                     Deserializer.Type.valueOf(this.filterType.name)
                 ))
-                deserializer_filter.editText?.setText(this.filter)
+                deserializer_filter_input.setContent(this.filter)
                 deserializer_name.editText?.setText(this.name)
-
-                deserializer_sample_data.editText?.setText(bytesToString(sampleData))
+                deserializer_sample_data_input.setContent(sampleData)
             }
         }
 
@@ -91,13 +93,10 @@ class EditDeserializerActivity : BaseActivity() {
 
     private var previewDisplayOn : Boolean = false
 
-    fun bytesToString(byteArray : ByteArray) =
-        ByteArrayFormatter.getFormatter(preferences.getAdvertisementBytesDisplayMode()).formatBytes(byteArray)
-
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit_deserializer)
+        setContentViewWithHexKeyboardAutoAdded(R.layout.activity_edit_deserializer)
 
         editDeserializerActivityComponent.inject(this)
 
@@ -179,6 +178,7 @@ class EditDeserializerActivity : BaseActivity() {
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 deserializer.filterType = Deserializer.Type.values()[position]
+                updateDeserializerFilterFormatter()
             }
         }
 
@@ -193,7 +193,7 @@ class EditDeserializerActivity : BaseActivity() {
         generate_sample_data.setOnClickListener {
             generateSampleDataUseCase.execute(updateDeserializerFromInputData())
                 .subscribe { sampleData ->
-                    deserializer_sample_data.editText?.setText(bytesToString(sampleData))
+                    deserializer_sample_data_input.setContent(sampleData)
                 }
 
         }
@@ -203,6 +203,32 @@ class EditDeserializerActivity : BaseActivity() {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        updateDeserializerFilterFormatter()
+
+        deserializer_sample_data_input.setFormatter(HexFormatters.getFormatter(
+            advertisementBytesDisplayModeToHexFormatterFormatType(preferences.getAdvertisementBytesDisplayMode())
+        ))
+    }
+
+    private fun advertisementBytesDisplayModeToHexFormatterFormatType(displayMode : ByteArrayFormatMode) : HexFormatters.FormatterType {
+        return when(displayMode) {
+            ByteArrayFormatMode.SINGLE_BYTE_WITH_PREFIX -> HexFormatters.FormatterType.PREFIXED_BYTE_HEX_FORMATTER
+            ByteArrayFormatMode.PLAIN -> HexFormatters.FormatterType.PLAIN_VALUES_HEX_FORMATTER
+            ByteArrayFormatMode.BYTE_PAIRS -> HexFormatters.FormatterType.BYTE_PAIRS_HEX_FORMATTER
+            ByteArrayFormatMode.SINGLE_BYTE -> HexFormatters.FormatterType.SINGLE_BYTE_HEX_FORMATTER
+        }
+    }
+
+    private fun updateDeserializerFilterFormatter() {
+      val formatterType = when(deserializer.filterType) {
+           Deserializer.Type.DATA -> {
+               advertisementBytesDisplayModeToHexFormatterFormatType(preferences.getAdvertisementBytesDisplayMode())
+           }
+           Deserializer.Type.MAC -> HexFormatters.FormatterType.MAC_ADDRESS_HEX_FORMATTER
+       }
+
+        val formatter = HexFormatters.getFormatter(formatterType)
+        deserializer_filter_input.setFormatter(formatter)
     }
 
     private fun displayDeserializerPreview() {
@@ -317,6 +343,10 @@ class EditDeserializerActivity : BaseActivity() {
         outState.putParcelable(DESERIALIZER_KEY,ParcelableDeserializer(deserializer))
         outState.putBoolean(EXISTING_KEY,existing)
         outState.putBoolean(PREVIEW_DISPLAY_ON_KEY,previewDisplayOn)
+    }
+
+    override fun onBackPressed() {
+        handleBackPressedWithHexKeyboardInContentView()
     }
 
     companion object {

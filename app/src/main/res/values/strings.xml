@@ -87,4 +87,7 @@
     <string name="bluetooth_not_available">Bluetooth not available</string>
     <string name="bletooth_not_available_message">There is a problem that causes the app not being able to use bluetooth on your device. You can still use the app, but its main features are not going to work as expected.</string>
     <string name="ok">Ok</string>
+    <string name="advertisement_filter_icon">Advertisement filter icon</string>
+    <string name="mac_address">Mac</string>
+    <string name="device_name">Name</string>
 </resources>
