@@ -1,6 +1,5 @@
 package com.aconno.hexinputlib
 
-import java.util.*
 import kotlin.math.ceil
 
 object HexUtils {
@@ -29,6 +28,6 @@ object HexUtils {
     }
 
     fun bytesToHex(values: ByteArray) : List<Char> {
-        return values.flatMap { it.toString(16).toUpperCase(Locale.ROOT).toList() }
+        return values.flatMap { String.format("%02X",it).toList() }
     }
 }
