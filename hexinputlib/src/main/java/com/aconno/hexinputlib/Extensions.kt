@@ -19,7 +19,9 @@ fun Activity.setContentViewWithHexKeyboardAutoAdded(layoutResourceId : Int, wrap
         inflatedLayout
     }
     activityMainContent.apply {
-        id = View.generateViewId()
+        if(id==0) {
+            id = View.generateViewId()
+        }
         layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,0)
     }
 
