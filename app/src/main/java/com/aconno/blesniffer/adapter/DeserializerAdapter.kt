@@ -1,11 +1,12 @@
 package com.aconno.blesniffer.adapter
 
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.aconno.blesniffer.R
 import com.aconno.blesniffer.domain.deserializing.Deserializer
+import com.aconno.hexinputlib.formatter.HexFormatter
+import com.aconno.hexinputlib.formatter.HexFormatters
 import kotlinx.android.synthetic.main.item_deserializer.view.*
 
 /**
@@ -14,7 +15,8 @@ import kotlinx.android.synthetic.main.item_deserializer.view.*
 class DeserializerAdapter(
         val deserializers: MutableList<Deserializer>,
         private val clickListener: ItemClickListener<Deserializer>,
-        private val longClickListener: LongItemClickListener<Deserializer>
+        private val longClickListener: LongItemClickListener<Deserializer>,
+        private val dataFilterFormatter : HexFormatter
 ) : androidx.recyclerview.widget.RecyclerView.Adapter<DeserializerAdapter.ViewHolder>() {
 
 
@@ -42,9 +44,23 @@ class DeserializerAdapter(
 
         fun bind(deserializer: Deserializer) {
             view.deserializer_name.text = deserializer.name
-            view.deserializer_filter_and_type.text = view.context.getString(R.string.deserializer_filter_and_type, deserializer.filterType.name, deserializer.filter)
+            view.deserializer_filter_and_type.text = view.context.getString(
+                R.string.deserializer_filter_and_type,
+                deserializer.filterType.name,
+                formatFilter(deserializer.filter,deserializer.filterType)
+            )
             view.setOnClickListener { clickListener.onItemClick(deserializer) }
             view.setOnLongClickListener { longClickListener.onLongItemClick(deserializer) }
+        }
+
+        private fun formatFilter(deserializerFilter : String, filterType : Deserializer.Type) : String {
+            return if(filterType == Deserializer.Type.MAC) {
+                deserializerFilter
+            } else {
+                val parsedValues = HexFormatters.parse(deserializerFilter)
+                dataFilterFormatter.format(parsedValues)
+            }
+
         }
     }
 }
