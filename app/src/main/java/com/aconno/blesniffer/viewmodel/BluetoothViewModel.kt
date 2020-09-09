@@ -23,8 +23,10 @@ class BluetoothViewModel(
 
     fun enableBluetooth() {
         val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        bluetoothAdapter.enable()
+        bluetoothAdapter?.enable()
     }
+
+    fun isBluetoothAvailable() = BluetoothAdapter.getDefaultAdapter() != null
 
     fun observeBluetoothState() {
         application.applicationContext.registerReceiver(

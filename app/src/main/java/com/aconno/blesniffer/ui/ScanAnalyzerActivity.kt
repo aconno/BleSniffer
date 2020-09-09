@@ -10,6 +10,12 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
 import android.widget.*
+import android.view.Menu
+import android.view.MenuItem
+import android.view.WindowManager
+import android.widget.ImageView
+import android.widget.SearchView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
@@ -139,6 +145,18 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             nameFilter = it.getString(ADVERTISEMENT_NAME_FILTER_KEY)
             filterType = it.getSerializable(ADVERTISEMENT_FILTER_TYPE_KEY) as AdvertisementFilterType
         }
+
+        if(!bluetoothViewModel.isBluetoothAvailable() && savedInstanceState == null) {
+            displayBluetoothNotAvailableDialog()
+        }
+    }
+
+    private fun displayBluetoothNotAvailableDialog() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.bluetooth_not_available))
+            .setMessage(getString(R.string.bletooth_not_available_message))
+            .setPositiveButton(getString(R.string.ok)) { _, _ ->}
+            .show()
 
     }
 
