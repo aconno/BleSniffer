@@ -6,7 +6,7 @@
         android:id="@+id/search"
         android:icon="@android:drawable/ic_menu_search"
         android:title="Search"
-        app:actionViewClass="android.widget.SearchView"
+        app:actionLayout="@layout/scan_analyzer_search_layout"
         app:showAsAction="always" />
     <item
         android:id="@+id/action_toggle_scan"

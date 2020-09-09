@@ -26,7 +26,9 @@ import com.aconno.blesniffer.domain.interactor.deserializing.AddDeserializersUse
 import com.aconno.blesniffer.domain.interactor.deserializing.DeleteDeserializerUseCase
 import com.aconno.blesniffer.domain.interactor.deserializing.DeleteDeserializersUseCase
 import com.aconno.blesniffer.domain.interactor.deserializing.GetAllDeserializersUseCase
+import com.aconno.blesniffer.getHexFormatterForAdvertisementBytesDisplayMode
 import com.aconno.blesniffer.model.BleSnifferPermission
+import com.aconno.blesniffer.preferences.BleSnifferPreferences
 import com.aconno.blesniffer.viewmodel.PermissionViewModel
 import com.crashlytics.android.Crashlytics
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -46,7 +48,7 @@ const val DEFAULT_EXPORT_FILE_NAME = "all.json"
 
 class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserializer>, LongItemClickListener<Deserializer>, PermissionViewModel.PermissionCallbacks {
 
-    private val deserializerAdapter: DeserializerAdapter = DeserializerAdapter(mutableListOf(), this, this)
+    private lateinit var deserializerAdapter: DeserializerAdapter
 
     @Inject
     lateinit var getAllDeserializersUseCase: GetAllDeserializersUseCase
@@ -66,6 +68,9 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     @Inject
     lateinit var deserializerFileStorage: DeserializerFileStorage
 
+    @Inject
+    lateinit var preferences: BleSnifferPreferences
+
     val editDeserializerActivityComponent: DeserializerListActivityComponent by lazy {
         val bleSnifferApplication: BleSnifferApplication? = application as? BleSnifferApplication
         DaggerDeserializerListActivityComponent.builder()
@@ -79,6 +84,9 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         setContentView(R.layout.activity_deserializer_list)
 
         editDeserializerActivityComponent.inject(this)
+
+        val dataFilterFormatter = getHexFormatterForAdvertisementBytesDisplayMode(preferences.getAdvertisementBytesDisplayMode())
+        deserializerAdapter = DeserializerAdapter(mutableListOf(), this, this,dataFilterFormatter)
 
         custom_toolbar.title = getString(R.string.app_name)
         deserializer_list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
