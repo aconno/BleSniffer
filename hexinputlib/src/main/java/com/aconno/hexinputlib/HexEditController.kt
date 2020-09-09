@@ -6,7 +6,11 @@ import com.aconno.hexinputlib.model.HexContentListener
 import com.aconno.hexinputlib.model.HexContentModel
 import com.aconno.hexinputlib.ui.editor.IHexEditView
 import com.aconno.hexinputlib.ui.keyboard.KeyboardListener
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class HexEditController(private val view : IHexEditView) : HexContentListener,
     KeyboardListener {
@@ -17,8 +21,7 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
             loadValuesFromText(view.getContent()) //reloading text that is currently in view so that it gets reformatted using new formatter
         }
 
-    @Volatile
-    private var removeBeingLongPressed = false
+    private var sequentialValueRemovalDisposable : Disposable? = null
 
     init {
         model.addListener(this)
@@ -112,17 +115,14 @@ class HexEditController(private val view : IHexEditView) : HexContentListener,
     }
 
     override fun onRemoveKeyLongPress() {
-        removeBeingLongPressed = true
-        Thread {
-            while(removeBeingLongPressed) {
+        sequentialValueRemovalDisposable = Observable.interval(TIME_BETWEEN_AUTO_VALUE_REMOVAL,TimeUnit.MILLISECONDS)
+            .observeOn(AndroidSchedulers.mainThread()).subscribe {
                 removeValueBeforeCursor()
-                Thread.sleep(TIME_BETWEEN_AUTO_VALUE_REMOVAL)
             }
-        }.start()
     }
 
     override fun onRemoveKeyUp() {
-        removeBeingLongPressed = false
+        sequentialValueRemovalDisposable?.dispose()
     }
 
     override fun onValueTyped(value: Char) {
