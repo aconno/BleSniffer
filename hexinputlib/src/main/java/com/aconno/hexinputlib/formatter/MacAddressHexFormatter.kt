@@ -1,11 +1,19 @@
 package com.aconno.hexinputlib.formatter
 
 import com.aconno.hexinputlib.isHexChar
+import java.lang.StringBuilder
 
 class MacAddressHexFormatter : HexFormatter {
 
     override fun format(values: List<Char>)  : String {
-        return HexFormattersUtils.hexValuesToValuePairs(values).joinToString(":")
+        return StringBuilder().apply {
+            values.forEachIndexed { index, c ->
+                if(index > 0 && index%2 == 0) {
+                    append(":")
+                }
+                append(c)
+            }
+        }.toString()
     }
 
     override fun parse(text: String): List<Char> {
@@ -30,14 +38,18 @@ class MacAddressHexFormatter : HexFormatter {
     }
 
     override fun locateSourceValue(values: List<Char>, formattedValueIndex: Int): Int {
-        return HexFormattersUtils.locateSourceValueInGroupedHexBytesString(values,formattedValueIndex,1)
+        return formattedValueIndex - formattedValueIndex/3
     }
 
     override fun locateFormattedValue(values: List<Char>, sourceIndex: Int): Int {
-        return HexFormattersUtils.locateFormattedValueInGroupedHexBytesString(values,sourceIndex,1)
+        var index = sourceIndex + sourceIndex/2
+        if(values.size % 2 == 0 && sourceIndex == values.size) {
+            index--
+        }
+        return index
     }
 
     override fun areValuesDerivableFrom(values: List<Char>, fromValues: List<Char>): Boolean {
-        return HexFormattersUtils.areByteValuesDerivableFrom(values,fromValues)
+        return values == fromValues
     }
 }
