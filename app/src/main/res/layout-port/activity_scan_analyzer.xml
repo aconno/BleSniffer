@@ -39,7 +39,7 @@
     <com.aconno.hexinputlib.ui.keyboard.HexKeyboardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="visible"
+        android:visibility="gone"
         android:layout_gravity="bottom"
         android:elevation="12dp"
         />
