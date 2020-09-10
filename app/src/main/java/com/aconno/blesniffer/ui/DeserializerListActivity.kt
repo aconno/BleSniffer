@@ -7,8 +7,6 @@ import android.os.Bundle
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -34,7 +32,6 @@ import com.crashlytics.android.Crashlytics
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_deserializer_list.*
-import kotlinx.android.synthetic.main.dialog_input_text.view.*
 import timber.log.Timber
 import java.io.FileNotFoundException
 import java.util.regex.Pattern
@@ -44,6 +41,7 @@ import javax.inject.Inject
 const val REQUEST_CODE_EDIT: Int = 0x00
 const val REQUEST_CODE_EDIT_QUIT_ON_RESULT: Int = 0x01
 const val REQUEST_CODE_OPEN_FILE: Int = 0x02
+const val REQUEST_CODE_SELECT_EXPORT_FILE_PATH : Int = 0x03
 const val DEFAULT_EXPORT_FILE_NAME = "all.json"
 
 class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserializer>, LongItemClickListener<Deserializer>, PermissionViewModel.PermissionCallbacks {
@@ -78,6 +76,8 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                 .deserializerListActivityModule(DeserializerListActivityModule(this))
                 .build()
     }
+
+    private var deserializersToExport : List<Deserializer>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -138,40 +138,18 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                 .setItems(R.array.deserializer_actions) { dialog, which ->
                     when (which) {
                         0 -> showRemoveItemDialog(item)
-                        1 -> showExportItemDialog(item)
+                        1 -> {
+                            deserializersToExport = listOf(item)
+                            startSelectExportFilePathActivity(generateDefaultExportFileNameForDeserializer(item))
+                        }
                     }
                     dialog.dismiss()
                 }.create().show()
         return true
     }
 
-    private fun showExportItemDialog(
-            item: Deserializer,
-            defaultFileName: String = item.name.replace(Pattern.compile("[\\\\/:*?\"<>|]").toRegex(), "") + ".json"
-    ) {
-        val view: View = layoutInflater.inflate(R.layout.dialog_input_text, findViewById(android.R.id.content), false)
-        val textInput: EditText = view.text_input.editText ?: return
-        textInput.hint = defaultFileName
-        AlertDialog.Builder(this)
-                .setMessage(getString(R.string.export_deserializer_x, item.name))
-                .setView(view)
-                .setPositiveButton(R.string.export) { dialog, _ ->
-                    permissionViewModel.checkRequestAndRunIfGranted(
-                            BleSnifferPermission.WRITE_EXTERNAL_STORAGE
-                    ) {
-                        deserializerFileStorage.storeItem(item,
-                                if (textInput.text.isEmpty()) defaultFileName
-                                else textInput.text.toString()
-                        ).let {
-                            Toast.makeText(this, getString(R.string.successfully_exported_file_to_x, it), Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    dialog.dismiss()
-                }
-                .setNegativeButton(R.string.cancel) { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .show()
+    private fun generateDefaultExportFileNameForDeserializer(deserializer: Deserializer) : String {
+        return deserializer.name.replace(Pattern.compile("[\\\\/:*?\"<>|]").toRegex(), "") + ".json"
     }
 
     private fun showRemoveItemDialog(item: Deserializer) {
@@ -209,7 +187,10 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         val id: Int? = item?.itemId
         when (id) {
             R.id.action_import -> openFileDialog()
-            R.id.action_export_all -> showExportAllDeserializersDialog()
+            R.id.action_export_all -> {
+                deserializersToExport = deserializerAdapter.deserializers
+                startSelectExportFilePathActivity(DEFAULT_EXPORT_FILE_NAME)
+            }
             R.id.action_remove_all -> showRemoveAllDeserializersDialog()
         }
 
@@ -250,32 +231,29 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         return intent
     }
 
-    private fun showExportAllDeserializersDialog() {
-        if (deserializerAdapter.deserializers.isEmpty()) {
-            Toast.makeText(this, R.string.no_deserializers_to_export, Toast.LENGTH_SHORT).show()
-            return
+    private fun startSelectExportFilePathActivity(defaultFileName: String) {
+        val exportIntent: Intent = Intent().apply {
+            type = "text/*"
+            action = Intent.ACTION_CREATE_DOCUMENT
+            addCategory(Intent.CATEGORY_OPENABLE)
+            putExtra(Intent.EXTRA_TITLE, defaultFileName)
         }
-        val view: View = layoutInflater.inflate(R.layout.dialog_input_text, findViewById(android.R.id.content), false)
-        val textInput: EditText = view.text_input.editText ?: return
-        textInput.hint = DEFAULT_EXPORT_FILE_NAME
-        AlertDialog.Builder(this)
-                .setMessage(R.string.export_all_deserializers)
-                .setView(view)
-                .setPositiveButton(R.string.export) { dialog, _ ->
-                    permissionViewModel.checkRequestAndRunIfGranted(
-                            BleSnifferPermission.WRITE_EXTERNAL_STORAGE
-                    ) {
-                        deserializerFileStorage.storeItems(deserializerAdapter.deserializers,
-                                if (textInput.text.isEmpty()) DEFAULT_EXPORT_FILE_NAME
-                                else textInput.text.toString()
-                        ).let {
-                            Toast.makeText(this, getString(R.string.successfully_exported_file_to_x, it), Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    dialog.dismiss()
+
+        startActivityForResult(exportIntent, REQUEST_CODE_SELECT_EXPORT_FILE_PATH)
+    }
+
+    private fun exportDeserializers(exportFileUri : Uri) {
+        deserializersToExport?.let { deserializers ->
+            permissionViewModel.checkRequestAndRunIfGranted(
+                BleSnifferPermission.WRITE_EXTERNAL_STORAGE
+            ) {
+                deserializerFileStorage.storeItems(deserializers,
+                    exportFileUri
+                ).let {
+                    Toast.makeText(this, getString(R.string.successfully_exported_file_to_x, it), Toast.LENGTH_SHORT).show()
                 }
-                .setNegativeButton(R.string.cancel) { dialog, _ -> dialog.dismiss() }
-                .show()
+            }
+        }
     }
 
 
@@ -360,6 +338,9 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                         }
                     }
                 }
+            }
+            REQUEST_CODE_SELECT_EXPORT_FILE_PATH -> {
+                data?.data?.let { exportDeserializers(it) }
             }
         }
     }
