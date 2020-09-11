@@ -250,7 +250,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                 deserializerFileStorage.storeItems(deserializers,
                     exportFileUri
                 ).let {
-                    Toast.makeText(this, getString(R.string.successfully_exported_file_to_x, it), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.file_successfully_exported), Toast.LENGTH_SHORT).show()
                 }
             }
         }

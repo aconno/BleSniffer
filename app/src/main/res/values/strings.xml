@@ -35,7 +35,6 @@
 
     <!-- Export Deserializer Dialog -->
     <string name="export_deserializer_x">Export deserializer: %1$s</string>
-    <string name="successfully_exported_file_to_x">Successfully exported deserializer to: %1$s</string>
 
     <!-- Remove Deserializer Dialog -->
     <string name="remove_deserializer">Remove deserializer?</string>
@@ -90,4 +89,5 @@
     <string name="advertisement_filter_icon">Advertisement filter icon</string>
     <string name="mac_address">Mac</string>
     <string name="device_name">Name</string>
+    <string name="file_successfully_exported">File exported successfully</string>
 </resources>
