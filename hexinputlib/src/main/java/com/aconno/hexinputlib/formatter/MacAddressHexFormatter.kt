@@ -3,7 +3,7 @@ package com.aconno.hexinputlib.formatter
 import com.aconno.hexinputlib.isHexChar
 import java.lang.StringBuilder
 
-class MacAddressHexFormatter : HexFormatter {
+open class MacAddressHexFormatter : HexFormatter {
 
     override fun format(values: List<Char>)  : String {
         return StringBuilder().apply {

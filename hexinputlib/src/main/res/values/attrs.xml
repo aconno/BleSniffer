@@ -9,6 +9,7 @@
             <enum name="mac_address_hex_formatter" value="3" />
             <enum name="plain_values_hex_formatter" value="4" />
             <enum name="plain_bytes_hex_formatter" value="5" />
+            <enum name="complete_mac_address_hex_formatter" value="6" />
         </attr>
     </declare-styleable>
 
