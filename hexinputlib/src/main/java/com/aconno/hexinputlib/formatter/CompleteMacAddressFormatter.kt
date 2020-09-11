@@ -1,6 +1,6 @@
 package com.aconno.hexinputlib.formatter
 
-class CompleteMacAddressHexFormatter : MacAddressHexFormatter() {
+open class CompleteMacAddressHexFormatter : MacAddressHexFormatter() {
 
     override fun format(values: List<Char>): String {
         val valuesToFormat = values.toMutableList()

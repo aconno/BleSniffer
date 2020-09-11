@@ -1,6 +1,6 @@
 package com.aconno.hexinputlib.formatter
 
-class SingleByteHexFormatter : HexFormatter {
+open class SingleByteHexFormatter : HexFormatter {
 
     override fun format(values: List<Char>) : String {
         return HexFormattersUtils.hexValuesToValuePairs(values).joinToString(" ")

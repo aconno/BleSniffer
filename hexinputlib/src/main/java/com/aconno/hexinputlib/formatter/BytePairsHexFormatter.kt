@@ -3,7 +3,7 @@ package com.aconno.hexinputlib.formatter
 import java.lang.StringBuilder
 import kotlin.math.min
 
-class BytePairsHexFormatter : HexFormatter {
+open class BytePairsHexFormatter : HexFormatter {
     override fun format(values: List<Char>) : String {
         val valuePairs = HexFormattersUtils.hexValuesToValuePairs(values)
 

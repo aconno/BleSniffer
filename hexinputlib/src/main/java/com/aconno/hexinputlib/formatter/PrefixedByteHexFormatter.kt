@@ -3,7 +3,7 @@ package com.aconno.hexinputlib.formatter
 import com.aconno.hexinputlib.isHexChar
 import java.util.*
 
-class PrefixedByteHexFormatter : HexFormatter {
+open class PrefixedByteHexFormatter : HexFormatter {
     override fun format(values: List<Char>)  : String {
         if(values.isEmpty()) {
             return ""
