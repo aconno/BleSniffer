@@ -7,6 +7,7 @@ import com.aconno.blesniffer.R
 import com.aconno.blesniffer.domain.deserializing.Deserializer
 import com.aconno.hexinputlib.formatter.HexFormatter
 import com.aconno.hexinputlib.formatter.HexFormatters
+import com.aconno.hexinputlib.formatter.IncompatibleFormatException
 import kotlinx.android.synthetic.main.item_deserializer.view.*
 
 /**
@@ -57,7 +58,11 @@ class DeserializerAdapter(
             return if(filterType == Deserializer.Type.MAC) {
                 deserializerFilter
             } else {
-                val parsedValues = HexFormatters.parse(deserializerFilter)
+                val parsedValues = try {
+                     HexFormatters.parse(deserializerFilter)
+                } catch (ex : IncompatibleFormatException) {
+                    return ""
+                }
                 dataFilterFormatter.format(parsedValues)
             }
 
