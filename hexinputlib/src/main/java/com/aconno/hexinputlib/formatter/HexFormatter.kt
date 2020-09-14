@@ -18,7 +18,12 @@ interface HexFormatter {
     fun format(values : List<Char>) : String
 
     /**
-     * Parses the specified formatted content back to a list of hex values.
+     * Parses the specified formatted content back to a list of hex values. The specified formatted
+     * content can be incomplete, i.e. it can only be a substring of formatted content create by
+     * formatting values using this formatter. For example, if object implementing this interface
+     * formats values [5,8,F,4,3,B] to '58F 43B', then this method should accept not only '58F 43B'
+     * as but also any substring as value of the parameter. So, 'F 43' should be successfully parsed, i.e.
+     * the method should return [F,4,3], instead of throwing an [IncompatibleFormatException]
      *
      * @param text formatted values
      *
