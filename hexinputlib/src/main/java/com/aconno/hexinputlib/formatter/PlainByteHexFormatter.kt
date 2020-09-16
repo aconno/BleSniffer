@@ -1,5 +1,10 @@
 package com.aconno.hexinputlib.formatter
 
+/**
+ * A hex formatter that formats values as one large group of bytes. Since it interprets given hex values
+ * as bytes (i.e. interprets each value pair as one byte), it inserts 0 before last hex value if there
+ * is odd number of values. For example, it would format values [8,3,1,B,4] as "831B04".
+ */
 class PlainByteHexFormatter : HexFormatter {
 
     override fun format(values: List<Char>): String {

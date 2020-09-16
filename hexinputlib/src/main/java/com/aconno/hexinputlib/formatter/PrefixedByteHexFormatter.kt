@@ -3,6 +3,12 @@ package com.aconno.hexinputlib.formatter
 import com.aconno.hexinputlib.isHexChar
 import java.util.*
 
+/**
+ * A hex formatter that formats values as bytes with each byte prefixed by "0x". For example, it
+ * would format values [4,2,A,8,C] as "0x42 0xA8 0x0C". If there is odd number of values, then it
+ * automatically inserts 0 before last hex value - for example, it would format values [4,A,C,2,F,3,7] as
+ * "0x4A 0xC2 0xF3 0x07".
+ */
 class PrefixedByteHexFormatter : HexFormatter {
     override fun format(values: List<Char>)  : String {
         if(values.isEmpty()) {
