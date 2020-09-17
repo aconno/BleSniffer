@@ -7,6 +7,13 @@ import android.view.MotionEvent
 import android.widget.Button
 import com.aconno.hexinputlib.R
 
+/**
+ * Represents a keyboard specialised for input of hexadecimal content. Contains buttons for all hex
+ * values and a remove button, arranged in a grid, just like in a classic keyboard. Layout of buttons
+ * is different between portrait and landscape orientation in order to utilize all available space
+ * on screen (so that there are no blank parts of screen that are reserved for the view
+ * or so that the buttons are not to wide).
+ */
 class HexKeyboardView(context : Context, attributeSet: AttributeSet?) : BaseHexKeyboardView(context, attributeSet) {
     private var charButtonsMap = mutableMapOf(
         R.id.button_0 to '0',
