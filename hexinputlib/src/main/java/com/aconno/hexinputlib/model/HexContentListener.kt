@@ -34,7 +34,7 @@ interface HexContentListener {
     fun valueRemoved(previousState: List<Char>, removalIndex : Int)
 
     /**
-     * Called when a range of values starting at index [removalEndIndex] and ending at index [removalEndIndex] (exclusive)
+     * Called when a range of values starting at index [removalStartIndex] and ending at index [removalEndIndex] (exclusive)
      * has been removed from model previous state [previousState].
      *
      * @param previousState previous state of hex content model
