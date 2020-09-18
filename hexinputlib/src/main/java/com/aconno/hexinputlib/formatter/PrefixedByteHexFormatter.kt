@@ -1,6 +1,7 @@
 package com.aconno.hexinputlib.formatter
 
 import com.aconno.hexinputlib.isHexChar
+import java.lang.IllegalArgumentException
 import java.util.*
 
 open class PrefixedByteHexFormatter : HexFormatter {
@@ -46,6 +47,10 @@ open class PrefixedByteHexFormatter : HexFormatter {
     }
 
     override fun locateSourceValue(values: List<Char>, formattedValueIndex: Int): Int {
+        if(formattedValueIndex < 0) {
+            throw IllegalArgumentException("Bad formatted value index: $formattedValueIndex")
+        }
+
         if(formattedValueIndex <= 2) {
             return 0
         }
@@ -71,6 +76,10 @@ open class PrefixedByteHexFormatter : HexFormatter {
     }
 
     override fun locateFormattedValue(values: List<Char>, sourceIndex: Int): Int {
+        if(sourceIndex < 0) {
+            throw IllegalArgumentException("Bad source index: $sourceIndex")
+        }
+
         var formattedIndex = 2 //formatted index for sourceIndex==0
         var index = 0
         while(index < sourceIndex) {

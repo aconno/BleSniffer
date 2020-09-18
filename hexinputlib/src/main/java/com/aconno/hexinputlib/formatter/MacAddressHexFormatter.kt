@@ -1,6 +1,7 @@
 package com.aconno.hexinputlib.formatter
 
 import com.aconno.hexinputlib.isHexChar
+import java.lang.IllegalArgumentException
 import java.lang.StringBuilder
 
 open class MacAddressHexFormatter : HexFormatter {
@@ -38,10 +39,18 @@ open class MacAddressHexFormatter : HexFormatter {
     }
 
     override fun locateSourceValue(values: List<Char>, formattedValueIndex: Int): Int {
+        if(formattedValueIndex < 0) {
+            throw IllegalArgumentException("Bad formatted value index: $formattedValueIndex")
+        }
+
         return formattedValueIndex - formattedValueIndex/3
     }
 
     override fun locateFormattedValue(values: List<Char>, sourceIndex: Int): Int {
+        if(sourceIndex < 0) {
+            throw IllegalArgumentException("Bad source index: $sourceIndex")
+        }
+
         var index = sourceIndex + sourceIndex/2
         if(values.size % 2 == 0 && sourceIndex == values.size) {
             index--

@@ -1,5 +1,7 @@
 package com.aconno.hexinputlib.formatter
 
+import java.lang.IllegalArgumentException
+
 open class SingleByteHexFormatter : HexFormatter {
 
     override fun format(values: List<Char>) : String {
@@ -11,10 +13,18 @@ open class SingleByteHexFormatter : HexFormatter {
     }
 
     override fun locateSourceValue(values: List<Char>, formattedValueIndex: Int): Int {
+        if(formattedValueIndex < 0) {
+            throw IllegalArgumentException("Bad formatted value index: $formattedValueIndex")
+        }
+
         return HexFormattersUtils.locateSourceValueInGroupedHexBytesString(values,formattedValueIndex,1)
     }
 
     override fun locateFormattedValue(values: List<Char>, sourceIndex: Int): Int {
+        if(sourceIndex < 0) {
+            throw IllegalArgumentException("Bad source index: $sourceIndex")
+        }
+
         return HexFormattersUtils.locateFormattedValueInGroupedHexBytesString(values,sourceIndex,1)
     }
 

@@ -1,11 +1,16 @@
 package com.aconno.hexinputlib.formatter
 
 import com.aconno.hexinputlib.isHexChar
+import java.lang.IllegalArgumentException
 
 object HexFormattersUtils {
     private const val HEX_CHARS_PER_BYTE = 2
 
     fun parseGroupedHexBytes(text : String, expectedGroupSizeInBytes : Int) : List<Char> {
+        if(expectedGroupSizeInBytes < 0) {
+            throw IllegalArgumentException("Bad expectedGroupSizeInBytes: $expectedGroupSizeInBytes")
+        }
+
         val expectedGroupSizeInChars = expectedGroupSizeInBytes * HEX_CHARS_PER_BYTE
         val values = mutableListOf<Char>()
 
@@ -47,6 +52,13 @@ object HexFormattersUtils {
     }
 
     fun locateSourceValueInGroupedHexBytesString(values: List<Char>, formattedValueIndex: Int, groupSizeInBytes : Int) : Int {
+        if(formattedValueIndex < 0) {
+            throw IllegalArgumentException("Bad formatted value index: $formattedValueIndex")
+        }
+        if(groupSizeInBytes < 0) {
+            throw IllegalArgumentException("Bad groupSizeInBytes: $groupSizeInBytes")
+        }
+
         val spacesBeforeTargetValue = formattedValueIndex/(groupSizeInBytes * HEX_CHARS_PER_BYTE + 1) // +1 for space between groups
         var index = formattedValueIndex - spacesBeforeTargetValue
         if(values.size % 2 == 1 && index > values.lastIndex) { // special case: formattedValueIndex is next to last value and there is odd number of values, so the pre padded 0 in last byte should be ignored because it is not part of values list
@@ -57,6 +69,13 @@ object HexFormattersUtils {
     }
 
     fun locateFormattedValueInGroupedHexBytesString(values: List<Char>, sourceIndex: Int, groupSizeInBytes : Int) : Int {
+        if(sourceIndex < 0) {
+            throw IllegalArgumentException("Bad source index: $sourceIndex")
+        }
+        if(groupSizeInBytes < 0) {
+            throw IllegalArgumentException("Bad groupSizeInBytes: $groupSizeInBytes")
+        }
+
         val groupSizeInChars = groupSizeInBytes * HEX_CHARS_PER_BYTE
         var index = sourceIndex + sourceIndex/groupSizeInChars
         if(values.size % 2 == 1 && sourceIndex >= values.lastIndex) {
