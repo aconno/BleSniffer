@@ -13,8 +13,6 @@ import android.widget.*
 import android.view.Menu
 import android.view.MenuItem
 import android.view.WindowManager
-import android.widget.ImageView
-import android.widget.SearchView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -121,7 +119,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentViewWithHexKeyboardAutoAdded(R.layout.activity_scan_analyzer)
+        setContentView(R.layout.activity_scan_analyzer)
         scanAnalyzerActivityComponent.inject(this)
 
         initScanResultObserver()

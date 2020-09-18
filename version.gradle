@@ -1,6 +1,6 @@
 // Version information
 def versionMajor = 3
-def versionMinor = 5
+def versionMinor = 6
 def versionPatch = 1
 
 ext.generateVersionCode = {
