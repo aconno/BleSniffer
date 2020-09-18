@@ -10,7 +10,7 @@ import java.lang.IllegalStateException
 
 /**
  * An object providing methods related to handling a hex keyboard and the system keyboard. To be more
- * specific, it contains method that handle showing and hiding a hex keyboard and the system keyboard,
+ * specific, it contains methods that handle showing and hiding a hex keyboard and the system keyboard,
  * with some other helpful methods as well. It is highly recommended to use methods of this manager to
  * handle displaying hex keyboard instead of doing this manually (for example, by directly changing the
  * visibility of a [BaseHexKeyboardView]) because doing this manually could lead to some issues resulting

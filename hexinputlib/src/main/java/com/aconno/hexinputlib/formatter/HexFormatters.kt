@@ -29,7 +29,7 @@ object HexFormatters {
      * Parses the [formattedContent]. The format of [formattedContent] has to be compatible with
      * one of the formatters contained in the library. This means that this method can not be used
      * to parse content formatted using some custom formatter. To parse content formatted using
-     * a custom formatter, use {@link HexFormatter#parse(String)} method of that formatter.
+     * a custom formatter, use [HexFormatter.parse] method of that formatter.
      *
      * @param formattedContent content formatted using one of the formatters contained in this library
      *

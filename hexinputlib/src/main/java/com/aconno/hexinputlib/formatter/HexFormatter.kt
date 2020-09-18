@@ -19,10 +19,10 @@ interface HexFormatter {
 
     /**
      * Parses the specified formatted content back to a list of hex values. The specified formatted
-     * content can be incomplete, i.e. it can only be a substring of formatted content create by
+     * content can be incomplete, i.e. it can only be a substring of formatted content created by
      * formatting values using this formatter. For example, if object implementing this interface
      * formats values [5,8,F,4,3,B] to '58F 43B', then this method should accept not only '58F 43B'
-     * as but also any substring as value of the parameter. So, 'F 43' should be successfully parsed, i.e.
+     * but also any substring as value of the parameter. So, 'F 43' should be successfully parsed, i.e.
      * the method should return [F,4,3], instead of throwing an [IncompatibleFormatException]
      *
      * @param text formatted values
@@ -120,7 +120,7 @@ interface HexFormatter {
      * it adds 0 next to the last hex value if there is odd number of values, then formatting the values using
      * that formatter would result in 'AB 13 C0'. If, after that, this formatted string gets parsed using
      * the same formatter, it will likely as a result produce [A,B,1,3,C,0]. So, this means that calling
-     * this method with [A,B,1,3,C,0] as the first parameter and with [A,B,1,3,C] as the second parameters,
+     * this method with [A,B,1,3,C,0] as the first parameter and with [A,B,1,3,C] as the second parameter,
      * should result in the return value of true.
      *
      * @param values list of hex values

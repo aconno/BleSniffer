@@ -23,7 +23,7 @@ import com.aconno.hexinputlib.ui.keyboard.HexKeyboardView
  *
  * The purpose of this method is to be able to provide [HexKeyboardView] for [HexEditText][com.aconno.hexinputlib.ui.editor.HexEditText]
  * without adding it manually into activity content view. But since this method wraps the specified layout
- * into a new layout, this could lead do some performance issues are maybe even to some bugs, so use this
+ * into a new layout, this could lead do some performance issues or maybe even to some bugs, so use this
  * method with caution. This method is recommended to be used only for simple layouts, but if there is
  * some more complex layout, then the best option is to manually add a [HexKeyboardView] into the layout
  * resource.
@@ -77,10 +77,9 @@ fun Activity.setContentViewWithHexKeyboardAutoAdded(layoutResourceId : Int, wrap
 
 /**
  * Handles back button press in the following way: if a hex keyboard is displayed, it hides it, but
- * if it is not displayed, it finishes the activity that
- * is the receiver of this method.
+ * if it is not displayed, it finishes the activity that is the receiver of this extension function.
  *
- * @receiver an activity containing a hex keyboard into it's content view
+ * @receiver an activity containing a hex keyboard in it's content view
  */
 fun Activity.handleBackPressedWithHexKeyboardInContentView() {
     val hexKeyboardView = KeyboardManager.findHexKeyboardView(findViewById(android.R.id.content))
