@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import com.aconno.hexinputlib.ui.keyboard.BaseHexKeyboardView
+import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 
 object KeyboardManager {
@@ -69,6 +70,10 @@ object KeyboardManager {
     }
 
     fun setHexKeyboardShowDelay(delayMillis : Long) {
+        if(delayMillis < 0) {
+            throw IllegalArgumentException("Bad delay: $delayMillis")
+        }
+
         showKeyboardDelayMillis = delayMillis
     }
 
