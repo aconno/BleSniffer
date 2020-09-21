@@ -31,8 +31,8 @@ open class BytePairsHexFormatter : HexFormatter {
     }
 
     override fun locateFormattedValue(values: List<Char>, sourceIndex: Int): Int {
-        if(sourceIndex < 0) {
-            throw IllegalArgumentException("Bad source index: $sourceIndex")
+        if(sourceIndex < 0 || sourceIndex > values.size) {
+            throw IllegalArgumentException("Source index out of bounds, expected index in range [0,${values.size}], given: $sourceIndex")
         }
 
         return HexFormattersUtils.locateFormattedValueInGroupedHexBytesString(values,sourceIndex,2)
