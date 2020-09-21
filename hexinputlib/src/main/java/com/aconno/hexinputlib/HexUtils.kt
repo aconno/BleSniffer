@@ -7,6 +7,8 @@ object HexUtils {
     const val HEX_CHARS = "0123456789ABCDEF"
 
     fun hexToBytes(hexValues : List<Char>) : ByteArray {
+        verifyHexValues(hexValues)
+
         val bytes = ByteArray(ceil(hexValues.size/2f).toInt())
         for(i in hexValues.indices step 2) {
             val byte = if(i == hexValues.lastIndex) {
