@@ -5,7 +5,7 @@ import com.aconno.hexinputlib.isHexChar
 object HexFormattersUtils {
     private const val HEX_CHARS_PER_BYTE = 2
 
-    fun parseGroupedHexBytes(text : String, expectedGroupSizeInBytes : Int) : List<Char> {
+    fun parseGroupedHexBytes(text : String, expectedGroupSizeInBytes : Int) : List<Char>? {
         val expectedGroupSizeInChars = expectedGroupSizeInBytes * HEX_CHARS_PER_BYTE
         val values = mutableListOf<Char>()
 
@@ -16,7 +16,7 @@ object HexFormattersUtils {
                 part.any { !it.isHexChar() }
             ) {
 
-                throw IncompatibleFormatException()
+                return null
             }
             part.forEach { values.add(it) }
         }
@@ -24,10 +24,10 @@ object HexFormattersUtils {
         return values
     }
 
-    fun parsePlainValues(text: String) : List<Char> {
+    fun parsePlainValues(text: String) : List<Char>? {
         val trimmedText = text.trim()
         if(trimmedText.find { !it.isHexChar() } != null) {
-            throw IncompatibleFormatException()
+            return null
         }
         return trimmedText.toCharArray().toList()
     }

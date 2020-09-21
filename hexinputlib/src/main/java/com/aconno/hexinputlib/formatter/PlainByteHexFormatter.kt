@@ -6,7 +6,7 @@ class PlainByteHexFormatter : HexFormatter {
         return HexFormattersUtils.hexValuesToValuePairs(values).joinToString("")
     }
 
-    override fun parse(text: String): List<Char> {
+    override fun parse(text: String): List<Char>? {
         return HexFormattersUtils.parsePlainValues(text)
     }
 

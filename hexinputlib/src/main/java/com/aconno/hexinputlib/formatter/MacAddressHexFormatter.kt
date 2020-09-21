@@ -16,9 +16,9 @@ class MacAddressHexFormatter : HexFormatter {
         }.toString()
     }
 
-    override fun parse(text: String): List<Char> {
+    override fun parse(text: String): List<Char>? {
         if(!isFormatCompatible(text)) {
-            throw IncompatibleFormatException()
+            return null
         }
         return HexFormattersUtils.parseGroupedHexBytes(text.replace(":"," "),1) //replacing all ':' with space gives text in format of grouped hex bytes with group size of 1 byte
     }

@@ -13,24 +13,25 @@ class PrefixedByteHexFormatter : HexFormatter {
         return valuePairs.joinToString(" 0x","0x")
     }
 
-    override fun parse(text: String): List<Char> {
+    override fun parse(text: String): List<Char>? {
         val values = mutableListOf<Char>()
         val textParts =
             text.toUpperCase(Locale.ROOT).split(" ").filter { it.isNotEmpty() && it.isNotBlank() }
 
         for((index,part) in textParts.withIndex()) {
-            values.addAll(parsePart(part,index==0,index==textParts.lastIndex))
+            val textPartValues = parsePart(part,index==0,index==textParts.lastIndex) ?: return null
+            values.addAll(textPartValues)
         }
 
         return values
     }
 
-    private fun parsePart(part : String, acceptIncompleteStart : Boolean, acceptIncompleteEnd : Boolean) : List<Char> {
+    private fun parsePart(part : String, acceptIncompleteStart : Boolean, acceptIncompleteEnd : Boolean) : List<Char>? {
         if(!acceptIncompleteStart && (part.first() != '0' || part.length > 1 && part[1] != 'X') ) {
-            throw IncompatibleFormatException()
+            return null
         }
         if(!acceptIncompleteEnd && (!part.last().isHexChar() || part.length > 1 && !part[part.lastIndex - 1].isHexChar()) ) { //checking if end is complete: the last char has to be a hex char and second to last char (if included) also has to be a hex char
-            throw IncompatibleFormatException()
+            return null
         }
         val prefixLength = when {
             part.startsWith("0X") -> 2
@@ -40,7 +41,7 @@ class PrefixedByteHexFormatter : HexFormatter {
 
         val values = part.subSequence(prefixLength,part.length)
         if(values.any { !it.isHexChar() }) {
-            throw IncompatibleFormatException()
+            return null
         }
         return values.toList()
     }
