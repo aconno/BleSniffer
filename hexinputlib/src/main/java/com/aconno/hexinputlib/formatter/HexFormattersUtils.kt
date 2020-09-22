@@ -71,7 +71,7 @@ object HexFormattersUtils {
         if(fromValues == byteValues) {
             return true
         }
-        if(byteValues.size - fromValues.size == 1 && byteValues.isNotEmpty() && fromValues.isNotEmpty()) {
+        if(byteValues.size - fromValues.size == 1 && fromValues.isNotEmpty()) {
             val sizeWithoutLastByte = byteValues.size - 2
             if(byteValues.last() == fromValues.last() && byteValues[byteValues.lastIndex - 1] == '0' && byteValues.subList(0,sizeWithoutLastByte) == fromValues.subList(0,sizeWithoutLastByte)) {
                 return true
