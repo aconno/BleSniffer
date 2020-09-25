@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ScrollView
 import androidx.constraintlayout.widget.ConstraintSet
+import com.aconno.hexinputlib.ui.keyboard.BaseHexKeyboardView
 import com.aconno.hexinputlib.ui.keyboard.HexKeyboardView
 
 /**
@@ -82,12 +83,20 @@ fun Activity.setContentViewWithHexKeyboardAutoAdded(layoutResourceId : Int, wrap
  * @receiver an activity containing a hex keyboard in it's content view
  */
 fun Activity.handleBackPressedWithHexKeyboardInContentView() {
-    val hexKeyboardView = KeyboardManager.findHexKeyboardView(findViewById(android.R.id.content))
+    val hexKeyboardView = getHexKeyboardView()
     if(hexKeyboardView.visibility == View.VISIBLE) {
         KeyboardManager.hideHexKeyboard(hexKeyboardView)
     } else {
         finish()
     }
+}
+
+fun Activity.getHexKeyboardView() : BaseHexKeyboardView {
+    return KeyboardManager.findHexKeyboardView(findViewById(android.R.id.content))
+}
+
+fun Activity.isHexKeyboardDisplayed() : Boolean {
+    return getHexKeyboardView().visibility == View.VISIBLE
 }
 
 internal fun Char.isHexChar() : Boolean {

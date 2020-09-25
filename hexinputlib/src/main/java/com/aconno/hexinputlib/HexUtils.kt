@@ -1,5 +1,6 @@
 package com.aconno.hexinputlib
 
+import java.lang.IllegalArgumentException
 import kotlin.math.ceil
 
 /**
@@ -23,6 +24,8 @@ object HexUtils {
      * @return a byte array created as a result of conversion from [hexValues]
      */
     fun hexToBytes(hexValues : List<Char>) : ByteArray {
+        verifyHexValues(hexValues)
+
         val bytes = ByteArray(ceil(hexValues.size/2f).toInt())
         for(i in hexValues.indices step 2) {
             val byte = if(i == hexValues.lastIndex) {
@@ -53,5 +56,11 @@ object HexUtils {
      */
     fun bytesToHex(values: ByteArray) : List<Char> {
         return values.flatMap { String.format("%02X",it).toList() }
+    }
+
+    fun verifyHexValues(hexValues: List<Char>) {
+        if(hexValues.any { !it.toUpperCase().isHexChar() }) {
+            throw IllegalArgumentException("Expected a list of hex values, received: $hexValues")
+        }
     }
 }

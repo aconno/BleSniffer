@@ -5,9 +5,12 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.View.OnFocusChangeListener
+import androidx.core.widget.addTextChangedListener
 import com.aconno.hexinputlib.HexEditController
 import com.aconno.hexinputlib.KeyboardManager
+import com.aconno.hexinputlib.R
 import com.aconno.hexinputlib.formatter.HexFormatter
+import com.aconno.hexinputlib.formatter.HexFormatters
 import com.aconno.hexinputlib.model.HexContentModel
 
 /**
@@ -40,6 +43,25 @@ class HexEditText(context: Context, attributeSet: AttributeSet) : androidx.appco
         setOnClickListener { KeyboardManager.showHexKeyboard(this) }
 
         addTextChangedListener(HexTextWatcher())
+
+        applyAttributes(attributeSet)
+    }
+
+    private fun applyAttributes(attributeSet: AttributeSet) {
+        val typedArray = context.theme.obtainStyledAttributes(attributeSet, R.styleable.HexEditText,0,0)
+
+        val hexValuesLimit = typedArray.getInt(R.styleable.HexEditText_hexValuesLimit,Int.MAX_VALUE)
+        setHexValuesLimit(hexValuesLimit)
+
+        val formatterNumber = typedArray.getInt(R.styleable.HexEditText_formatter,-1)
+        val formatter = if(formatterNumber < 0) {
+            HexFormatters.getDefaultFormatter()
+        } else {
+            val formatterType = HexFormatters.FormatterType.values()[formatterNumber]
+            HexFormatters.getFormatter(formatterType)
+        }
+
+        setFormatter(formatter)
     }
 
     override fun updateContent(text: String) {
@@ -102,6 +124,14 @@ class HexEditText(context: Context, attributeSet: AttributeSet) : androidx.appco
      */
     fun getValuesAsBytes() : ByteArray {
         return controller.model.getValuesAsBytes()
+    }
+
+    fun setHexValuesLimit(hexValuesLimit : Int) {
+        controller.model.setValuesLimit(hexValuesLimit)
+    }
+
+    fun doAfterTextChanges(afterTextChanges : ((String) -> Unit)) {
+        addTextChangedListener(afterTextChanged = {afterTextChanges(getContent())})
     }
 
     inner class HexTextWatcher : TextWatcher {

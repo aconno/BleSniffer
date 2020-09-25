@@ -1,6 +1,7 @@
 package com.aconno.hexinputlib.formatter
 
 import com.aconno.hexinputlib.isHexChar
+import java.lang.IllegalArgumentException
 import java.util.*
 
 /**
@@ -9,7 +10,7 @@ import java.util.*
  * automatically inserts 0 before last hex value - for example, it would format values [4,A,C,2,F,3,7] as
  * "0x4A 0xC2 0xF3 0x07".
  */
-class PrefixedByteHexFormatter : HexFormatter {
+open class PrefixedByteHexFormatter : HexFormatter {
     override fun format(values: List<Char>)  : String {
         if(values.isEmpty()) {
             return ""
@@ -52,6 +53,10 @@ class PrefixedByteHexFormatter : HexFormatter {
     }
 
     override fun locateSourceValue(values: List<Char>, formattedValueIndex: Int): Int {
+        if(formattedValueIndex < 0) {
+            throw IllegalArgumentException("Bad formatted value index: $formattedValueIndex")
+        }
+
         if(formattedValueIndex <= 2) {
             return 0
         }
@@ -77,6 +82,10 @@ class PrefixedByteHexFormatter : HexFormatter {
     }
 
     override fun locateFormattedValue(values: List<Char>, sourceIndex: Int): Int {
+        if(sourceIndex < 0 || sourceIndex > values.size) {
+            throw IllegalArgumentException("Source index out of bounds, expected index in range [0,${values.size}], given: $sourceIndex")
+        }
+
         var formattedIndex = 2 //formatted index for sourceIndex==0
         var index = 0
         while(index < sourceIndex) {

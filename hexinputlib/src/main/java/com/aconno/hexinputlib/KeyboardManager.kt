@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import com.aconno.hexinputlib.ui.keyboard.BaseHexKeyboardView
+import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 
 /**
@@ -17,7 +18,12 @@ import java.lang.IllegalStateException
  * in a poor UX.
  */
 object KeyboardManager {
+    private const val DEFAULT_SHOW_KEYBOARD_DELAY_MILLIS = 500L
+    private const val KEYBOARD_VIEW_MISSING_EXCEPTION_MESSAGE = "Unable to find hex keyboard view in activity content view hierarchy. To fix this issue, add HexKeyboardView into activity layout or replace Activity#setContentView() with Activity#setContentViewWithHexKeyboardAutoAdded() to make it added automatically."
+    private const val KEYBOARD_REAPPEARANCE_TIME_THRESHOLD = 100
+
     private var keyboardHideEventTime : Long = 0
+    private var showKeyboardDelayMillis : Long = DEFAULT_SHOW_KEYBOARD_DELAY_MILLIS
 
     /**
      * Finds a [BaseHexKeyboardView] in the view hierarchy of [viewHierarchyMember]. It goes through
@@ -63,7 +69,7 @@ object KeyboardManager {
             if(System.currentTimeMillis() - keyboardHideEventTime > KEYBOARD_REAPPEARANCE_TIME_THRESHOLD) {
                 Handler().postDelayed({
                     hexKeyboardView.visibility = View.VISIBLE
-                }, SHOW_KEYBOARD_DELAY_MILLIS)
+                }, showKeyboardDelayMillis)
             } else {
                 hexKeyboardView.visibility = View.VISIBLE
             }
@@ -114,7 +120,12 @@ object KeyboardManager {
         inputMethodManager.hideSoftInputFromWindow(viewToHideFrom.windowToken,0)
     }
 
-    private const val KEYBOARD_VIEW_MISSING_EXCEPTION_MESSAGE = "Unable to find hex keyboard view in activity content view hierarchy. To fix this issue, add HexKeyboardView into activity layout or replace Activity#setContentView() with Activity#setContentViewWithHexKeyboardAutoAdded() to make it added automatically."
-    private const val SHOW_KEYBOARD_DELAY_MILLIS = 500L
-    private const val KEYBOARD_REAPPEARANCE_TIME_THRESHOLD = 100
+    fun setHexKeyboardShowDelay(delayMillis : Long) {
+        if(delayMillis < 0) {
+            throw IllegalArgumentException("Bad delay: $delayMillis")
+        }
+
+        showKeyboardDelayMillis = delayMillis
+    }
+
 }

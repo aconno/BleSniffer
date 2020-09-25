@@ -1,6 +1,10 @@
 package com.aconno.hexinputlib.model
 
 import com.aconno.hexinputlib.HexUtils
+import com.aconno.hexinputlib.isHexChar
+import java.lang.IllegalArgumentException
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Represents a model of some hexadecimal content. Provides methods for making changes to the content
@@ -9,6 +13,15 @@ import com.aconno.hexinputlib.HexUtils
  */
 class HexContentModel : HexContentObservable() {
     private val values : MutableList<Char> = mutableListOf()
+    private var valuesLimit : Int = Int.MAX_VALUE
+
+    fun setValuesLimit(limit : Int) {
+        if(limit < 0) {
+            throw IllegalArgumentException("Bad values limit: $limit")
+        }
+
+        this.valuesLimit = limit
+    }
 
     /**
      * Inserts [value] to the model at index [index].
@@ -17,6 +30,15 @@ class HexContentModel : HexContentObservable() {
      * @param value a hex value to insert
      */
     fun insertValue(index : Int, value : Char) {
+        if(index < 0 || index >= values.size) {
+            throw IllegalArgumentException("Index out of bounds, expected index in range [0,${values.lastIndex}], given: $index")
+        }
+        if(!value.isHexChar()) {
+            throw IllegalArgumentException("Bad value: $value")
+        }
+
+        if(values.size == valuesLimit) return
+
         val previousState = getValues()
 
         values.add(index,value)
@@ -31,11 +53,17 @@ class HexContentModel : HexContentObservable() {
      * @param values hex values to insert
      */
     fun insertValues(index : Int, values : List<Char>) {
+        if(index < 0 || index >= values.size) {
+            throw IllegalArgumentException("Index out of bounds, expected index in range [0,${values.lastIndex}], given: $index")
+        }
+
         val previousState = getValues()
 
-        this.values.addAll(index,values)
+        val valuesExceedingLimit = max(0,this.values.size + values.size - valuesLimit) // making sure that the values limit doesn't get surpassed by excluding last N values that would cause the limit get surpassed
+        val valuesToInsert = values.subList(0,values.size - valuesExceedingLimit)
+        this.values.addAll(index,valuesToInsert)
 
-        notifyValuesInserted(previousState,index,values)
+        notifyValuesInserted(previousState,index,valuesToInsert)
     }
 
     /**
@@ -56,7 +84,7 @@ class HexContentModel : HexContentObservable() {
         val previousState = getValues()
 
         this.values.clear()
-        this.values.addAll(values)
+        this.values.addAll(values.subList(0,min(valuesLimit,values.size)))
 
         notifyValuesReplaced(previousState)
     }
@@ -67,6 +95,10 @@ class HexContentModel : HexContentObservable() {
      * @param index index of value to remove
      */
     fun removeValue(index : Int) {
+        if(index < 0 || index >= values.size) {
+            throw IllegalArgumentException("Index out of bounds, expected index in range [0,${values.lastIndex}], given: $index")
+        }
+
         if(index < 0 || index > values.lastIndex) return
 
         val previousState = getValues()
@@ -83,6 +115,13 @@ class HexContentModel : HexContentObservable() {
      * @param endIndex index of the last value to remove incremented by one
      */
     fun removeRange(startIndex : Int, endIndex : Int) {
+        if(startIndex < 0 || startIndex > values.size) {
+            throw IllegalArgumentException("Index out of bounds, expected index in range [0,${values.size}], given: $startIndex")
+        }
+        if(endIndex < 0 || endIndex > values.size) {
+            throw IllegalArgumentException("Index out of bounds, expected index in range [0,${values.size}], given: $endIndex")
+        }
+
         if(startIndex == endIndex) return
 
         val previousState = getValues()
