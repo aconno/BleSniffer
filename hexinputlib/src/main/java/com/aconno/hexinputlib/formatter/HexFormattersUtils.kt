@@ -25,7 +25,7 @@ object HexFormattersUtils {
      * @return list of parsed values
      * @throws IncompatibleFormatException if [text] is not formatted as a set of byte groups of size [expectedGroupSizeInBytes]
      */
-    fun parseGroupedHexBytes(text : String, expectedGroupSizeInBytes : Int) : List<Char> {
+    fun parseGroupedHexBytes(text : String, expectedGroupSizeInBytes : Int) : List<Char>? {
         if(expectedGroupSizeInBytes < 0) {
             throw IllegalArgumentException("Bad expectedGroupSizeInBytes: $expectedGroupSizeInBytes")
         }
@@ -40,7 +40,7 @@ object HexFormattersUtils {
                 part.any { !it.isHexChar() }
             ) {
 
-                throw IncompatibleFormatException()
+                return null
             }
             part.forEach { values.add(it) }
         }
@@ -57,10 +57,10 @@ object HexFormattersUtils {
      * @return list of parsed hex values
      * @throws IncompatibleFormatException if [text] contains any non-hex characters, except whitespace at the beginning or at the end
      */
-    fun parsePlainValues(text: String) : List<Char> {
+    fun parsePlainValues(text: String) : List<Char>? {
         val trimmedText = text.trim()
         if(trimmedText.find { !it.isHexChar() } != null) {
-            throw IncompatibleFormatException()
+            return null
         }
         return trimmedText.toCharArray().toList()
     }

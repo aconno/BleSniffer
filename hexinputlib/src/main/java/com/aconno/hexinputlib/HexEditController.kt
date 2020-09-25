@@ -39,14 +39,11 @@ internal class HexEditController(private val view : IHexEditView) : HexContentLi
 
     fun onViewContentChanged() {
         val content = view.getContent()
-        val parsedValues = try {
-            formatter.parse(view.getContent())
-        } catch (ex : IncompatibleFormatException) {
-            loadValuesFromText(content)
-            return
-        }
+        val parsedValues = formatter.parse(view.getContent())
 
-        if(!formatter.areValuesDerivableFrom(parsedValues,model.getValues())) {
+        if(parsedValues == null) {
+            loadValuesFromText(content)
+        } else if(!formatter.areValuesDerivableFrom(parsedValues,model.getValues())) {
             model.setValues(parsedValues)
         }
     }

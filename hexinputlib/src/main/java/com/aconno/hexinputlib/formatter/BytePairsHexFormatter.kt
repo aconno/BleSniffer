@@ -25,7 +25,7 @@ open class BytePairsHexFormatter : HexFormatter {
         return builder.trim().toString()
     }
 
-    override fun parse(text: String): List<Char> {
+    override fun parse(text: String): List<Char>? {
         return HexFormattersUtils.parseGroupedHexBytes(text,2)
     }
 

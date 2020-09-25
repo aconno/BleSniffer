@@ -32,7 +32,7 @@ interface HexFormatter {
      * @throws IncompatibleFormatException if format of [text] is not compatible with the format
      * that this formatter produces
      */
-    fun parse(text : String) : List<Char>
+    fun parse(text : String) : List<Char>?
 
     /**
      * Locates a source value from the specified list of values at which the specified formatted value

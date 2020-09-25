@@ -43,12 +43,7 @@ object HexFormatters {
         FormatterType.values().forEach {
             val formatter = getFormatter(it)
 
-            val parsedValues = try {
-                    formatter.parse(formattedContent)
-                } catch (ex : IncompatibleFormatException) {
-                    null
-                }
-
+            val parsedValues = formatter.parse(formattedContent)
             if(parsedValues != null) {
                 return parsedValues
             }
