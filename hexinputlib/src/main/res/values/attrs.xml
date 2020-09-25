@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="HexEditText">
+        <attr name="hexValuesLimit" format="integer" />
+        <attr name="formatter" format="enum">
+            <enum name="prefixed_byte_hex_formatter" value="0" />
+            <enum name="single_byte_hex_formatter" value="1" />
+            <enum name="byte_pairs_hex_formatter" value="2" />
+            <enum name="mac_address_hex_formatter" value="3" />
+            <enum name="plain_values_hex_formatter" value="4" />
+            <enum name="plain_bytes_hex_formatter" value="5" />
+            <enum name="complete_mac_address_hex_formatter" value="6" />
+        </attr>
+    </declare-styleable>
+
+</resources>
