@@ -4,6 +4,13 @@ import java.lang.IllegalArgumentException
 import java.lang.StringBuilder
 import kotlin.math.min
 
+/**
+ * A hex formatter that formats hex values as byte pairs. For example, it would format values
+ * [4,A,C,2,F,3,7,C] as "4AC2 F37C". If there is odd number of values, then it automatically
+ * inserts 0 before last hex value - for example, it would format values [4,A,C,2,F,3,7] as
+ * "4AC2 F307".
+ *
+ */
 open class BytePairsHexFormatter : HexFormatter {
     override fun format(values: List<Char>) : String {
         val valuePairs = HexFormattersUtils.hexValuesToValuePairs(values)

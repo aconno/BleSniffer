@@ -4,6 +4,10 @@ import com.aconno.hexinputlib.isHexChar
 import java.lang.IllegalArgumentException
 import java.lang.StringBuilder
 
+/**
+ * A hex formatter that formats hex values in standard MAC address format (hex value pairs separated
+ * by colon). For example, it would format values [4,2,7,F,A,5] as "42:7F:A5".
+ */
 open class MacAddressHexFormatter : HexFormatter {
 
     override fun format(values: List<Char>)  : String {
