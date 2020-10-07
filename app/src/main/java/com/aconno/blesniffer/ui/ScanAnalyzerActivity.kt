@@ -46,13 +46,12 @@ import com.aconno.blesniffer.viewmodel.BluetoothViewModel
 import com.aconno.blesniffer.viewmodel.PermissionViewModel
 import com.aconno.blesniffer.viewmodel.ScanResultViewModel
 import com.aconno.blesniffer.work.SyncDeserializersWorker
-import com.aconno.hexinputlib.KeyboardManager
-import com.aconno.hexinputlib.formatter.HexFormatters
-import com.aconno.hexinputlib.handleBackPressedWithHexKeyboardInContentView
-import com.aconno.hexinputlib.setContentViewWithHexKeyboardAutoAdded
-import com.aconno.hexinputlib.ui.editor.HexEditText
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
+import com.troido.hexinput.KeyboardManager
+import com.troido.hexinput.formatter.HexFormatters
+import com.troido.hexinput.handleBackPressedWithHexKeyboardInContentView
+import com.troido.hexinput.ui.editor.HexEditText
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers

@@ -55,7 +55,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/deserializer_name">
 
-                <view class="com.aconno.hexinputlib.ui.editor.HexEditText"
+                <view class="com.troido.hexinput.ui.editor.HexEditText"
                     android:id="@+id/deserializer_filter_input"
                     android:tag="hexInput"
                     android:layout_width="match_parent"
@@ -79,7 +79,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/deserializer_filter">
 
-                <view class="com.aconno.hexinputlib.ui.editor.HexEditText"
+                <view class="com.troido.hexinput.ui.editor.HexEditText"
                     android:id="@+id/deserializer_sample_data_input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -52,7 +52,6 @@ dependencies {
     implementation project(':domain')
     implementation project(':device')
     implementation project(':data')
-    implementation project(':hexinputlib')
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     // Support Library
@@ -99,6 +98,8 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:2.0.1"
     implementation "androidx.work:work-rxjava2:2.0.1"
 
+    def hexinput_version = '1.0.0'
+    implementation "com.troido.hexinput:hex-input:$hexinput_version"
 }
 
 repositories {

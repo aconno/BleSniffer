@@ -26,10 +26,10 @@ import com.aconno.blesniffer.domain.interactor.deserializing.*
 import com.aconno.blesniffer.getHexFormatterForAdvertisementBytesDisplayMode
 import com.aconno.blesniffer.preferences.BleSnifferPreferences
 import com.aconno.blesniffer.ui.base.BaseActivity
-import com.aconno.hexinputlib.formatter.*
-import com.aconno.hexinputlib.handleBackPressedWithHexKeyboardInContentView
-import com.aconno.hexinputlib.setContentViewWithHexKeyboardAutoAdded
 import com.google.common.io.BaseEncoding
+import com.troido.hexinput.formatter.MacAddressHexFormatter
+import com.troido.hexinput.handleBackPressedWithHexKeyboardInContentView
+import com.troido.hexinput.setContentViewWithHexKeyboardAutoAdded
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_edit_deserializer.*
