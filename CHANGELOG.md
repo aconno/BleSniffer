@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [3.6.1]
 - Fix small bug
 - Upgrade to Firebase Crashlytics
 
@@ -16,5 +18,6 @@
 
 
 [Unreleased]: https://github.com/aconno/BleSniffer/compare/master...develop
+[3.6.1]: https://github.com/aconno/BleSniffer/releases/tag/v3.6.1
 [3.6.0]: https://github.com/aconno/BleSniffer/releases/tag/v3.6.0
 [3.5.0]: https://github.com/aconno/BleSniffer/releases/tag/v3.5.0
