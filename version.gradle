@@ -8,11 +8,7 @@ ext.generateVersionCode = {
 }
 
 ext.generateVersionName = {
-    if (project.hasProperty('RELEASE_FLAG') && RELEASE_FLAG == "true") {
-        return "$versionMajor.$versionMinor.$versionPatch"
-    } else {
-        return "$versionMajor.$versionMinor.$versionPatch-SNAPSHOT"
-    }
+    return "$versionMajor.$versionMinor.$versionPatch"
 }
 
 task printVersionName {
