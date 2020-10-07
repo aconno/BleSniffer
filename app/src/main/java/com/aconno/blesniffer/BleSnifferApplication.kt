@@ -8,9 +8,7 @@ import com.aconno.blesniffer.dagger.application.AppModule
 import com.aconno.blesniffer.dagger.application.DaggerAppComponent
 import com.aconno.blesniffer.work.SyncDeserializersWorker
 import com.aconno.blesniffer.work.factory.BleSnifferWorkerFactory
-import com.crashlytics.android.Crashlytics
 import com.squareup.leakcanary.LeakCanary
-import io.fabric.sdk.android.Fabric
 import timber.log.Timber
 
 
@@ -42,7 +40,6 @@ class BleSnifferApplication : Application() {
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
-        Fabric.with(this, Crashlytics())
 
         initAndStartSyncWorker()
     }
