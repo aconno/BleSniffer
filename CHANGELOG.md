@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Fix small bug
 
 ## [3.6.0]
 - Add hex keyboard support

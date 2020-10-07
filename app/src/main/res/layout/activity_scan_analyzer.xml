@@ -21,11 +21,10 @@
         android:scrollbars="vertical"
         tools:listitem="@layout/item_scan_record" />
 
-    <com.aconno.hexinputlib.ui.keyboard.HexKeyboardView
+    <com.troido.hexinput.ui.keyboard.HexKeyboardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
         android:layout_gravity="bottom"
-        />
+        android:visibility="gone" />
 
 </LinearLayout>
