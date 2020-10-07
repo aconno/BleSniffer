@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 - Fix small bug
+- Upgrade to Firebase Crashlytics
 
 ## [3.6.0]
 - Add hex keyboard support
