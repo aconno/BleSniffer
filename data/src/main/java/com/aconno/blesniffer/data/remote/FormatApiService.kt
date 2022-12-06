@@ -10,10 +10,10 @@ import retrofit2.http.Url
 interface FormatApiService {
 
     companion object {
-        const val BASE_URL = "http://playground.simvelop.de:8095"
+        const val BASE_URL = "https://aconno.de/"
     }
 
-    @GET("/sensorics/api/getLatestVersion.php")
+    @GET("/sensorics/api/getLatestVersion_debug.php")
     fun getLatestVersion(@Query("version") version: String): Single<LatestVersion>
 
 
