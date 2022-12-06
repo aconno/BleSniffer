@@ -38,6 +38,6 @@ task clean(type: Delete) {
 ext {
     supportLibraryVersion = '1.0.0-beta01'
 
-    daggerVersion = '2.14.1'
+    daggerVersion = '2.44'
     timberVersion = '4.7.1'
 }
