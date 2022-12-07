@@ -432,6 +432,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private fun initSearchView(searchView: ViewGroup) {
         val advertisementFilterByMacLayout = searchView.findViewById<TextInputLayout>(R.id.advertisement_filter_by_mac_layout)
         val advertisementFilterByMac = advertisementFilterByMacLayout.editText as HexEditText
+        advertisementFilterByMac.setHexValuesLimit(MAX_MAC_LENGTH)
         advertisementFilterByMac.setFormatter(HexFormatters.getFormatter(HexFormatters.FormatterType.MAC_ADDRESS_HEX_FORMATTER))
         macFilter?.let { advertisementFilterByMac.setContent(it) }
 
@@ -570,6 +571,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         const val ADVERTISEMENT_MAC_FILTER_KEY : String = "ADVERTISEMENT_MAC_FILTER_KEY"
         const val ADVERTISEMENT_NAME_FILTER_KEY : String = "ADVERTISEMENT_NAME_FILTER_KEY"
         const val ADVERTISEMENT_FILTER_TYPE_KEY : String = "ADVERTISEMENT_FILTER_TYPE_KEY"
+        const val MAX_MAC_LENGTH : Int = 12
 
         var scanLogSavedState : MutableList<ScanAnalyzerAdapter.Item>? = null
     }
