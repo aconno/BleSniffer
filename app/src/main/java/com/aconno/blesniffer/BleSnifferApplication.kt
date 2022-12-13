@@ -8,7 +8,7 @@ import com.aconno.blesniffer.dagger.application.AppModule
 import com.aconno.blesniffer.dagger.application.DaggerAppComponent
 import com.aconno.blesniffer.work.SyncDeserializersWorker
 import com.aconno.blesniffer.work.factory.BleSnifferWorkerFactory
-import com.squareup.leakcanary.LeakCanary
+
 import timber.log.Timber
 
 
@@ -31,12 +31,6 @@ class BleSnifferApplication : Application() {
 
         bleSnifferWorkerFactory = appComponent.bleSnifferWorkerFactory()
 
-        if (LeakCanary.isInAnalyzerProcess(this)) {
-            // This process is dedicated to LeakCanary for heap analysis.
-            // You should not init your app in this process.
-            return
-        }
-        LeakCanary.install(this)
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }
