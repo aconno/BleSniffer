@@ -4,11 +4,11 @@ apply plugin: 'kotlin-kapt'
 apply from: '../version.gradle'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 33
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 33
         versionCode generateVersionCode()
         versionName generateVersionName()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -34,19 +34,19 @@ dependencies {
     implementation project(':domain')
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    implementation 'androidx.room:room-runtime:2.1.0-alpha06'
-    implementation 'androidx.room:room-rxjava2:2.1.0-alpha06'
-    implementation 'androidx.room:room-guava:2.1.0-alpha06'
-    kapt "androidx.room:room-compiler:2.1.0-alpha06"
+    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-rxjava2:$room_version"
+    implementation "androidx.room:room-guava:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
 
     // javax inject
     implementation 'javax.inject:javax.inject:1'
     compileOnly 'javax.annotation:jsr250-api:1.0'
 
-    api 'com.squareup.retrofit2:retrofit:2.5.0'
-    api 'com.squareup.retrofit2:converter-gson:2.5.0'
+    api 'com.squareup.retrofit2:retrofit:2.9.0'
+    api 'com.squareup.retrofit2:converter-gson:2.9.0'
     api "com.squareup.retrofit2:adapter-rxjava2:2.5.0"
 
-    api 'com.squareup.okhttp3:okhttp:3.14.1'
-    api 'com.squareup.okhttp3:logging-interceptor:3.14.1'
+    api 'com.squareup.okhttp3:okhttp:4.10.0'
+    api 'com.squareup.okhttp3:logging-interceptor:4.10.0'
 }
