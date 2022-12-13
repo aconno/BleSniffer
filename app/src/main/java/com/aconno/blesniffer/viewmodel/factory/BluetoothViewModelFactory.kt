@@ -12,7 +12,7 @@ class BluetoothViewModelFactory(
     private val application: Application
 ) : BaseViewModelFactory() {
 
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val viewModel = BluetoothViewModel(bluetooth, bluetoothStateReceiver, application)
         return getViewModel(viewModel, modelClass)
     }

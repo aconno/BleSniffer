@@ -7,7 +7,7 @@ import io.reactivex.Flowable
 
 class ScanResultViewModelFactory(private val scanResults: Flowable<ScanResult>) : BaseViewModelFactory() {
 
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val viewModel = ScanResultViewModel(scanResults)
         return getViewModel(viewModel, modelClass)
     }

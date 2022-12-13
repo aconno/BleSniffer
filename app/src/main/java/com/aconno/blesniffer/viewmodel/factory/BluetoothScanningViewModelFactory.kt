@@ -15,7 +15,7 @@ class BluetoothScanningViewModelFactory(
     private val bluetoothScanner : BluetoothScanner
 ) : BaseViewModelFactory() {
 
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         val viewModel = BluetoothScanningViewModel(bluetooth, bleSnifferApplication,bluetoothScanner)
         return getViewModel(viewModel, modelClass)
     }
