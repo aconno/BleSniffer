@@ -3,11 +3,14 @@ package com.aconno.blesniffer.ui
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+import android.provider.DocumentsContract
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.aconno.blesniffer.BleSnifferApplication
@@ -25,9 +28,7 @@ import com.aconno.blesniffer.domain.interactor.deserializing.DeleteDeserializerU
 import com.aconno.blesniffer.domain.interactor.deserializing.DeleteDeserializersUseCase
 import com.aconno.blesniffer.domain.interactor.deserializing.GetAllDeserializersUseCase
 import com.aconno.blesniffer.getHexFormatterForAdvertisementBytesDisplayMode
-import com.aconno.blesniffer.model.BleSnifferPermission
 import com.aconno.blesniffer.preferences.BleSnifferPreferences
-import com.aconno.blesniffer.viewmodel.PermissionViewModel
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -45,7 +46,7 @@ const val REQUEST_CODE_SELECT_EXPORT_FILE_PATH: Int = 0x03
 const val DEFAULT_EXPORT_FILE_NAME = "all.json"
 
 class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserializer>,
-    LongItemClickListener<Deserializer>, PermissionViewModel.PermissionCallbacks {
+    LongItemClickListener<Deserializer> {
 
     private lateinit var deserializerAdapter: DeserializerAdapter
 
@@ -62,21 +63,39 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     lateinit var deleteDeserializersUseCase: DeleteDeserializersUseCase
 
     @Inject
-    lateinit var permissionViewModel: PermissionViewModel
-
-    @Inject
     lateinit var deserializerFileStorage: DeserializerFileStorage
 
     @Inject
     lateinit var preferences: BleSnifferPreferences
 
-    val editDeserializerActivityComponent: DeserializerListActivityComponent by lazy {
+    private val editDeserializerActivityComponent: DeserializerListActivityComponent by lazy {
         val bleSnifferApplication: BleSnifferApplication? = application as? BleSnifferApplication
         DaggerDeserializerListActivityComponent.builder()
             .appComponent(bleSnifferApplication?.appComponent)
             .deserializerListActivityModule(DeserializerListActivityModule(this))
             .build()
     }
+
+    private val editActivityLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+            result.data?.let {
+                activityResult(REQUEST_CODE_EDIT, result.resultCode, it)
+            } ?: FirebaseCrashlytics.getInstance().recordException(Exception("Data == null"))
+        }
+
+    private val openFileActivityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+        result.data?.let {
+            activityResult(REQUEST_CODE_OPEN_FILE, result.resultCode, it)
+        } ?: FirebaseCrashlytics.getInstance().recordException(Exception("Data == null"))
+    }
+
+    private val exportFileLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+        result.data?.let {
+            activityResult(REQUEST_CODE_SELECT_EXPORT_FILE_PATH, result.resultCode, it)
+        } ?: FirebaseCrashlytics.getInstance().recordException(Exception("Data == null"))
+    }
+
+
 
     private var deserializersToExport: List<Deserializer>? = null
 
@@ -94,7 +113,6 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         deserializer_list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         deserializer_list.adapter = deserializerAdapter
         setSupportActionBar(custom_toolbar)
-        permissionViewModel.requestWriteExternalStoragePermission()
 
         updateDeserializers()
 
@@ -108,8 +126,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                     it.getString(ScanAnalyzerActivity.EXTRA_FILTER_MAC, null),
                     Deserializer.Type.MAC,
                     it.getByteArray(ScanAnalyzerActivity.EXTRA_SAMPLE_DATA)
-                        ?: byteArrayOf(),
-                    true
+                        ?: byteArrayOf()
                 )
             }
         }
@@ -122,29 +139,28 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     private fun startEditActivity(
         filter: String,
         type: String,
-        sampleData: ByteArray = byteArrayOf(),
-        quitOnResult: Boolean = false
+        sampleData: ByteArray = byteArrayOf()
     ) {
-        startActivityForResult(Intent(this, EditDeserializerActivity::class.java).apply {
+
+        editActivityLauncher.launch(Intent(this, EditDeserializerActivity::class.java).apply {
             putExtra("filter", filter)
             putExtra("type", type)
             putExtra("sampleData", sampleData)
-        }, if (quitOnResult) REQUEST_CODE_EDIT_QUIT_ON_RESULT else REQUEST_CODE_EDIT)
+        })
     }
 
     private fun startEditActivity(id: Long? = -1) {
-        startActivityForResult(Intent(this, EditDeserializerActivity::class.java).apply {
+        editActivityLauncher.launch(Intent(this, EditDeserializerActivity::class.java).apply {
             putExtra("id", id)
-        }, REQUEST_CODE_EDIT)
+        })
     }
 
     private fun startEditActivity(
         filter: String,
         type: Deserializer.Type,
-        sampleData: ByteArray = byteArrayOf(),
-        quitOnResult: Boolean = false
+        sampleData: ByteArray = byteArrayOf()
     ) =
-        startEditActivity(filter, type.name, sampleData, quitOnResult)
+        startEditActivity(filter, type.name, sampleData)
 
     override fun onLongItemClick(item: Deserializer): Boolean {
         AlertDialog.Builder(this)
@@ -200,8 +216,8 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        val id: Int? = item?.itemId
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id: Int = item.itemId
         when (id) {
             R.id.action_import -> openFileDialog()
             R.id.action_export_all -> {
@@ -246,7 +262,7 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
     }
 
     private fun openFileDialog() {
-        startActivityForResult(createGetContentIntent(), REQUEST_CODE_OPEN_FILE)
+        openFileActivityLauncher.launch(createGetContentIntent())
     }
 
     private fun createGetContentIntent(): Intent {
@@ -264,49 +280,29 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
             putExtra(Intent.EXTRA_TITLE, defaultFileName)
         }
 
-        startActivityForResult(exportIntent, REQUEST_CODE_SELECT_EXPORT_FILE_PATH)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, Uri.parse("/Documents"));
+        }
+
+        exportFileLauncher.launch(exportIntent)
     }
 
     private fun exportDeserializers(exportFileUri: Uri) {
         deserializersToExport?.let { deserializers ->
-            permissionViewModel.checkRequestAndRunIfGranted(
-                BleSnifferPermission.WRITE_EXTERNAL_STORAGE
-            ) {
-                deserializerFileStorage.storeItems(
-                    deserializers,
-                    exportFileUri
-                ).let {
-                    Toast.makeText(
-                        this,
-                        getString(R.string.file_successfully_exported),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-        }
-    }
-
-
-    override fun permissionAccepted(actionCode: Int) {
-    }
-
-    override fun permissionDenied(actionCode: Int) {
-        when (actionCode) {
-            BleSnifferPermission.WRITE_EXTERNAL_STORAGE_CODE -> {
+            deserializerFileStorage.storeItems(
+                deserializers,
+                exportFileUri
+            ).let {
                 Toast.makeText(
                     this,
-                    R.string.permission_denied_export_import,
-                    Toast.LENGTH_LONG
+                    getString(R.string.file_successfully_exported),
+                    Toast.LENGTH_SHORT
                 ).show()
             }
         }
     }
 
-    override fun showRationale(actionCode: Int) {
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+    private fun activityResult(requestCode: Int, resultCode: Int, data: Intent) {
         when (requestCode) {
             REQUEST_CODE_EDIT -> {
                 updateDeserializers()
@@ -344,15 +340,11 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                         .recordException(Exception("Result: $resultCode"))
                     return
                 }
-                if (data == null) {
-                    FirebaseCrashlytics.getInstance().recordException(Exception("Data == null"))
-                } else {
-                    if (data.data == null) {
-                        FirebaseCrashlytics.getInstance()
-                            .recordException(Exception("data.data == null"))
-                    }
+                if (data.data == null) {
+                    FirebaseCrashlytics.getInstance()
+                        .recordException(Exception("data.data == null"))
                 }
-                data?.data?.let {
+                data.data?.let {
                     try {
                         this.contentResolver.openInputStream(it)?.use {
                             deserializerFileStorage.readItems(it).subscribe({ list ->
@@ -379,29 +371,8 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                                         updateDeserializers()
                                     }
                             }, {
-                                if (it.message?.contains("Permission denied") == true && !permissionViewModel.hasSelfPermission(
-                                        BleSnifferPermission.READ_EXTERNAL_STORAGE
-                                    )
-                                ) {
-                                    permissionViewModel.checkRequestAndRun(
-                                        BleSnifferPermission.WRITE_EXTERNAL_STORAGE,
-                                        {
-                                            onActivityResult(requestCode, resultCode, data)
-                                        },
-                                        {
-                                            runOnUiThread {
-                                                Toast.makeText(
-                                                    this,
-                                                    R.string.permission_denied_loading_items,
-                                                    Toast.LENGTH_LONG
-                                                ).show()
-                                                openPermissionSettingsScreen()
-                                            }
-                                        })
-                                } else {
-                                    Timber.e(it)
-                                    FirebaseCrashlytics.getInstance().recordException(it)
-                                }
+                                Timber.e(it)
+                                FirebaseCrashlytics.getInstance().recordException(it)
                             })
                         }
                     } catch (e: FileNotFoundException) {
@@ -416,25 +387,9 @@ class DeserializerListActivity : AppCompatActivity(), ItemClickListener<Deserial
                 }
             }
             REQUEST_CODE_SELECT_EXPORT_FILE_PATH -> {
-                data?.data?.let { exportDeserializers(it) }
+                data.data?.let { exportDeserializers(it) }
             }
         }
-    }
-
-    private fun openPermissionSettingsScreen() {
-        val settings =
-            Intent(ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
-        settings.addCategory(Intent.CATEGORY_DEFAULT)
-        settings.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(settings)
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        permissionViewModel.checkGrantedPermission(grantResults, requestCode)
     }
 
 }
