@@ -1,6 +1,10 @@
 package com.aconno.blesniffer.ui
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -252,12 +256,23 @@ class ScanAnalyzerActivity : AppCompatActivity(),
         )
     }
 
-    private fun requestToEnableBluetooth(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            permissionsBuilder(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN).build().send {
-                if (it.allGranted())
-                    bluetoothViewModel.enableBluetooth(applicationContext)
-            }
+    @SuppressLint("MissingPermission")
+    private fun requestToEnableBluetooth() {
+        val bluetoothAdapter =
+            (getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            startActivity(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissionsBuilder(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN)
+                .build()
+                .send {
+                    if (it.allGranted()) {
+                        bluetoothViewModel.enableBluetooth(bluetoothAdapter)
+                    }
+                }
+        } else {
+            bluetoothViewModel.enableBluetooth(bluetoothAdapter)
         }
     }
 

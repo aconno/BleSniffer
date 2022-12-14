@@ -25,9 +25,8 @@ class BluetoothViewModel(
     private var bluetoothStatesSubscription: Disposable? = null
 
     @SuppressLint("MissingPermission")
-    fun enableBluetooth(context: Context) {
-        val bluetoothAdapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
-        bluetoothAdapter.enable()
+    fun enableBluetooth(adapter: BluetoothAdapter) {
+        adapter.enable()
     }
 
     fun isBluetoothAvailable() = BluetoothAdapter.getDefaultAdapter() != null
