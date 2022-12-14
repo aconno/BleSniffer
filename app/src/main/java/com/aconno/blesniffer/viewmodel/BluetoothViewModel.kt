@@ -1,9 +1,12 @@
 package com.aconno.blesniffer.viewmodel
 
+import android.annotation.SuppressLint
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.content.IntentFilter
 import com.aconno.blesniffer.BluetoothStateReceiver
 import com.aconno.blesniffer.SingleLiveEvent
@@ -21,9 +24,10 @@ class BluetoothViewModel(
 
     private var bluetoothStatesSubscription: Disposable? = null
 
-    fun enableBluetooth() {
-        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        bluetoothAdapter?.enable()
+    @SuppressLint("MissingPermission")
+    fun enableBluetooth(context: Context) {
+        val bluetoothAdapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+        bluetoothAdapter.enable()
     }
 
     fun isBluetoothAvailable() = BluetoothAdapter.getDefaultAdapter() != null

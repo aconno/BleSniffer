@@ -242,7 +242,7 @@ class ScanAnalyzerActivity : AppCompatActivity(),
     private fun createSnackbar() {
         snackbar =
             Snackbar.make(scan_analyzer_root, R.string.bt_disabled, Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.enable) { bluetoothViewModel.enableBluetooth() }
+                .setAction(R.string.enable) { requestToEnableBluetooth() }
 
         snackbar?.setActionTextColor(
             ContextCompat.getColor(
@@ -250,6 +250,15 @@ class ScanAnalyzerActivity : AppCompatActivity(),
                 R.color.primaryColor
             )
         )
+    }
+
+    private fun requestToEnableBluetooth(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissionsBuilder(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN).build().send {
+                if (it.allGranted())
+                    bluetoothViewModel.enableBluetooth(applicationContext)
+            }
+        }
     }
 
     private fun setScanStatus() {
@@ -553,7 +562,6 @@ class ScanAnalyzerActivity : AppCompatActivity(),
                 Toast.makeText(this, R.string.permission_scan_denied, Toast.LENGTH_LONG).show()
             }
         }
-
     }
 
     private fun setScanMenuLabel(menuItem: MenuItem) {
