@@ -1,18 +1,23 @@
 package com.aconno.blesniffer.ui
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
 import android.widget.*
-import android.view.Menu
-import android.view.MenuItem
-import android.view.WindowManager
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -43,9 +48,11 @@ import com.aconno.blesniffer.domain.scanning.BluetoothState
 import com.aconno.blesniffer.preferences.BleSnifferPreferences
 import com.aconno.blesniffer.viewmodel.BluetoothScanningViewModel
 import com.aconno.blesniffer.viewmodel.BluetoothViewModel
-import com.aconno.blesniffer.viewmodel.PermissionViewModel
 import com.aconno.blesniffer.viewmodel.ScanResultViewModel
 import com.aconno.blesniffer.work.SyncDeserializersWorker
+import com.fondesa.kpermissions.allGranted
+import com.fondesa.kpermissions.extension.permissionsBuilder
+import com.fondesa.kpermissions.extension.send
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.troido.hexinput.KeyboardManager
@@ -56,21 +63,17 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_scan_analyzer.*
-import kotlinx.android.synthetic.main.activity_scan_analyzer.custom_toolbar
 import timber.log.Timber
 import javax.inject.Inject
 
 
-class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.PermissionCallbacks,
+class ScanAnalyzerActivity : AppCompatActivity(),
     ScanRecordListener, LongItemClickListener<ScanResult> {
     @Inject
     lateinit var bluetoothViewModel: BluetoothViewModel
 
     @Inject
     lateinit var bluetoothScanningViewModel: BluetoothScanningViewModel
-
-    @Inject
-    lateinit var permissionViewModel: PermissionViewModel
 
     @Inject
     lateinit var scanResultViewModel: ScanResultViewModel
@@ -88,16 +91,23 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
     private var snackbar: Snackbar? = null
 
-    private var macFilter : String? = null
-    private var nameFilter : String? = null
-    private var filterType : AdvertisementFilterType = AdvertisementFilterType.MAC
+    private var macFilter: String? = null
+    private var nameFilter: String? = null
+    private var filterType: AdvertisementFilterType = AdvertisementFilterType.MAC
 
     @Inject
-    lateinit var deserializerFinder : DeserializerFinder
+    lateinit var deserializerFinder: DeserializerFinder
 
     private val scanAnalyzerAdapter: ScanAnalyzerAdapter by lazy {
-        val byteArrayFormatter = ByteArrayFormatter.getFormatter(preferences.getAdvertisementBytesDisplayMode())
-        ScanAnalyzerAdapter(this, this, byteArrayFormatter, getAdvertisementDataFilter(), deserializerFinder)
+        val byteArrayFormatter =
+            ByteArrayFormatter.getFormatter(preferences.getAdvertisementBytesDisplayMode())
+        ScanAnalyzerAdapter(
+            this,
+            this,
+            byteArrayFormatter,
+            getAdvertisementDataFilter(),
+            deserializerFinder
+        )
     }
 
     @Inject
@@ -115,6 +125,11 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
     //this flag indicates that user requested scan start and has not yet requested scan stop
     private var shouldBeScanning = false
+
+    private val activityResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _: ActivityResult ->
+            getAllDeserializers()
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -140,10 +155,18 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             shouldBeScanning = it.getBoolean(SHOULD_BE_SCANNING_KEY)
             macFilter = it.getString(ADVERTISEMENT_MAC_FILTER_KEY)
             nameFilter = it.getString(ADVERTISEMENT_NAME_FILTER_KEY)
-            filterType = it.getSerializable(ADVERTISEMENT_FILTER_TYPE_KEY) as AdvertisementFilterType
+            filterType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                it.getSerializable(
+                    ADVERTISEMENT_FILTER_TYPE_KEY,
+                    AdvertisementFilterType::class.java
+                ) as AdvertisementFilterType
+            } else {
+                @Suppress("DEPRECATION")
+                it.getSerializable(ADVERTISEMENT_FILTER_TYPE_KEY) as AdvertisementFilterType
+            }
         }
 
-        if(!bluetoothViewModel.isBluetoothAvailable() && savedInstanceState == null) {
+        if (!bluetoothViewModel.isBluetoothAvailable() && savedInstanceState == null) {
             displayBluetoothNotAvailableDialog()
         }
     }
@@ -152,7 +175,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         AlertDialog.Builder(this)
             .setTitle(getString(R.string.bluetooth_not_available))
             .setMessage(getString(R.string.bletooth_not_available_message))
-            .setPositiveButton(getString(R.string.ok)) { _, _ ->}
+            .setPositiveButton(getString(R.string.ok)) { _, _ -> }
             .show()
 
     }
@@ -165,14 +188,13 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         super.onResume()
         if (BluetoothScanner.isRunning()) onScanStart()
         else onScanStop()
-        bluetoothScanningViewModel.getResult().observe(this, Observer { handleScanEvent(it) })
+        bluetoothScanningViewModel.getResult().observe(this) { handleScanEvent(it) }
         bluetoothViewModel.observeBluetoothState()
-        bluetoothViewModel.bluetoothState.observe(this, Observer { onBluetoothStateChange(it) })
-        Timber.e("Observer Added")
+        bluetoothViewModel.bluetoothState.observe(this) { onBluetoothStateChange(it) }
         scanResultViewModel.getScanResultsLiveData().observe(this, scanResultObserver)
-        getSyncDeserializersLiveData().observe(this, Observer {
+        getSyncDeserializersLiveData().observe(this) {
             onWorkStateChanged(it)
-        })
+        }
 
         scanAnalyzerAdapter.advertisementDataFormatter =
             ByteArrayFormatter.getFormatter(preferences.getAdvertisementBytesDisplayMode())
@@ -187,21 +209,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     override fun onPause() {
         super.onPause()
         bluetoothViewModel.stopObservingBluetoothState()
-        Timber.e("Observer Removed")
         scanResultViewModel.getScanResultsLiveData().removeObserver(scanResultObserver)
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        permissionViewModel.checkGrantedPermission(grantResults, requestCode)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        getAllDeserializers()
     }
 
     override fun onDestroy() {
@@ -219,12 +227,18 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         }
     }
 
-    private fun satisfiesFilterConditions(scanResult : ScanResult) : Boolean {
-        return when(filterType) {
+    private fun satisfiesFilterConditions(scanResult: ScanResult): Boolean {
+        return when (filterType) {
             AdvertisementFilterType.MAC ->
-                macFilter == null || scanResult.device.macAddress.contains(macFilter ?: "", ignoreCase = true)
+                macFilter == null || scanResult.device.macAddress.contains(
+                    macFilter ?: "",
+                    ignoreCase = true
+                )
             AdvertisementFilterType.DEVICE_NAME ->
-                nameFilter == null || scanResult.device.name.contains(nameFilter ?: "", ignoreCase = true)
+                nameFilter == null || scanResult.device.name.contains(
+                    nameFilter ?: "",
+                    ignoreCase = true
+                )
         }
 
     }
@@ -232,7 +246,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private fun createSnackbar() {
         snackbar =
             Snackbar.make(scan_analyzer_root, R.string.bt_disabled, Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.enable) { bluetoothViewModel.enableBluetooth() }
+                .setAction(R.string.enable) { requestToEnableBluetooth() }
 
         snackbar?.setActionTextColor(
             ContextCompat.getColor(
@@ -240,6 +254,26 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 R.color.primaryColor
             )
         )
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun requestToEnableBluetooth() {
+        val bluetoothAdapter =
+            (getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            startActivity(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissionsBuilder(Manifest.permission.BLUETOOTH_CONNECT, Manifest.permission.BLUETOOTH_SCAN)
+                .build()
+                .send {
+                    if (it.allGranted()) {
+                        bluetoothViewModel.enableBluetooth(bluetoothAdapter)
+                    }
+                }
+        } else {
+            bluetoothViewModel.enableBluetooth(bluetoothAdapter)
+        }
     }
 
     private fun setScanStatus() {
@@ -265,15 +299,16 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
             false
         scan_list.itemAnimator = null
 
-        scanAnalyzerAdapter.hideMissingSerializer = resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+        scanAnalyzerAdapter.hideMissingSerializer =
+            resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
         scan_list.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                if(!recyclerView.canScrollVertically(-1)) {
+                if (!recyclerView.canScrollVertically(-1)) {
                     attachScrollToTop = true
                 }
 
-                if(newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
                     attachScrollToTop = false
                 }
             }
@@ -285,13 +320,14 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     }
 
     override fun onRecordAdded(size: Int) {
-       if(attachScrollToTop) {
-           scan_list.scrollToPosition(size)
-       }
+        if (attachScrollToTop) {
+            scan_list.scrollToPosition(size)
+        }
     }
 
     private fun getSyncDeserializersLiveData(): LiveData<WorkInfo> {
-        return WorkManager.getInstance().getWorkInfoByIdLiveData(SyncDeserializersWorker.WORKER_ID)
+        return WorkManager.getInstance(applicationContext)
+            .getWorkInfoByIdLiveData(SyncDeserializersWorker.WORKER_ID)
     }
 
     private fun onWorkStateChanged(workInfo: WorkInfo) {
@@ -339,10 +375,10 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     }
 
     override fun onLongItemClick(item: ScanResult): Boolean {
-        startActivityForResult(Intent(this, DeserializerListActivity::class.java).apply {
+        activityResultLauncher.launch(Intent(this, DeserializerListActivity::class.java).apply {
             putExtra(EXTRA_FILTER_MAC, item.device.macAddress)
             putExtra(EXTRA_SAMPLE_DATA, item.advertisement.rawData)
-        }, 0x00)
+        })
         return true
     }
 
@@ -354,7 +390,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     private fun onScanStart() {
         startScan()
 
-        if(preferences.isKeepScreenOn()) {
+        if (preferences.isKeepScreenOn()) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -369,9 +405,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 it.setTitle(getString(R.string.stop_scan))
             }
         }
-        Timber.e("Observer Removed")
         scanResultViewModel.getScanResultsLiveData().removeObserver(scanResultObserver)
-        Timber.e("Observer Added")
         scanResultViewModel.getScanResultsLiveData().observe(this, scanResultObserver)
     }
 
@@ -384,7 +418,6 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 it.setTitle(getString(R.string.start_scan))
             }
         }
-        Timber.e("Observer Removed")
         scanResultViewModel.getScanResultsLiveData().removeObservers(this)
 
         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -396,8 +429,10 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         menuInflater.inflate(R.menu.scanner_menu, menu)
 
         val searchMenuItem = mainMenu?.findItem(R.id.search)
-        searchMenuItem?.isVisible = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        searchMenuItem?.icon?.colorFilter = PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY)
+        searchMenuItem?.isVisible =
+            resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        searchMenuItem?.icon?.colorFilter =
+            PorterDuffColorFilter(Color.BLACK, PorterDuff.Mode.MULTIPLY)
 
         val searchView = searchMenuItem?.actionView as ViewGroup
         initSearchView(searchView)
@@ -414,10 +449,10 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         return true
     }
 
-    private fun getOnAdvFilterChangedListener(filterType : AdvertisementFilterType) =
+    private fun getOnAdvFilterChangedListener(filterType: AdvertisementFilterType) =
         object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                when(filterType) {
+                when (filterType) {
                     AdvertisementFilterType.MAC -> macFilter = s?.toString()
                     AdvertisementFilterType.DEVICE_NAME -> nameFilter = s?.toString()
                 }
@@ -430,54 +465,78 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         }
 
     private fun initSearchView(searchView: ViewGroup) {
-        val advertisementFilterByMacLayout = searchView.findViewById<TextInputLayout>(R.id.advertisement_filter_by_mac_layout)
+        val advertisementFilterByMacLayout =
+            searchView.findViewById<TextInputLayout>(R.id.advertisement_filter_by_mac_layout)
         val advertisementFilterByMac = advertisementFilterByMacLayout.editText as HexEditText
+//        val advertisementFilterByMac = findViewById<HexEditText>(R.id.advertisement_filter_by_mac)
         advertisementFilterByMac.setFormatter(HexFormatters.getFormatter(HexFormatters.FormatterType.MAC_ADDRESS_HEX_FORMATTER))
-        macFilter?.let { advertisementFilterByMac.setContent(it) }
+        macFilter?.let {
+            advertisementFilterByMac.setContent(it)
+        }
 
-        val advertisementFilterByNameLayout = searchView.findViewById<TextInputLayout>(R.id.advertisement_filter_by_name_layout)
+        val advertisementFilterByNameLayout =
+            searchView.findViewById<TextInputLayout>(R.id.advertisement_filter_by_name_layout)
         val advertisementFilterByName = advertisementFilterByNameLayout.editText as EditText
         advertisementFilterByName.setText(nameFilter)
 
-        advertisementFilterByMac.addTextChangedListener(getOnAdvFilterChangedListener(AdvertisementFilterType.MAC))
-        advertisementFilterByName.addTextChangedListener(getOnAdvFilterChangedListener(AdvertisementFilterType.DEVICE_NAME))
+        advertisementFilterByMac.addTextChangedListener(
+            getOnAdvFilterChangedListener(
+                AdvertisementFilterType.MAC
+            )
+        )
+        advertisementFilterByName.addTextChangedListener(
+            getOnAdvFilterChangedListener(
+                AdvertisementFilterType.DEVICE_NAME
+            )
+        )
 
-        val advertisementFilterType = searchView.findViewById<Spinner>(R.id.advertisement_filter_type)
+        val advertisementFilterType =
+            searchView.findViewById<Spinner>(R.id.advertisement_filter_type)
         advertisementFilterType.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_item,
             AdvertisementFilterType.values().map { resources.getString(it.stringResourceId) }
         )
         advertisementFilterType.setSelection(AdvertisementFilterType.values().indexOf(filterType))
-        advertisementFilterType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                advertisementFilterType.setSelection(0)
-            }
+        advertisementFilterType.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                    advertisementFilterType.setSelection(0)
+                }
 
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                filterType = AdvertisementFilterType.values()[position]
-                if(filterType == AdvertisementFilterType.MAC) {
-                    advertisementFilterByMacLayout.visibility = View.VISIBLE
-                    advertisementFilterByNameLayout.visibility = View.GONE
-                    KeyboardManager.hideSystemKeyboard(advertisementFilterByMac)
-                } else {
-                    advertisementFilterByMacLayout.visibility = View.GONE
-                    advertisementFilterByNameLayout.visibility = View.VISIBLE
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    filterType = AdvertisementFilterType.values()[position]
+                    if (filterType == AdvertisementFilterType.MAC) {
+                        advertisementFilterByMacLayout.visibility = View.VISIBLE
+                        advertisementFilterByNameLayout.visibility = View.GONE
+                        KeyboardManager.hideSystemKeyboard(advertisementFilterByMac)
+                    } else {
+                        advertisementFilterByMacLayout.visibility = View.GONE
+                        advertisementFilterByNameLayout.visibility = View.VISIBLE
+                    }
                 }
             }
-        }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        val id: Int? = item?.itemId
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id: Int = item.itemId
         when (id) {
             R.id.action_toggle_scan -> toggleScan(item)
             R.id.action_start_deserializer_list_activity -> startDeserializerListActivity()
             R.id.action_clear -> {
                 scanAnalyzerAdapter.clear()
             }
-            R.id.action_start_settings_activity -> startActivity(Intent(this,
-                SettingsActivity::class.java))
+            R.id.action_start_settings_activity -> startActivity(
+                Intent(
+                    this,
+                    SettingsActivity::class.java
+                )
+            )
         }
 
         return super.onOptionsItemSelected(item)
@@ -485,7 +544,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
 
     private fun startDeserializerListActivity() {
-        startActivityForResult(Intent(this, DeserializerListActivity::class.java), 0x00)
+        activityResultLauncher.launch(Intent(this, DeserializerListActivity::class.java))
     }
 
     private fun toggleScan(item: MenuItem?) {
@@ -494,8 +553,28 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
                 shouldBeScanning = false
                 bluetoothScanningViewModel.stopScanning()
             } else {
+                checkPermissionAndStartScan()
+            }
+        }
+    }
+
+    private fun checkPermissionAndStartScan() {
+        val permissionBuilder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissionsBuilder(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_SCAN
+            )
+        } else {
+            permissionsBuilder(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
+        permissionBuilder.build().send {
+            if (it.allGranted()) {
                 shouldBeScanning = true
-                permissionViewModel.requestAccessFineLocation()
+                bluetoothScanningViewModel.startScanning()
+            } else {
+                Toast.makeText(this, R.string.permission_scan_denied, Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -510,7 +589,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
         }
     }
 
-    private fun getAllDeserializers(onDeserializersLoaded : (() -> Unit)? = null) {
+    private fun getAllDeserializers(onDeserializersLoaded: (() -> Unit)? = null) {
         disposable = getAllDeserializersUseCase.execute()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -532,23 +611,10 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         scanLogSavedState = scanAnalyzerAdapter.scanLog
-        outState.putBoolean(SHOULD_BE_SCANNING_KEY,shouldBeScanning)
-        outState.putString(ADVERTISEMENT_MAC_FILTER_KEY,macFilter)
-        outState.putString(ADVERTISEMENT_NAME_FILTER_KEY,nameFilter)
-        outState.putSerializable(ADVERTISEMENT_FILTER_TYPE_KEY,filterType)
-    }
-
-    override fun permissionAccepted(actionCode: Int) {
-        bluetoothScanningViewModel.startScanning()
-        //TODO: Permission accepted
-    }
-
-    override fun permissionDenied(actionCode: Int) {
-        //TODO: Permission denied
-    }
-
-    override fun showRationale(actionCode: Int) {
-        //TODO: Show rationale
+        outState.putBoolean(SHOULD_BE_SCANNING_KEY, shouldBeScanning)
+        outState.putString(ADVERTISEMENT_MAC_FILTER_KEY, macFilter)
+        outState.putString(ADVERTISEMENT_NAME_FILTER_KEY, nameFilter)
+        outState.putSerializable(ADVERTISEMENT_FILTER_TYPE_KEY, filterType)
     }
 
     override fun onStop() {
@@ -558,7 +624,7 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
 
     override fun onStart() {
         super.onStart()
-        if(shouldBeScanning) {
+        if (shouldBeScanning) {
             bluetoothScanningViewModel.startScanning()
         }
     }
@@ -566,15 +632,15 @@ class ScanAnalyzerActivity : AppCompatActivity(), PermissionViewModel.Permission
     companion object {
         const val EXTRA_FILTER_MAC: String = "com.acconno.blesniffer.FILTER_MAC"
         const val EXTRA_SAMPLE_DATA: String = "com.acconno.blesniffer.SAMPLE_DATA"
-        const val SHOULD_BE_SCANNING_KEY : String = "SHOULD_BE_SCANNING_KEY"
-        const val ADVERTISEMENT_MAC_FILTER_KEY : String = "ADVERTISEMENT_MAC_FILTER_KEY"
-        const val ADVERTISEMENT_NAME_FILTER_KEY : String = "ADVERTISEMENT_NAME_FILTER_KEY"
-        const val ADVERTISEMENT_FILTER_TYPE_KEY : String = "ADVERTISEMENT_FILTER_TYPE_KEY"
+        const val SHOULD_BE_SCANNING_KEY: String = "SHOULD_BE_SCANNING_KEY"
+        const val ADVERTISEMENT_MAC_FILTER_KEY: String = "ADVERTISEMENT_MAC_FILTER_KEY"
+        const val ADVERTISEMENT_NAME_FILTER_KEY: String = "ADVERTISEMENT_NAME_FILTER_KEY"
+        const val ADVERTISEMENT_FILTER_TYPE_KEY: String = "ADVERTISEMENT_FILTER_TYPE_KEY"
 
-        var scanLogSavedState : MutableList<ScanAnalyzerAdapter.Item>? = null
+        var scanLogSavedState: MutableList<ScanAnalyzerAdapter.Item>? = null
     }
 
-    enum class AdvertisementFilterType(val stringResourceId : Int) {
+    enum class AdvertisementFilterType(val stringResourceId: Int) {
         MAC(R.string.mac_address), DEVICE_NAME(R.string.device_name)
     }
 }

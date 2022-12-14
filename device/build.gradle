@@ -4,11 +4,11 @@ apply plugin: 'kotlin-android-extensions'
 apply from: '../version.gradle'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 33
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 33
         versionCode generateVersionCode()
         versionName generateVersionName()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

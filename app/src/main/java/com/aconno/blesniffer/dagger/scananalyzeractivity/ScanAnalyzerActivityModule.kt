@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModelProviders
 import com.aconno.blesniffer.*
 import com.aconno.blesniffer.device.notification.IntentProvider
 import com.aconno.blesniffer.device.notification.NotificationFactory
-import com.aconno.blesniffer.device.permissons.PermissionActionFactory
 import com.aconno.blesniffer.domain.deserializing.DeserializerFinder
 import com.aconno.blesniffer.domain.deserializing.DeserializerFinderImpl
 import com.aconno.blesniffer.domain.deserializing.DeserializerRepository
@@ -15,7 +14,6 @@ import com.aconno.blesniffer.domain.scanning.Bluetooth
 import com.aconno.blesniffer.ui.ScanAnalyzerActivity
 import com.aconno.blesniffer.viewmodel.BluetoothScanningViewModel
 import com.aconno.blesniffer.viewmodel.BluetoothViewModel
-import com.aconno.blesniffer.viewmodel.PermissionViewModel
 import com.aconno.blesniffer.viewmodel.ScanResultViewModel
 import com.aconno.blesniffer.viewmodel.factory.BluetoothScanningViewModelFactory
 import com.aconno.blesniffer.viewmodel.factory.BluetoothViewModelFactory
@@ -64,13 +62,6 @@ class ScanAnalyzerActivityModule(private val scanAnalyzerActivity: ScanAnalyzerA
     @Provides
     @ScanAnalyzerActivityScope
     fun provideScanAnalyzerActivity() = scanAnalyzerActivity
-
-    @Provides
-    @ScanAnalyzerActivityScope
-    fun providePermissionsViewModel(): PermissionViewModel {
-        val permissionAction = PermissionActionFactory.getPermissionAction(scanAnalyzerActivity)
-        return PermissionViewModel(permissionAction, scanAnalyzerActivity)
-    }
 
     @Provides
     @ScanAnalyzerActivityScope

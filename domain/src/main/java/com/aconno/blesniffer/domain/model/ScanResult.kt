@@ -22,14 +22,14 @@ data class ScanResult(val device: Device, val advertisement: Advertisement, var 
 
     override fun describeContents() = 0
 
-    override fun writeToParcel(dest: Parcel?, flags: Int) {
-        dest?.writeString(device.name)
-        dest?.writeString(device.macAddress)
-        dest?.writeInt(advertisement.rawData.size)
-        dest?.writeByteArray(advertisement.rawData)
-        dest?.writeLong(timestamp)
-        dest?.writeInt(rssi)
-        dest?.writeLong(timeFromLastTimestamp)
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeString(device.name)
+        dest.writeString(device.macAddress)
+        dest.writeInt(advertisement.rawData.size)
+        dest.writeByteArray(advertisement.rawData)
+        dest.writeLong(timestamp)
+        dest.writeInt(rssi)
+        dest.writeLong(timeFromLastTimestamp)
     }
 
     companion object CREATOR : Parcelable.Creator<ScanResult> {

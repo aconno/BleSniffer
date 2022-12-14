@@ -3,6 +3,7 @@ package com.aconno.blesniffer
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import com.aconno.blesniffer.device.notification.AlertNotificationReceiver
 import com.aconno.blesniffer.device.notification.IntentProvider
 import com.aconno.blesniffer.device.notification.NotificationFactory
@@ -17,6 +18,9 @@ class IntentProviderImpl : IntentProvider {
                 context,
                 0,
                 contentIntent,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            else
                 PendingIntent.FLAG_UPDATE_CURRENT
         )
     }
